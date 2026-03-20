@@ -1,5 +1,5 @@
 <?php $pageTitle = 'Iniciar Sesión – ' . APP_NAME; require APP_PATH . '/views/layout/head.php'; ?>
-<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+<div class="flex-1 min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
   <div class="w-full max-w-md">
     <!-- Logo & Title -->
     <div class="text-center mb-8">
@@ -47,22 +47,37 @@
           </div>
         </div>
 
+        <!-- CAPTCHA -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Verificación: ¿Cuánto es <strong><?= (int)$captchaA ?> + <?= (int)$captchaB ?></strong>?
+          </label>
+          <input type="number" name="captcha" required min="0" max="18"
+            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-sm"
+            placeholder="Resultado">
+        </div>
+
         <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition shadow-sm">
           Ingresar al Panel
         </button>
       </form>
 
-      <p class="text-center text-xs text-gray-400 mt-6">
-        <a href="<?= url('mapa') ?>" class="hover:text-blue-600 transition">← Ver mapa turístico público</a>
-      </p>
+      <div class="flex items-center justify-between mt-5">
+        <a href="<?= url('olvide-contrasena') ?>" class="text-xs text-blue-600 hover:underline transition">
+          ¿Olvidaste tu Contraseña?
+        </a>
+        <a href="<?= url('mapa') ?>" class="text-xs text-gray-400 hover:text-blue-600 transition">
+          ← Ver mapa turístico público
+        </a>
+      </div>
     </div>
   </div>
+</div>
 
-  <script>
-    function togglePwd() {
-      const p = document.getElementById('pwd');
-      p.type = p.type === 'password' ? 'text' : 'password';
-    }
-  </script>
-</body>
-</html>
+<script>
+  function togglePwd() {
+    const p = document.getElementById('pwd');
+    p.type = p.type === 'password' ? 'text' : 'password';
+  }
+</script>
+<?php require APP_PATH . '/views/layout/footer.php'; ?>
