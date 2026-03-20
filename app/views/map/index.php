@@ -111,7 +111,7 @@ function loadPOIs() {
       markers.forEach(m => map.removeLayer(m));
       markers = [];
       pois.forEach(poi => {
-        if (!poi.lat || !poi.lng) return;
+        if (poi.lat === null || poi.lng === null) return;
         const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#3B82F6') });
         m.addTo(map);
         m.on('click', () => showPOI(poi));

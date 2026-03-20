@@ -229,6 +229,12 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(editMap)
 let marker = L.marker([defLat, defLng], {draggable: true}).addTo(editMap);
 marker.on('drag', e => updateCoords(e.target.getLatLng()));
 
+// Auto-populate lat/lng inputs if they are empty (new business)
+if (!document.getElementById('lat-input').value || !document.getElementById('lng-input').value) {
+  document.getElementById('lat-input').value = defLat.toFixed(7);
+  document.getElementById('lng-input').value = defLng.toFixed(7);
+}
+
 editMap.on('click', e => {
   marker.setLatLng(e.latlng);
   updateCoords(e.latlng);

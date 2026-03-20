@@ -50,7 +50,14 @@ class Router
 
     private function match(string $routePath, string $uri): ?array
     {
-        $pattern = preg_replace('/\{[a-z_]+\}/', '([^/]+)', preg_quote($routePath, '#'));
+        // Split on {param} tokens, quote static parts, then reassemble
+        $parts   = preg_split('/(\{[a-z_]+\})/', $routePath, -1, PREG_SPLIT_DELIM_CAPTURE);
+        $pattern = '';
+        foreach ($parts as $part) {
+            $pattern .= preg_match('/^\{[a-z_]+\}$/', $part)
+                ? '([^/]+)'
+                : preg_quote($part, '#');
+        }
         if (preg_match('#^' . $pattern . '$#', $uri, $matches)) {
             array_shift($matches);
             return $matches;

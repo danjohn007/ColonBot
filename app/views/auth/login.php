@@ -1,5 +1,15 @@
-<?php $pageTitle = 'Iniciar Sesión – ' . APP_NAME; require APP_PATH . '/views/layout/head.php'; ?>
-<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+<?php
+$pageTitle = 'Iniciar Sesión – ' . APP_NAME;
+// Generate captcha numbers and store answer in session
+$captchaA = random_int(1, 9);
+$captchaB = random_int(1, 9);
+$_SESSION['captcha_answer'] = $captchaA + $captchaB;
+require APP_PATH . '/views/layout/head.php';
+?>
+<style>
+  body { background: linear-gradient(135deg, #EFF6FF 0%, #EEF2FF 100%) !important; }
+</style>
+<div class="flex-1 flex items-center justify-center p-4">
   <div class="w-full max-w-md">
     <!-- Logo & Title -->
     <div class="text-center mb-8">
@@ -47,22 +57,40 @@
           </div>
         </div>
 
+        <!-- Math CAPTCHA -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Verificación: ¿Cuánto es <?= $captchaA ?> + <?= $captchaB ?>?
+          </label>
+          <input type="number" name="captcha" required
+            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-sm"
+            placeholder="Ingresa el resultado" min="0" max="18">
+        </div>
+
         <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition shadow-sm">
           Ingresar al Panel
         </button>
       </form>
 
-      <p class="text-center text-xs text-gray-400 mt-6">
+      <div class="mt-5 flex items-center justify-between text-xs text-gray-400">
         <a href="<?= url('mapa') ?>" class="hover:text-blue-600 transition">← Ver mapa turístico público</a>
-      </p>
+        <button type="button"
+          onclick="document.getElementById('forgot-msg').classList.toggle('hidden')"
+          class="hover:text-blue-600 transition focus:outline-none">
+          ¿Olvidaste tu Contraseña?
+        </button>
+      </div>
+      <div id="forgot-msg" class="hidden mt-3 p-3 bg-blue-50 border border-blue-200 text-blue-700 text-xs rounded-xl" role="alert">
+        Para restablecer tu contraseña, contacta al administrador del sistema.
+      </div>
     </div>
   </div>
+</div>
 
-  <script>
-    function togglePwd() {
-      const p = document.getElementById('pwd');
-      p.type = p.type === 'password' ? 'text' : 'password';
-    }
-  </script>
-</body>
-</html>
+<script>
+  function togglePwd() {
+    const p = document.getElementById('pwd');
+    p.type = p.type === 'password' ? 'text' : 'password';
+  }
+</script>
+<?php require APP_PATH . '/views/layout/footer.php'; ?>

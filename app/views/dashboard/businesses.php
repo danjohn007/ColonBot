@@ -40,6 +40,12 @@ require APP_PATH . '/views/layout/head.php';
           <td class="px-4 py-3 text-gray-600"><?= number_format($b['visits']) ?></td>
           <td class="px-4 py-3">
             <div class="flex gap-1.5 flex-wrap">
+              <a href="<?= url('admin/negocio/' . $b['id']) ?>"
+                class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-lg hover:bg-blue-200 transition">Editar</a>
+              <?php if ($b['status'] === 'published'): ?>
+              <a href="<?= url('lugar/' . $b['slug']) ?>" target="_blank"
+                class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg hover:bg-gray-200 transition">Ver</a>
+              <?php endif; ?>
               <?php if ($b['status'] !== 'published'): ?>
               <form method="POST" action="<?= url('superadmin/negocios/' . $b['id'] . '/aprobar') ?>" class="inline">
                 <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">

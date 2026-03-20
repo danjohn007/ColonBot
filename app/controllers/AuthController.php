@@ -28,6 +28,15 @@ class AuthController extends Controller
             $this->redirect('login');
         }
 
+        // Validate math captcha
+        $captchaInput  = isset($_POST['captcha']) ? (int)$_POST['captcha'] : null;
+        $captchaAnswer = isset($_SESSION['captcha_answer']) ? (int)$_SESSION['captcha_answer'] : null;
+        unset($_SESSION['captcha_answer']);
+        if ($captchaInput === null || $captchaAnswer === null || $captchaInput !== $captchaAnswer) {
+            $this->flash('error', 'Verificación incorrecta. Intenta de nuevo.');
+            $this->redirect('login');
+        }
+
         $user = $this->users->findByEmail($email);
 
         if (!$user || !$this->users->verifyPassword($password, $user['password'])) {
