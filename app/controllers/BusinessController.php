@@ -46,12 +46,24 @@ class BusinessController extends Controller
         $this->requireAuth('admin');
         $this->verifyCsrf();
 
+        $categoryIds = array_map('intval', $_POST['categories'] ?? []);
+        if (empty($categoryIds)) {
+            $this->flash('error', 'Selecciona al menos una categoría.');
+            $this->redirect('admin/negocio/crear');
+            return;
+        }
+
         $data = $this->buildData();
+        // The first selected category is stored as primary for display/map joins (backward compat)
+        $data['category_id'] = $categoryIds[0];
         $slug = $this->uniqueSlug($data['name']);
         $data['slug']    = $slug;
         $data['user_id'] = currentUser()['id'];
 
         $id = $this->businesses->insert($data);
+
+        // Categorías
+        $this->businesses->syncCategories($id, $categoryIds);
 
         // Amenidades
         $amenityIds = array_map('intval', $_POST['amenities'] ?? []);
@@ -73,22 +85,24 @@ class BusinessController extends Controller
 
         $this->ownerOrAdmin($business);
 
-        $categories      = $this->categories->active();
-        $amenities       = $this->amenities->active();
-        $businessAmen    = array_column($this->businesses->amenities((int)$id), 'id');
-        $images          = $this->businesses->images((int)$id);
-        $services        = $this->businesses->services((int)$id);
-        $products        = $this->businesses->products((int)$id);
+        $categories         = $this->categories->active();
+        $amenities          = $this->amenities->active();
+        $businessAmen       = array_column($this->businesses->amenities((int)$id), 'id');
+        $businessCategoryIds = array_column($this->businesses->businessCategories((int)$id), 'id');
+        $images             = $this->businesses->images((int)$id);
+        $services           = $this->businesses->services((int)$id);
+        $products           = $this->businesses->products((int)$id);
 
         $this->view('business.form', [
-            'business'        => $business,
-            'categories'      => $categories,
-            'amenities'       => $amenities,
-            'businessAmenIds' => $businessAmen,
-            'images'          => $images,
-            'services'        => $services,
-            'products'        => $products,
-            'csrf'            => $this->csrf(),
+            'business'           => $business,
+            'categories'         => $categories,
+            'amenities'          => $amenities,
+            'businessAmenIds'    => $businessAmen,
+            'businessCategoryIds' => $businessCategoryIds,
+            'images'             => $images,
+            'services'           => $services,
+            'products'           => $products,
+            'csrf'               => $this->csrf(),
         ]);
     }
 
@@ -102,7 +116,17 @@ class BusinessController extends Controller
 
         $this->ownerOrAdmin($business);
 
+        $categoryIds = array_map('intval', $_POST['categories'] ?? []);
+        if (empty($categoryIds)) {
+            $this->flash('error', 'Selecciona al menos una categoría.');
+            $this->redirect('admin/negocio/' . $id);
+            return;
+        }
+
         $data = $this->buildData();
+        // The first selected category is stored as primary for display/map joins
+        $data['category_id'] = $categoryIds[0];
+        $this->businesses->syncCategories((int)$id, $categoryIds);
         $this->businesses->update((int)$id, $data);
 
         $amenityIds = array_map('intval', $_POST['amenities'] ?? []);
@@ -160,7 +184,6 @@ class BusinessController extends Controller
     private function buildData(): array
     {
         return [
-            'category_id' => (int)($_POST['category_id'] ?? 1),
             'name'        => trim($_POST['name'] ?? ''),
             'description' => trim($_POST['description'] ?? ''),
             'address'     => trim($_POST['address'] ?? ''),
