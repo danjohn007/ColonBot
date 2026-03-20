@@ -20,9 +20,9 @@ define('PUBLIC_PATH', ROOT_PATH . '/public');
 
 // ─── Base de datos ─────────────────────────────────────────────────────────
 define('DB_HOST',     getenv('DB_HOST')     ?: 'localhost');
-define('DB_NAME',     getenv('DB_NAME')     ?: 'idactivo_colonbot');
-define('DB_USER',     getenv('DB_USER')     ?: 'idactivo_colonbot');
-define('DB_PASS',     getenv('DB_PASS')     ?: '3rN[)$zL!YY&');
+define('DB_NAME',     getenv('DB_NAME')     ?: 'colon_colonbotdb');
+define('DB_USER',     getenv('DB_USER')     ?: 'colon_enolobot');
+define('DB_PASS',     getenv('DB_PASS')     ?: 'B@#O,lv&uA2*');
 define('DB_CHARSET',  'utf8mb4');
 
 // ─── Aplicación ────────────────────────────────────────────────────────────
