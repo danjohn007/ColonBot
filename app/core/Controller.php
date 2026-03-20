@@ -88,4 +88,20 @@ abstract class Controller
         );
         $stmt->execute([$userId, $action, $model ?: null, $modelId ?: null, $detail ?: null, $ip]);
     }
+
+    protected function saveUpload(array $file): ?string
+    {
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        if (!in_array($ext, ALLOWED_IMG_EXT, true)) return null;
+        if ($file['size'] > MAX_FILE_SIZE) return null;
+
+        $filename = bin2hex(random_bytes(16)) . '.' . $ext;
+        $dest     = UPLOAD_PATH . '/' . $filename;
+
+        if (!is_dir(UPLOAD_PATH)) {
+            mkdir(UPLOAD_PATH, 0755, true);
+        }
+
+        return move_uploaded_file($file['tmp_name'], $dest) ? $filename : null;
+    }
 }

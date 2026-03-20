@@ -72,6 +72,7 @@ $router->get('superadmin/errores',      'DashboardController', 'errorLog');
 // Configuraciones globales
 $router->get('configuraciones',         'SettingsController',  'index');
 $router->post('configuraciones/guardar','SettingsController',  'save');
+$router->post('configuraciones/logo',   'SettingsController',  'saveLogo');
 $router->get('configuraciones/hikvision',    'SettingsController', 'hikvision');
 $router->post('configuraciones/hikvision/crear', 'SettingsController', 'createHikvision');
 $router->post('configuraciones/hikvision/{id}/eliminar', 'SettingsController', 'deleteHikvision');

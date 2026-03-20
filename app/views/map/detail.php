@@ -17,10 +17,16 @@ require APP_PATH . '/views/layout/head.php';
       <?php if ($images): ?>
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 rounded-2xl overflow-hidden">
         <?php foreach (array_slice($images, 0, 5) as $i => $img): ?>
-        <img src="<?= $i === 0 ? asset('uploads/' . $img['path']) : asset('uploads/' . $img['path']) ?>"
+        <img src="<?= asset('uploads/' . $img['path']) ?>"
           alt="<?= e($img['caption'] ?: $business['name']) ?>"
           class="<?= $i === 0 ? 'col-span-2 row-span-2 sm:col-span-2 sm:row-span-2' : '' ?> w-full h-48 object-cover">
         <?php endforeach; ?>
+      </div>
+      <?php elseif ($business['cover_image']): ?>
+      <div class="rounded-2xl overflow-hidden">
+        <img src="<?= asset('uploads/' . $business['cover_image']) ?>"
+          alt="<?= e($business['name']) ?>"
+          class="w-full h-64 object-cover">
       </div>
       <?php else: ?>
       <div class="w-full h-64 bg-gradient-to-br from-blue-100 to-indigo-200 rounded-2xl flex items-center justify-center text-blue-400 text-6xl">

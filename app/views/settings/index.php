@@ -15,6 +15,7 @@ require APP_PATH . '/views/layout/head.php';
         <?php $sections = [
           ['general',  '🏠 General',          '#sec-general'],
           ['theme',    '🎨 Colores y Estilos', '#sec-theme'],
+          ['logo',     '🖼️ Logo del Sistema',  '#sec-logo'],
           ['map',      '🗺️ Mapa',             '#sec-map'],
           ['chatbot',  '🤖 ChatBot WhatsApp',  '#sec-chatbot'],
           ['payments', '💳 PayPal',            '#sec-payments'],
@@ -123,6 +124,26 @@ require APP_PATH . '/views/layout/head.php';
             <?php endforeach; ?>
           </div>
           <button type="submit" class="btn-primary">Guardar colores</button>
+        </form>
+      </section>
+
+      <!-- Logo -->
+      <section id="sec-logo" class="bg-white rounded-2xl shadow-sm p-6">
+        <h2 class="font-semibold text-gray-900 mb-4 border-b pb-2">🖼️ Añadir Logo</h2>
+        <?php if (setting('site_logo')): ?>
+        <div class="mb-4 flex items-center gap-4">
+          <img src="<?= asset('uploads/' . setting('site_logo')) ?>" alt="Logo actual" class="h-16 w-auto rounded-xl border border-gray-200 p-1 bg-gray-50">
+          <span class="text-sm text-gray-500">Logo actual</span>
+        </div>
+        <?php endif; ?>
+        <form method="POST" action="<?= url('configuraciones/logo') ?>" enctype="multipart/form-data" class="space-y-4">
+          <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
+          <div>
+            <label class="label">Imagen del logo (JPG, PNG, GIF, WEBP – máx. 5 MB)</label>
+            <input type="file" name="site_logo" accept=".jpg,.jpeg,.png,.gif,.webp" class="input" required>
+          </div>
+          <p class="text-xs text-gray-400">El logo se mostrará en la parte superior izquierda de todas las páginas del sistema.</p>
+          <button type="submit" class="btn-primary">Guardar logo</button>
         </form>
       </section>
 

@@ -31,6 +31,28 @@ class SettingsController extends Controller
         $this->redirect('configuraciones');
     }
 
+    public function saveLogo(): void
+    {
+        $this->requireAuth('superadmin');
+        $this->verifyCsrf();
+
+        if (!isset($_FILES['site_logo']) || $_FILES['site_logo']['error'] !== UPLOAD_ERR_OK) {
+            $this->flash('error', 'No se seleccionó ninguna imagen o hubo un error al subirla.');
+            $this->redirect('configuraciones#sec-logo');
+        }
+
+        $path = $this->saveUpload($_FILES['site_logo']);
+        if (!$path) {
+            $this->flash('error', 'Formato no permitido o archivo demasiado grande (máx. 5 MB). Formatos aceptados: JPG, PNG, GIF, WEBP.');
+            $this->redirect('configuraciones#sec-logo');
+        }
+
+        $this->settings->set('site_logo', $path, 'general');
+        $this->logAction('update_settings', 'settings', 0, 'site_logo');
+        $this->flash('success', 'Logo guardado correctamente.');
+        $this->redirect('configuraciones#sec-logo');
+    }
+
     // ── HikVision ─────────────────────────────────────────────────────────
 
     public function hikvision(): void
