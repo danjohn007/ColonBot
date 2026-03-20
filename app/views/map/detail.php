@@ -131,9 +131,9 @@ require APP_PATH . '/views/layout/head.php';
     </div>
 
     <!-- Sidebar Contact -->
-    <div class="space-y-4">
+    <div class="space-y-4 sticky top-20">
       <!-- CTA -->
-      <div class="bg-white rounded-2xl shadow-sm p-5 space-y-3 sticky top-20">
+      <div class="bg-white rounded-2xl shadow-sm p-5 space-y-3">
         <h3 class="font-semibold text-gray-900">Contactar</h3>
 
         <?php if ($business['whatsapp']): ?>
