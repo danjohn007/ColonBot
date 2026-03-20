@@ -24,34 +24,34 @@ require APP_PATH . '/views/layout/head.php';
         foreach ($sections as [$grp, $label, $anchor]):
         ?>
         <li>
-          <a href="<?= $anchor ?>" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
+          <a href="<?= $anchor ?>" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium theme-nav-link">
             <?= $label ?>
           </a>
         </li>
         <?php endforeach; ?>
         <li><hr class="my-2 border-gray-100"></li>
         <li>
-          <a href="<?= url('configuraciones/hikvision') ?>" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
+          <a href="<?= url('configuraciones/hikvision') ?>" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium theme-nav-link">
             📹 HikVision
           </a>
         </li>
         <li>
-          <a href="<?= url('configuraciones/shelly') ?>" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
+          <a href="<?= url('configuraciones/shelly') ?>" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium theme-nav-link">
             💡 Shelly Cloud
           </a>
         </li>
         <li>
-          <a href="<?= url('configuraciones/gps') ?>" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
+          <a href="<?= url('configuraciones/gps') ?>" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium theme-nav-link">
             📡 GPS Trackers
           </a>
         </li>
         <li>
-          <a href="<?= url('superadmin/bitacora') ?>" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
+          <a href="<?= url('superadmin/bitacora') ?>" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium theme-nav-link">
             📋 Bitácora
           </a>
         </li>
         <li>
-          <a href="<?= url('superadmin/errores') ?>" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
+          <a href="<?= url('superadmin/errores') ?>" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium theme-nav-link">
             🚨 Errores
           </a>
         </li>

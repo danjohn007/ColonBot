@@ -34,10 +34,11 @@ class BusinessController extends Controller
         $categories = $this->categories->active();
         $amenities  = $this->amenities->active();
         $this->view('business.form', [
-            'business'   => null,
-            'categories' => $categories,
-            'amenities'  => $amenities,
-            'csrf'       => $this->csrf(),
+            'business'        => null,
+            'categories'      => $categories,
+            'amenities'       => $amenities,
+            'businessCatIds'  => [],
+            'csrf'            => $this->csrf(),
         ]);
     }
 
@@ -46,12 +47,20 @@ class BusinessController extends Controller
         $this->requireAuth('admin');
         $this->verifyCsrf();
 
-        $data = $this->buildData();
+        $categoryIds = array_values(array_filter(array_map('intval', $_POST['category_ids'] ?? [])));
+        if (empty($categoryIds)) {
+            $categoryIds = [(int)($_POST['category_id'] ?? 1)];
+        }
+
+        $data = $this->buildData($categoryIds[0]);
         $slug = $this->uniqueSlug($data['name']);
         $data['slug']    = $slug;
         $data['user_id'] = currentUser()['id'];
 
         $id = $this->businesses->insert($data);
+
+        // Categorías múltiples
+        $this->businesses->syncCategories($id, $categoryIds);
 
         // Amenidades
         $amenityIds = array_map('intval', $_POST['amenities'] ?? []);
@@ -76,6 +85,10 @@ class BusinessController extends Controller
         $categories      = $this->categories->active();
         $amenities       = $this->amenities->active();
         $businessAmen    = array_column($this->businesses->amenities((int)$id), 'id');
+        $businessCatIds  = $this->businesses->categoryIds((int)$id);
+        if (empty($businessCatIds)) {
+            $businessCatIds = [$business['category_id']];
+        }
         $images          = $this->businesses->images((int)$id);
         $services        = $this->businesses->services((int)$id);
         $products        = $this->businesses->products((int)$id);
@@ -85,6 +98,7 @@ class BusinessController extends Controller
             'categories'      => $categories,
             'amenities'       => $amenities,
             'businessAmenIds' => $businessAmen,
+            'businessCatIds'  => $businessCatIds,
             'images'          => $images,
             'services'        => $services,
             'products'        => $products,
@@ -102,8 +116,16 @@ class BusinessController extends Controller
 
         $this->ownerOrAdmin($business);
 
-        $data = $this->buildData();
+        $categoryIds = array_values(array_filter(array_map('intval', $_POST['category_ids'] ?? [])));
+        if (empty($categoryIds)) {
+            $categoryIds = [(int)($_POST['category_id'] ?? $business['category_id'])];
+        }
+
+        $data = $this->buildData($categoryIds[0]);
         $this->businesses->update((int)$id, $data);
+
+        // Categorías múltiples
+        $this->businesses->syncCategories((int)$id, $categoryIds);
 
         $amenityIds = array_map('intval', $_POST['amenities'] ?? []);
         $this->businesses->syncAmenities((int)$id, $amenityIds);
@@ -157,10 +179,10 @@ class BusinessController extends Controller
 
     // ── Privados ──────────────────────────────────────────────────────────
 
-    private function buildData(): array
+    private function buildData(int $primaryCategoryId = 0): array
     {
         return [
-            'category_id' => (int)($_POST['category_id'] ?? 1),
+            'category_id' => $primaryCategoryId ?: (int)($_POST['category_id'] ?? 1),
             'name'        => trim($_POST['name'] ?? ''),
             'description' => trim($_POST['description'] ?? ''),
             'address'     => trim($_POST['address'] ?? ''),

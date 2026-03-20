@@ -7,7 +7,7 @@ $flash = flash();
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
       <!-- Logo -->
-      <a href="<?= url() ?>" class="flex items-center gap-2 font-bold text-blue-600 text-lg">
+      <a href="<?= url() ?>" class="flex items-center gap-2 font-bold text-blue-600 text-lg theme-nav-brand">
         <?php if (setting('site_logo')): ?>
           <img src="<?= asset('uploads/' . setting('site_logo')) ?>" alt="Logo" class="h-8 w-auto">
         <?php else: ?>
@@ -21,16 +21,16 @@ $flash = flash();
 
       <!-- Desktop menu -->
       <div class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
-        <a href="<?= url('mapa') ?>" class="hover:text-blue-600 transition">🗺️ Mapa</a>
+        <a href="<?= url('mapa') ?>" class="hover:text-blue-600 transition theme-nav-link">🗺️ Mapa</a>
         <?php if ($user): ?>
           <?php if (hasRole('superadmin')): ?>
-            <a href="<?= url('superadmin') ?>" class="hover:text-blue-600 transition">📊 Dashboard</a>
-            <a href="<?= url('configuraciones') ?>" class="hover:text-blue-600 transition">⚙️ Config</a>
+            <a href="<?= url('superadmin') ?>" class="hover:text-blue-600 transition theme-nav-link">📊 Dashboard</a>
+            <a href="<?= url('configuraciones') ?>" class="hover:text-blue-600 transition theme-nav-link">⚙️ Config</a>
           <?php endif; ?>
-          <a href="<?= url('admin') ?>" class="hover:text-blue-600 transition">🏢 Mi Negocio</a>
+          <a href="<?= url('admin') ?>" class="hover:text-blue-600 transition theme-nav-link">🏢 Mi Negocio</a>
           <a href="<?= url('logout') ?>" class="text-red-500 hover:text-red-700 transition">Salir</a>
         <?php else: ?>
-          <a href="<?= url('login') ?>" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">Ingresar</a>
+          <a href="<?= url('login') ?>" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition theme-nav-btn">Ingresar</a>
         <?php endif; ?>
       </div>
 
@@ -46,16 +46,16 @@ $flash = flash();
   <!-- Mobile menu -->
   <div id="mobile-menu" class="hidden md:hidden border-t">
     <div class="px-4 py-3 space-y-2 text-sm font-medium text-gray-600">
-      <a href="<?= url('mapa') ?>" class="block py-2 hover:text-blue-600">🗺️ Mapa Turístico</a>
+      <a href="<?= url('mapa') ?>" class="block py-2 hover:text-blue-600 theme-nav-link">🗺️ Mapa Turístico</a>
       <?php if ($user): ?>
         <?php if (hasRole('superadmin')): ?>
-          <a href="<?= url('superadmin') ?>" class="block py-2 hover:text-blue-600">📊 Dashboard</a>
-          <a href="<?= url('configuraciones') ?>" class="block py-2 hover:text-blue-600">⚙️ Configuraciones</a>
+          <a href="<?= url('superadmin') ?>" class="block py-2 hover:text-blue-600 theme-nav-link">📊 Dashboard</a>
+          <a href="<?= url('configuraciones') ?>" class="block py-2 hover:text-blue-600 theme-nav-link">⚙️ Configuraciones</a>
         <?php endif; ?>
-        <a href="<?= url('admin') ?>" class="block py-2 hover:text-blue-600">🏢 Mi Negocio</a>
+        <a href="<?= url('admin') ?>" class="block py-2 hover:text-blue-600 theme-nav-link">🏢 Mi Negocio</a>
         <a href="<?= url('logout') ?>" class="block py-2 text-red-500">Cerrar sesión</a>
       <?php else: ?>
-        <a href="<?= url('login') ?>" class="block py-2 text-blue-600 font-semibold">Ingresar</a>
+        <a href="<?= url('login') ?>" class="block py-2 text-blue-600 font-semibold theme-nav-brand">Ingresar</a>
       <?php endif; ?>
     </div>
   </div>

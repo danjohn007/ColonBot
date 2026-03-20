@@ -20,6 +20,26 @@
       }
     }
   </script>
+  <!-- Theme CSS variables – primary affects nav, secondary affects main titles -->
+  <style>
+    :root {
+      --color-primary:   <?= e(setting('color_primary',   '#3B82F6')) ?>;
+      --color-secondary: <?= e(setting('color_secondary', '#10B981')) ?>;
+      --color-accent:    <?= e(setting('color_accent',    '#F59E0B')) ?>;
+    }
+    /* Primary color → navigation brand */
+    .theme-nav-brand { color: var(--color-primary) !important; }
+    /* Primary color → nav links (hover) */
+    .theme-nav-link:hover {
+      color: var(--color-primary) !important;
+      background-color: color-mix(in srgb, var(--color-primary) 10%, white) !important;
+    }
+    /* Primary color → nav button (login) */
+    .theme-nav-btn { background-color: var(--color-primary) !important; }
+    .theme-nav-btn:hover { background-color: var(--color-primary) !important; filter: brightness(0.88); }
+    /* Secondary color → main page titles */
+    main h1 { color: var(--color-secondary) !important; }
+  </style>
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <!-- ApexCharts -->

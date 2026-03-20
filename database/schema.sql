@@ -95,6 +95,15 @@ CREATE TABLE IF NOT EXISTS `business_amenities` (
   FOREIGN KEY (`amenity_id`)  REFERENCES `amenities`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ─── Categorías por negocio (múltiples categorías) ────────────────────────
+CREATE TABLE IF NOT EXISTS `business_categories` (
+  `business_id` INT UNSIGNED NOT NULL,
+  `category_id` INT UNSIGNED NOT NULL,
+  PRIMARY KEY (`business_id`, `category_id`),
+  FOREIGN KEY (`business_id`) REFERENCES `businesses`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ─── Servicios del negocio ────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `services` (
   `id`          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

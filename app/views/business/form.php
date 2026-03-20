@@ -31,11 +31,12 @@ require APP_PATH . '/views/layout/head.php';
         </div>
 
         <div>
-          <label class="label">Categoría *</label>
-          <select name="category_id" class="input">
+          <label class="label">Categoría * <span class="text-xs text-gray-400 font-normal">(mantén Ctrl/Cmd para elegir varias)</span></label>
+          <select name="category_ids[]" multiple size="<?= min(count($categories), 5) ?>" class="input">
+            <?php $selectedCatIds = array_map('strval', $businessCatIds ?? []); ?>
             <?php foreach ($categories as $cat): ?>
             <option value="<?= $cat['id'] ?>"
-              <?= ($business['category_id'] ?? '') == $cat['id'] ? 'selected' : '' ?>>
+              <?= in_array((string)$cat['id'], $selectedCatIds, true) ? 'selected' : '' ?>>
               <?= e($cat['name']) ?>
             </option>
             <?php endforeach; ?>

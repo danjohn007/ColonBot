@@ -121,6 +121,33 @@ class BusinessModel extends Model
         }
     }
 
+    public function categoryIds(int $businessId): array
+    {
+        $rows = $this->query(
+            'SELECT category_id FROM business_categories WHERE business_id = ?',
+            [$businessId]
+        );
+        return array_column($rows, 'category_id');
+    }
+
+    public function syncCategories(int $businessId, array $categoryIds): void
+    {
+        $this->execute('DELETE FROM business_categories WHERE business_id = ?', [$businessId]);
+        if (empty($categoryIds)) {
+            return;
+        }
+        $placeholders = implode(',', array_fill(0, count($categoryIds), '(?,?)'));
+        $params = [];
+        foreach ($categoryIds as $cId) {
+            $params[] = $businessId;
+            $params[] = (int)$cId;
+        }
+        $this->execute(
+            "INSERT IGNORE INTO business_categories (business_id, category_id) VALUES $placeholders",
+            $params
+        );
+    }
+
     public function upsertService(int $businessId, array $data, int $serviceId = 0): void
     {
         if ($serviceId > 0) {
