@@ -1,0 +1,25 @@
+# Dependencies / Build artifacts
+/vendor/
+/node_modules/
+
+# User uploads (do not commit real user files)
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# Environment / Secrets
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# PHP error logs
+*.log
+error_log
