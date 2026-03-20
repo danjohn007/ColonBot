@@ -15,7 +15,7 @@ require APP_PATH . '/views/layout/head.php';
     <h1 class="text-2xl font-bold text-gray-900"><?= $isEdit ? 'Editar Negocio' : 'Nuevo Negocio' ?></h1>
   </div>
 
-  <form method="POST" action="<?= url($isEdit ? 'admin/negocio/' . $business['id'] : 'admin/negocio/crear') ?>"
+  <form id="business-form" method="POST" action="<?= url($isEdit ? 'admin/negocio/' . $business['id'] : 'admin/negocio/crear') ?>"
     enctype="multipart/form-data" class="space-y-6">
     <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
 
@@ -30,16 +30,21 @@ require APP_PATH . '/views/layout/head.php';
             class="input" placeholder="Ej. Restaurante El Sabor">
         </div>
 
-        <div>
-          <label class="label">Categoría *</label>
-          <select name="category_id" class="input">
+        <div class="sm:col-span-2">
+          <label class="label">Categoría(s) * <span class="text-xs text-gray-400">(selecciona al menos una)</span></label>
+          <div class="flex flex-wrap gap-3 mt-1">
             <?php foreach ($categories as $cat): ?>
-            <option value="<?= $cat['id'] ?>"
-              <?= ($business['category_id'] ?? '') == $cat['id'] ? 'selected' : '' ?>>
-              <?= e($cat['name']) ?>
-            </option>
+            <label class="flex items-center gap-2 cursor-pointer select-none">
+              <input type="checkbox" name="categories[]" value="<?= $cat['id'] ?>"
+                <?= in_array($cat['id'], $businessCategoryIds ?? [], false) ? 'checked' : '' ?>
+                class="w-4 h-4 rounded text-blue-600 category-checkbox">
+              <span class="flex items-center gap-1 text-sm text-gray-700">
+                <span class="inline-block w-3 h-3 rounded-full flex-shrink-0" style="background-color: <?= e($cat['color']) ?>"></span>
+                <?= e($cat['name']) ?>
+              </span>
+            </label>
             <?php endforeach; ?>
-          </select>
+          </div>
         </div>
 
         <div>
@@ -198,7 +203,7 @@ require APP_PATH . '/views/layout/head.php';
     <?php endif; ?>
 
     <div class="flex gap-3">
-      <button type="submit"
+      <button type="submit" id="submit-btn"
         class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
         <?= $isEdit ? 'Guardar cambios' : 'Crear negocio' ?>
       </button>
@@ -221,6 +226,15 @@ require APP_PATH . '/views/layout/head.php';
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+// Category checkbox validation
+document.getElementById('business-form').addEventListener('submit', function(e) {
+  const checked = document.querySelectorAll('.category-checkbox:checked');
+  if (checked.length === 0) {
+    e.preventDefault();
+    alert('Por favor selecciona al menos una categoría.');
+  }
+});
+
 const defLat = parseFloat(document.getElementById('lat-input').value) || <?= setting('map_lat','20.2862') ?>;
 const defLng = parseFloat(document.getElementById('lng-input').value) || <?= setting('map_lng','-99.7242') ?>;
 const editMap = L.map('edit-map').setView([defLat, defLng], 15);

@@ -81,6 +81,28 @@ class BusinessModel extends Model
         );
     }
 
+    public function businessCategories(int $businessId): array
+    {
+        return $this->query(
+            'SELECT c.* FROM categories c
+             JOIN business_categories bc ON bc.category_id = c.id
+             WHERE bc.business_id = ?
+             ORDER BY c.sort_order, c.name',
+            [$businessId]
+        );
+    }
+
+    public function syncCategories(int $businessId, array $categoryIds): void
+    {
+        $this->execute('DELETE FROM business_categories WHERE business_id = ?', [$businessId]);
+        foreach ($categoryIds as $catId) {
+            $this->execute(
+                'INSERT IGNORE INTO business_categories (business_id, category_id) VALUES (?,?)',
+                [$businessId, (int)$catId]
+            );
+        }
+    }
+
     public function allWithCategory(): array
     {
         return $this->query(

@@ -20,6 +20,14 @@
       }
     }
   </script>
+  <style>
+    :root {
+      --color-primary:   <?= e(setting('color_primary','#3B82F6')) ?>;
+      --color-secondary: <?= e(setting('color_secondary','#10B981')) ?>;
+      --color-accent:    <?= e(setting('color_accent','#F59E0B')) ?>;
+    }
+    main h1 { color: var(--color-secondary); }
+  </style>
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <!-- ApexCharts -->
