@@ -39,6 +39,8 @@ $router->post('lugar/{slug}/contactar', 'MapController',       'contact');
 $router->get('login',                   'AuthController',      'loginForm');
 $router->post('login',                  'AuthController',      'login');
 $router->get('logout',                  'AuthController',      'logout');
+$router->get('olvide-contrasena',       'AuthController',      'forgotPasswordForm');
+$router->post('olvide-contrasena',      'AuthController',      'forgotPassword');
 
 // Admin de Negocio
 $router->get('admin',                   'BusinessController',  'dashboard');

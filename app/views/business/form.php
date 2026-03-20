@@ -229,6 +229,12 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(editMap)
 let marker = L.marker([defLat, defLng], {draggable: true}).addTo(editMap);
 marker.on('drag', e => updateCoords(e.target.getLatLng()));
 
+// Pre-fill inputs with default coordinates for new businesses
+if (!document.getElementById('lat-input').value) {
+  document.getElementById('lat-input').value = defLat.toFixed(7);
+  document.getElementById('lng-input').value = defLng.toFixed(7);
+}
+
 editMap.on('click', e => {
   marker.setLatLng(e.latlng);
   updateCoords(e.latlng);
