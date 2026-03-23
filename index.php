@@ -55,6 +55,8 @@ $router->post('admin/negocio/{id}/servicio', 'BusinessController', 'saveService'
 $router->post('admin/negocio/{id}/servicio/{sid}/eliminar', 'BusinessController', 'deleteService');
 $router->post('admin/negocio/{id}/producto', 'BusinessController', 'saveProduct');
 $router->post('admin/negocio/{id}/producto/{pid}/eliminar', 'BusinessController', 'deleteProduct');
+$router->post('admin/negocio/{id}/evento', 'BusinessController', 'saveEvent');
+$router->post('admin/negocio/{id}/evento/{eid}/eliminar', 'BusinessController', 'deleteEvent');
 
 // Notificaciones
 $router->get('admin/notificaciones',    'NotificationController', 'index');

@@ -142,6 +142,26 @@ function showPOI(poi) {
       <a href="${poi.url}" class="col-span-2 flex items-center justify-center gap-2 bg-blue-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 transition">
         Ver detalle
       </a>
+      <button type="button" onclick="toggleReservarMenu(this)"
+        class="col-span-2 flex items-center justify-center gap-2 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-purple-700 transition">
+        🛒 Reservar/Comprar
+      </button>
+      <div class="col-span-2 hidden reservar-menu">
+        <div class="grid grid-cols-2 gap-2 mt-1">
+          <a href="${poi.url}#productos" class="flex items-center justify-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 py-2 rounded-xl text-sm font-medium hover:bg-blue-100 transition">
+            🛍️ Productos
+          </a>
+          <a href="${poi.url}#servicios" class="flex items-center justify-center gap-1.5 bg-green-50 text-green-700 border border-green-200 py-2 rounded-xl text-sm font-medium hover:bg-green-100 transition">
+            📋 Servicios
+          </a>
+          <a href="${poi.url}#amenidades" class="flex items-center justify-center gap-1.5 bg-orange-50 text-orange-700 border border-orange-200 py-2 rounded-xl text-sm font-medium hover:bg-orange-100 transition">
+            🛎️ Amenidades
+          </a>
+          <a href="${poi.url}#eventos" class="flex items-center justify-center gap-1.5 bg-purple-50 text-purple-700 border border-purple-200 py-2 rounded-xl text-sm font-medium hover:bg-purple-100 transition">
+            🎉 Eventos
+          </a>
+        </div>
+      </div>
       <a href="https://wa.me/?text=Estoy%20en%20${encodeURIComponent(poi.name)}%20Colón%20Qro" target="_blank"
         onclick="trackWA(${poi.id})"
         class="flex items-center justify-center gap-1.5 bg-green-500 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-green-600 transition">
@@ -204,6 +224,11 @@ function trackWA(id) {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: `event=whatsapp_click&business_id=${id}`,
   });
+}
+
+function toggleReservarMenu(btn) {
+  const menu = btn.nextElementSibling;
+  menu.classList.toggle('hidden');
 }
 
 loadPOIs();

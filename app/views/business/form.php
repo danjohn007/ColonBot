@@ -28,6 +28,11 @@ require APP_PATH . '/views/layout/head.php';
       onclick="switchTab('products')">
       🛍️ Mis Productos
     </button>
+    <button type="button" id="tab-btn-events"
+      class="tab-btn px-5 py-2.5 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 -mb-px"
+      onclick="switchTab('events')">
+      🎉 Mis Eventos
+    </button>
   </div>
   <?php endif; ?>
 
@@ -336,6 +341,93 @@ require APP_PATH . '/views/layout/head.php';
       </div>
     </div>
   </div><!-- /tab-products -->
+
+  <!-- Tab: Mis Eventos -->
+  <div id="tab-events" class="hidden">
+    <div class="bg-white rounded-2xl shadow-sm p-6">
+      <div class="flex items-center justify-between border-b pb-3 mb-4">
+        <h2 class="font-semibold text-gray-900">🎉 Mis Eventos</h2>
+        <button type="button" onclick="openEventForm()"
+          class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition">
+          + Agregar evento
+        </button>
+      </div>
+
+      <!-- Events table -->
+      <div id="events-table-wrap">
+        <?php if (empty($events)): ?>
+        <p class="text-sm text-gray-400 text-center py-8" id="no-events-msg">No hay eventos registrados.</p>
+        <?php else: ?>
+        <div class="hidden" id="no-events-msg"></div>
+        <?php endif; ?>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm" id="events-table" <?= empty($events) ? 'class="hidden"' : '' ?>>
+            <thead>
+              <tr class="text-left text-xs text-gray-500 uppercase tracking-wide border-b">
+                <th class="pb-2 pr-4">Nombre</th>
+                <th class="pb-2 pr-4">Descripción</th>
+                <th class="pb-2 pr-4">Precio</th>
+                <th class="pb-2 pr-4">Fecha</th>
+                <th class="pb-2"></th>
+              </tr>
+            </thead>
+            <tbody id="events-tbody">
+              <?php foreach ($events as $ev): ?>
+              <tr class="border-b last:border-0" id="evt-row-<?= $ev['id'] ?>">
+                <td class="py-2 pr-4 font-medium text-gray-800"><?= e($ev['name']) ?></td>
+                <td class="py-2 pr-4 text-gray-500 max-w-xs truncate"><?= e($ev['description'] ?? '') ?></td>
+                <td class="py-2 pr-4"><?= $ev['price'] !== null ? formatPrice((float)$ev['price']) : '–' ?></td>
+                <td class="py-2 pr-4"><?= $ev['date'] ? e(date('d/m/Y H:i', strtotime($ev['date']))) : '–' ?></td>
+                <td class="py-2 text-right whitespace-nowrap">
+                  <button type="button"
+                    onclick="editEvent(<?= htmlspecialchars(json_encode($ev), ENT_QUOTES) ?>)"
+                    class="text-blue-600 hover:text-blue-800 mr-3 transition">Editar</button>
+                  <button type="button"
+                    onclick="removeEvent(<?= $business['id'] ?>, <?= $ev['id'] ?>)"
+                    class="text-red-500 hover:text-red-700 transition">Eliminar</button>
+                </td>
+              </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Event form (hidden by default) -->
+      <div id="event-form-wrap" class="hidden mt-4 pt-4 border-t">
+        <h3 class="text-sm font-semibold text-gray-800 mb-3" id="event-form-title">Nuevo evento</h3>
+        <input type="hidden" id="evt-id" value="">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="sm:col-span-2">
+            <label class="label">Nombre *</label>
+            <input type="text" id="evt-name" class="input" placeholder="Ej. Festival de vendimia">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="label">Descripción</label>
+            <textarea id="evt-desc" rows="2" class="input" placeholder="Descripción del evento..."></textarea>
+          </div>
+          <div>
+            <label class="label">Precio</label>
+            <input type="number" id="evt-price" class="input" step="0.01" min="0" placeholder="0.00">
+          </div>
+          <div>
+            <label class="label">Fecha y hora</label>
+            <input type="datetime-local" id="evt-date" class="input">
+          </div>
+        </div>
+        <div class="flex gap-2 mt-3">
+          <button type="button" onclick="saveEvent(<?= $business['id'] ?>)"
+            class="bg-green-500 text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-green-600 transition">
+            Guardar evento
+          </button>
+          <button type="button" onclick="cancelEventForm()"
+            class="px-5 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-events -->
   <?php endif; ?>
 
 </main>
@@ -393,14 +485,16 @@ function updateCoords(latlng) {
 function switchTab(tab) {
   document.getElementById('tab-basic').classList.toggle('hidden', tab !== 'basic');
   document.getElementById('tab-products').classList.toggle('hidden', tab !== 'products');
-  document.getElementById('tab-btn-basic').classList.toggle('border-blue-600', tab === 'basic');
-  document.getElementById('tab-btn-basic').classList.toggle('text-blue-600', tab === 'basic');
-  document.getElementById('tab-btn-basic').classList.toggle('border-transparent', tab !== 'basic');
-  document.getElementById('tab-btn-basic').classList.toggle('text-gray-500', tab !== 'basic');
-  document.getElementById('tab-btn-products').classList.toggle('border-blue-600', tab === 'products');
-  document.getElementById('tab-btn-products').classList.toggle('text-blue-600', tab === 'products');
-  document.getElementById('tab-btn-products').classList.toggle('border-transparent', tab !== 'products');
-  document.getElementById('tab-btn-products').classList.toggle('text-gray-500', tab !== 'products');
+  document.getElementById('tab-events').classList.toggle('hidden', tab !== 'events');
+
+  ['basic', 'products', 'events'].forEach(t => {
+    const btn = document.getElementById('tab-btn-' + t);
+    btn.classList.toggle('border-blue-600', t === tab);
+    btn.classList.toggle('text-blue-600', t === tab);
+    btn.classList.toggle('border-transparent', t !== tab);
+    btn.classList.toggle('text-gray-500', t !== tab);
+  });
+
   // Invalidate the map when switching back to basic tab so it renders correctly
   if (tab === 'basic') { setTimeout(() => editMap.invalidateSize(), 50); }
 }
@@ -598,6 +692,141 @@ function renderProducts(products) {
         <button type="button" onclick='editProduct(${JSON.stringify(p).replace(/'/g, "\\'")})'
           class="text-blue-600 hover:text-blue-800 mr-3 transition">Editar</button>
         <button type="button" onclick="removeProduct(${bid}, ${p.id})"
+          class="text-red-500 hover:text-red-700 transition">Eliminar</button>
+      </td>
+    </tr>`;
+  });
+}
+
+// ── Events ───────────────────────────────────────────────────────────────────
+function openEventForm() {
+  document.getElementById('event-form-title').textContent = 'Nuevo evento';
+  document.getElementById('evt-id').value    = '';
+  document.getElementById('evt-name').value  = '';
+  document.getElementById('evt-desc').value  = '';
+  document.getElementById('evt-price').value = '';
+  document.getElementById('evt-date').value  = '';
+  document.getElementById('event-form-wrap').classList.remove('hidden');
+  document.getElementById('evt-name').focus();
+}
+
+function editEvent(ev) {
+  document.getElementById('event-form-title').textContent = 'Editar evento';
+  document.getElementById('evt-id').value    = ev.id;
+  document.getElementById('evt-name').value  = ev.name;
+  document.getElementById('evt-desc').value  = ev.description || '';
+  document.getElementById('evt-price').value = ev.price || '';
+  if (ev.date) {
+    const d = new Date(ev.date.replace(' ', 'T'));
+    if (!isNaN(d.getTime())) {
+      const yyyy = d.getFullYear();
+      const mm   = String(d.getMonth() + 1).padStart(2, '0');
+      const dd   = String(d.getDate()).padStart(2, '0');
+      const hh   = String(d.getHours()).padStart(2, '0');
+      const min  = String(d.getMinutes()).padStart(2, '0');
+      document.getElementById('evt-date').value = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+    } else {
+      document.getElementById('evt-date').value = '';
+    }
+  } else {
+    document.getElementById('evt-date').value = '';
+  }
+  document.getElementById('event-form-wrap').classList.remove('hidden');
+  document.getElementById('evt-name').focus();
+}
+
+function cancelEventForm() {
+  document.getElementById('event-form-wrap').classList.add('hidden');
+}
+
+function saveEvent(businessId) {
+  const name  = document.getElementById('evt-name').value.trim();
+  const desc  = document.getElementById('evt-desc').value.trim();
+  const price = document.getElementById('evt-price').value;
+  const date  = document.getElementById('evt-date').value;
+  const eid   = document.getElementById('evt-id').value;
+
+  if (!name) { alert('Escribe el nombre del evento.'); return; }
+
+  const body = new URLSearchParams({ _csrf: CSRF, name, description: desc, price, date, event_id: eid });
+  fetch('<?= url('admin/negocio/' . $business['id'] . '/evento') ?>', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString()
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) {
+      renderEvents(d.events);
+      cancelEventForm();
+    } else {
+      alert(d.error || 'Error al guardar.');
+    }
+  });
+}
+
+function removeEvent(businessId, eid) {
+  if (!confirm('¿Eliminar este evento?')) return;
+  const body = new URLSearchParams({ _csrf: CSRF });
+  fetch(`<?= url('admin/negocio/' . $business['id']) ?>/evento/${eid}/eliminar`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString()
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) {
+      const row = document.getElementById('evt-row-' + eid);
+      if (row) row.remove();
+      toggleNoEventsMsg();
+    }
+  });
+}
+
+function toggleNoEventsMsg() {
+  const tbody = document.getElementById('events-tbody');
+  const msg   = document.getElementById('no-events-msg');
+  const table = document.getElementById('events-table');
+  if (tbody && tbody.children.length === 0) {
+    msg.textContent = 'No hay eventos registrados.';
+    msg.classList.remove('hidden');
+    if (table) table.classList.add('hidden');
+  }
+}
+
+function renderEvents(events) {
+  const tbody = document.getElementById('events-tbody');
+  const msg   = document.getElementById('no-events-msg');
+  const table = document.getElementById('events-table');
+  if (!tbody) return;
+
+  tbody.innerHTML = '';
+  if (events.length === 0) {
+    msg.textContent = 'No hay eventos registrados.';
+    msg.classList.remove('hidden');
+    if (table) table.classList.add('hidden');
+    return;
+  }
+  msg.classList.add('hidden');
+  if (table) table.classList.remove('hidden');
+
+  const bid = <?= $business['id'] ?>;
+  events.forEach(ev => {
+    const priceText = ev.price !== null ? '$' + parseFloat(ev.price).toFixed(2) : '–';
+    let dateText = '–';
+    if (ev.date) {
+      const d = new Date(ev.date.replace(' ', 'T'));
+      dateText = d.toLocaleDateString('es-MX') + ' ' + d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+    }
+    tbody.innerHTML += `<tr class="border-b last:border-0" id="evt-row-${ev.id}">
+      <td class="py-2 pr-4 font-medium text-gray-800">${escHtml(ev.name)}</td>
+      <td class="py-2 pr-4 text-gray-500 max-w-xs truncate">${escHtml(ev.description || '')}</td>
+      <td class="py-2 pr-4">${priceText}</td>
+      <td class="py-2 pr-4">${dateText}</td>
+      <td class="py-2 text-right whitespace-nowrap">
+        <button type="button" onclick='editEvent(${JSON.stringify(ev).replace(/'/g, "\\'")})'
+          class="text-blue-600 hover:text-blue-800 mr-3 transition">Editar</button>
+        <button type="button" onclick="removeEvent(${bid}, ${ev.id})"
           class="text-red-500 hover:text-red-700 transition">Eliminar</button>
       </td>
     </tr>`;
