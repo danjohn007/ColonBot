@@ -10,7 +10,7 @@ function url(string $path = ''): string
 
 function asset(string $path): string
 {
-    return BASE_URL . '/assets/' . ltrim($path, '/');
+    return '/assets/' . ltrim($path, '/');
 }
 
 function e(mixed $val): string

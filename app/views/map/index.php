@@ -129,7 +129,7 @@ function showPOI(poi) {
   });
 
   const html = `
-    <img src="${poi.cover}" class="w-full h-40 object-cover rounded-xl mb-3" onerror="this.src='${BASE_URL}/public/img/placeholder.jpg'">
+    <img src="${poi.cover}" class="w-full h-40 object-cover rounded-xl mb-3" onerror="this.src='/assets/img/placeholder.svg'">
     <div class="flex items-start justify-between gap-2 mb-2">
       <h3 class="font-bold text-gray-900 text-base leading-tight">${poi.name}</h3>
       <span class="text-xs px-2 py-1 rounded-full text-white font-medium shrink-0" style="background:${poi.category_color}">${poi.category}</span>
