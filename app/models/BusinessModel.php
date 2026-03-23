@@ -66,9 +66,19 @@ class BusinessModel extends Model
         return $this->query('SELECT * FROM services WHERE business_id = ? AND active = 1', [$businessId]);
     }
 
+    public function allServices(int $businessId): array
+    {
+        return $this->query('SELECT * FROM services WHERE business_id = ? ORDER BY id', [$businessId]);
+    }
+
     public function products(int $businessId): array
     {
         return $this->query('SELECT * FROM products WHERE business_id = ? AND available = 1 ORDER BY sort_order', [$businessId]);
+    }
+
+    public function allProducts(int $businessId): array
+    {
+        return $this->query('SELECT * FROM products WHERE business_id = ? ORDER BY sort_order, id', [$businessId]);
     }
 
     public function amenities(int $businessId): array
@@ -171,5 +181,15 @@ class BusinessModel extends Model
                 [$businessId, $data['name'], $data['description'] ?? null, $data['price'] ?? null, $data['available'] ?? 1]
             );
         }
+    }
+
+    public function deleteService(int $serviceId, int $businessId): void
+    {
+        $this->execute('DELETE FROM services WHERE id = ? AND business_id = ?', [$serviceId, $businessId]);
+    }
+
+    public function deleteProduct(int $productId, int $businessId): void
+    {
+        $this->execute('DELETE FROM products WHERE id = ? AND business_id = ?', [$productId, $businessId]);
     }
 }

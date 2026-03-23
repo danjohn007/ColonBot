@@ -51,6 +51,15 @@ $router->get('admin/negocio/{id}',      'BusinessController',  'edit');
 $router->post('admin/negocio/{id}',     'BusinessController',  'update');
 $router->post('admin/negocio/{id}/eliminar', 'BusinessController', 'destroy');
 $router->post('admin/upload',           'BusinessController',  'upload');
+$router->post('admin/negocio/{id}/servicio', 'BusinessController', 'saveService');
+$router->post('admin/negocio/{id}/servicio/{sid}/eliminar', 'BusinessController', 'deleteService');
+$router->post('admin/negocio/{id}/producto', 'BusinessController', 'saveProduct');
+$router->post('admin/negocio/{id}/producto/{pid}/eliminar', 'BusinessController', 'deleteProduct');
+
+// Notificaciones
+$router->get('admin/notificaciones',    'NotificationController', 'index');
+$router->post('admin/notificaciones/{id}/leer', 'NotificationController', 'markRead');
+$router->post('admin/notificaciones/leer-todas', 'NotificationController', 'markAllRead');
 
 // SuperAdmin
 $router->get('superadmin',              'DashboardController', 'index');
