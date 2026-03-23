@@ -36,7 +36,7 @@ define('SESSION_LIFETIME', 3600 * 8); // 8 horas
 
 // ─── Subidas de archivos ───────────────────────────────────────────────────
 define('UPLOAD_PATH',    PUBLIC_PATH . '/uploads');
-define('UPLOAD_URL',     BASE_URL . '/public/uploads');
+define('UPLOAD_URL',     BASE_URL . '/assets/uploads');
 define('MAX_FILE_SIZE',  5 * 1024 * 1024); // 5 MB
 define('ALLOWED_IMG_EXT', ['jpg', 'jpeg', 'png', 'gif', 'webp']);
 
