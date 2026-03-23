@@ -192,4 +192,29 @@ class BusinessModel extends Model
     {
         $this->execute('DELETE FROM products WHERE id = ? AND business_id = ?', [$productId, $businessId]);
     }
+
+    public function allEvents(int $businessId): array
+    {
+        return $this->query('SELECT * FROM events WHERE business_id = ? ORDER BY date, id', [$businessId]);
+    }
+
+    public function upsertEvent(int $businessId, array $data, int $eventId = 0): void
+    {
+        if ($eventId > 0) {
+            $this->execute(
+                'UPDATE events SET name=?, description=?, price=?, date=? WHERE id=? AND business_id=?',
+                [$data['name'], $data['description'] ?? null, $data['price'] ?? null, $data['date'] ?? null, $eventId, $businessId]
+            );
+        } else {
+            $this->execute(
+                'INSERT INTO events (business_id, name, description, price, date) VALUES (?,?,?,?,?)',
+                [$businessId, $data['name'], $data['description'] ?? null, $data['price'] ?? null, $data['date'] ?? null]
+            );
+        }
+    }
+
+    public function deleteEvent(int $eventId, int $businessId): void
+    {
+        $this->execute('DELETE FROM events WHERE id = ? AND business_id = ?', [$eventId, $businessId]);
+    }
 }

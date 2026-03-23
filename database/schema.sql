@@ -227,6 +227,17 @@ CREATE TABLE IF NOT EXISTS `gps_trackers` (
   `created_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ─── Eventos del negocio ─────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `events` (
+  `id`          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `business_id` INT UNSIGNED NOT NULL,
+  `name`        VARCHAR(150) NOT NULL,
+  `description` TEXT         DEFAULT NULL,
+  `price`       DECIMAL(10,2) DEFAULT NULL,
+  `date`        DATETIME     DEFAULT NULL,
+  FOREIGN KEY (`business_id`) REFERENCES `businesses`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ─── Conversaciones chatbot ──────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `chatbot_sessions` (
   `id`          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

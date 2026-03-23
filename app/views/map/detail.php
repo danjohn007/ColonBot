@@ -73,7 +73,7 @@ require APP_PATH . '/views/layout/head.php';
 
       <!-- Amenidades -->
       <?php if ($amenities): ?>
-      <div class="bg-white rounded-2xl shadow-sm p-6">
+      <div id="amenidades" class="bg-white rounded-2xl shadow-sm p-6">
         <h2 class="font-semibold text-gray-900 mb-3">🛎️ Amenidades</h2>
         <div class="flex flex-wrap gap-2">
           <?php foreach ($amenities as $a): ?>
@@ -87,7 +87,7 @@ require APP_PATH . '/views/layout/head.php';
 
       <!-- Servicios -->
       <?php if ($services): ?>
-      <div class="bg-white rounded-2xl shadow-sm p-6">
+      <div id="servicios" class="bg-white rounded-2xl shadow-sm p-6">
         <h2 class="font-semibold text-gray-900 mb-4">📋 Servicios</h2>
         <div class="divide-y">
           <?php foreach ($services as $s): ?>
@@ -107,7 +107,7 @@ require APP_PATH . '/views/layout/head.php';
 
       <!-- Productos -->
       <?php if ($products): ?>
-      <div class="bg-white rounded-2xl shadow-sm p-6">
+      <div id="productos" class="bg-white rounded-2xl shadow-sm p-6">
         <h2 class="font-semibold text-gray-900 mb-4">🛍️ Productos</h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <?php foreach ($products as $p): ?>
@@ -123,6 +123,27 @@ require APP_PATH . '/views/layout/head.php';
               <p class="text-blue-600 font-bold text-sm mt-1"><?= formatPrice((float)$p['price']) ?></p>
               <?php endif; ?>
             </div>
+          </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
+      <?php endif; ?>
+
+      <!-- Eventos -->
+      <?php if (!empty($events)): ?>
+      <div id="eventos" class="bg-white rounded-2xl shadow-sm p-6">
+        <h2 class="font-semibold text-gray-900 mb-4">🎉 Eventos</h2>
+        <div class="divide-y">
+          <?php foreach ($events as $ev): ?>
+          <div class="py-3 flex justify-between items-start">
+            <div>
+              <p class="font-medium text-gray-800"><?= e($ev['name']) ?></p>
+              <?php if ($ev['description']): ?><p class="text-sm text-gray-500 mt-0.5"><?= e($ev['description']) ?></p><?php endif; ?>
+              <?php if ($ev['date']): ?><p class="text-xs text-gray-400 mt-1">📅 <?= e(date('d/m/Y H:i', strtotime($ev['date']))) ?></p><?php endif; ?>
+            </div>
+            <?php if ($ev['price']): ?>
+            <span class="text-blue-600 font-semibold text-sm shrink-0 ml-4"><?= formatPrice((float)$ev['price']) ?></span>
+            <?php endif; ?>
           </div>
           <?php endforeach; ?>
         </div>

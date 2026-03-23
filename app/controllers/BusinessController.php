@@ -92,6 +92,7 @@ class BusinessController extends Controller
         $images             = $this->businesses->images((int)$id);
         $services           = $this->businesses->allServices((int)$id);
         $products           = $this->businesses->allProducts((int)$id);
+        $events             = $this->businesses->allEvents((int)$id);
 
         $this->view('business.form', [
             'business'           => $business,
@@ -102,6 +103,7 @@ class BusinessController extends Controller
             'images'             => $images,
             'services'           => $services,
             'products'           => $products,
+            'events'             => $events,
             'csrf'               => $this->csrf(),
         ]);
     }
@@ -260,6 +262,49 @@ class BusinessController extends Controller
         $this->ownerOrAdmin($business);
 
         $this->businesses->deleteProduct((int)$pid, (int)$id);
+        $this->json(['ok' => true]);
+    }
+
+    public function saveEvent(string $id): void
+    {
+        $this->requireAuth('admin');
+        $this->verifyCsrf();
+
+        $business = $this->businesses->find((int)$id);
+        if (!$business) { $this->json(['error' => 'not found'], 404); }
+
+        $this->ownerOrAdmin($business);
+
+        $name  = trim($_POST['name'] ?? '');
+        $desc  = trim($_POST['description'] ?? '');
+        $price = $this->parsePrice();
+        $date  = trim($_POST['date'] ?? '') ?: null;
+        $eid   = (int)($_POST['event_id'] ?? 0);
+
+        if ($name === '') { $this->json(['error' => 'El nombre es requerido'], 422); }
+
+        $this->businesses->upsertEvent((int)$id, [
+            'name'        => $name,
+            'description' => $desc,
+            'price'       => $price,
+            'date'        => $date,
+        ], $eid);
+
+        $events = $this->businesses->allEvents((int)$id);
+        $this->json(['ok' => true, 'events' => $events]);
+    }
+
+    public function deleteEvent(string $id, string $eid): void
+    {
+        $this->requireAuth('admin');
+        $this->verifyCsrf();
+
+        $business = $this->businesses->find((int)$id);
+        if (!$business) { $this->json(['error' => 'not found'], 404); }
+
+        $this->ownerOrAdmin($business);
+
+        $this->businesses->deleteEvent((int)$eid, (int)$id);
         $this->json(['ok' => true]);
     }
 
