@@ -23,6 +23,9 @@ $flash = flash();
       <div class="hidden md:flex items-center gap-6 text-sm font-medium text-white">
         <a href="<?= url('mapa') ?>" class="hover:opacity-80 transition">🗺️ Mapa</a>
         <?php if ($user): ?>
+          <?php if (hasRole('admin')): ?>
+            <a href="<?= url('admin/notificaciones') ?>" class="hover:opacity-80 transition">🔔 Notificaciones</a>
+          <?php endif; ?>
           <?php if (hasRole('superadmin')): ?>
             <a href="<?= url('superadmin') ?>" class="hover:opacity-80 transition">📊 Dashboard</a>
             <a href="<?= url('configuraciones') ?>" class="hover:opacity-80 transition">⚙️ Config</a>
@@ -48,6 +51,9 @@ $flash = flash();
     <div class="px-4 py-3 space-y-2 text-sm font-medium text-gray-700">
       <a href="<?= url('mapa') ?>" class="block py-2 hover:opacity-80">🗺️ Mapa Turístico</a>
       <?php if ($user): ?>
+        <?php if (hasRole('admin')): ?>
+          <a href="<?= url('admin/notificaciones') ?>" class="block py-2 hover:opacity-80">🔔 Notificaciones</a>
+        <?php endif; ?>
         <?php if (hasRole('superadmin')): ?>
           <a href="<?= url('superadmin') ?>" class="block py-2 hover:opacity-80">📊 Dashboard</a>
           <a href="<?= url('configuraciones') ?>" class="block py-2 hover:opacity-80">⚙️ Configuraciones</a>

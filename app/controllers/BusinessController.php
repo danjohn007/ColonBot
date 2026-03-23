@@ -90,8 +90,8 @@ class BusinessController extends Controller
         $businessAmen       = array_column($this->businesses->amenities((int)$id), 'id');
         $businessCategoryIds = array_column($this->businesses->businessCategories((int)$id), 'id');
         $images             = $this->businesses->images((int)$id);
-        $services           = $this->businesses->services((int)$id);
-        $products           = $this->businesses->products((int)$id);
+        $services           = $this->businesses->allServices((int)$id);
+        $products           = $this->businesses->allProducts((int)$id);
 
         $this->view('business.form', [
             'business'           => $business,
@@ -179,6 +179,90 @@ class BusinessController extends Controller
         $this->json(['ok' => true, 'path' => asset('uploads/' . $path)]);
     }
 
+    public function saveService(string $id): void
+    {
+        $this->requireAuth('admin');
+        $this->verifyCsrf();
+
+        $business = $this->businesses->find((int)$id);
+        if (!$business) { $this->json(['error' => 'not found'], 404); }
+
+        $this->ownerOrAdmin($business);
+
+        $name  = trim($_POST['name'] ?? '');
+        $desc  = trim($_POST['description'] ?? '');
+        $price = $this->parsePrice();
+        $sid   = (int)($_POST['service_id'] ?? 0);
+
+        if ($name === '') { $this->json(['error' => 'El nombre es requerido'], 422); }
+
+        $this->businesses->upsertService((int)$id, [
+            'name'        => $name,
+            'description' => $desc,
+            'price'       => $price,
+        ], $sid);
+
+        $services = $this->businesses->allServices((int)$id);
+        $this->json(['ok' => true, 'services' => $services]);
+    }
+
+    public function deleteService(string $id, string $sid): void
+    {
+        $this->requireAuth('admin');
+        $this->verifyCsrf();
+
+        $business = $this->businesses->find((int)$id);
+        if (!$business) { $this->json(['error' => 'not found'], 404); }
+
+        $this->ownerOrAdmin($business);
+
+        $this->businesses->deleteService((int)$sid, (int)$id);
+        $this->json(['ok' => true]);
+    }
+
+    public function saveProduct(string $id): void
+    {
+        $this->requireAuth('admin');
+        $this->verifyCsrf();
+
+        $business = $this->businesses->find((int)$id);
+        if (!$business) { $this->json(['error' => 'not found'], 404); }
+
+        $this->ownerOrAdmin($business);
+
+        $name      = trim($_POST['name'] ?? '');
+        $desc      = trim($_POST['description'] ?? '');
+        $price     = $this->parsePrice();
+        $available = (int)($_POST['available'] ?? 1);
+        $pid       = (int)($_POST['product_id'] ?? 0);
+
+        if ($name === '') { $this->json(['error' => 'El nombre es requerido'], 422); }
+
+        $this->businesses->upsertProduct((int)$id, [
+            'name'        => $name,
+            'description' => $desc,
+            'price'       => $price,
+            'available'   => $available,
+        ], $pid);
+
+        $products = $this->businesses->allProducts((int)$id);
+        $this->json(['ok' => true, 'products' => $products]);
+    }
+
+    public function deleteProduct(string $id, string $pid): void
+    {
+        $this->requireAuth('admin');
+        $this->verifyCsrf();
+
+        $business = $this->businesses->find((int)$id);
+        if (!$business) { $this->json(['error' => 'not found'], 404); }
+
+        $this->ownerOrAdmin($business);
+
+        $this->businesses->deleteProduct((int)$pid, (int)$id);
+        $this->json(['ok' => true]);
+    }
+
     // ── Privados ──────────────────────────────────────────────────────────
 
     private function buildData(): array
@@ -214,6 +298,12 @@ class BusinessController extends Controller
             $stmt->execute([$slug]);
         }
         return $slug;
+    }
+
+    private function parsePrice(): ?float
+    {
+        $raw = $_POST['price'] ?? '';
+        return $raw !== '' ? (float)$raw : null;
     }
 
     private function ownerOrAdmin(array $business): void
