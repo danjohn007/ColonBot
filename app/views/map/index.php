@@ -72,6 +72,7 @@ const BASE_URL = '<?= BASE_URL ?>';
 const MAP_LAT  = <?= setting('map_lat','20.2862') ?>;
 const MAP_LNG  = <?= setting('map_lng','-99.7242') ?>;
 const MAP_ZOOM = <?= setting('map_zoom','13') ?>;
+const PRELOAD_ID = <?= (int)($preloadId ?? 0) ?>;
 
 // Initialise map
 const map = L.map('map', { zoomControl: true }).setView([MAP_LAT, MAP_LNG], MAP_ZOOM);
@@ -117,10 +118,16 @@ function loadPOIs() {
         m.on('click', () => showPOI(poi));
         markers.push(m);
       });
+      if (PRELOAD_ID) {
+        const target = pois.find(p => p.id === PRELOAD_ID);
+        if (target) showPOI(target);
+      }
     });
 }
 
 function showPOI(poi) {
+  history.pushState({ poiId: poi.id }, '', `${BASE_URL}/mapa/${poi.id}`);
+
   // Track event
   fetch(`${BASE_URL}/api/analitica`, {
     method: 'POST',
@@ -188,11 +195,17 @@ function showPOI(poi) {
   map.panTo([poi.lat, poi.lng]);
 }
 
+function resetMapUrl() {
+  history.pushState({ poiId: null }, '', `${BASE_URL}/mapa`);
+}
+
 function closePanel() {
+  resetMapUrl();
   document.getElementById('poi-panel').classList.add('translate-x-full');
 }
 
 function closeBottomSheet() {
+  resetMapUrl();
   document.getElementById('bottom-sheet').classList.add('translate-y-full');
   document.getElementById('bottom-sheet-overlay').classList.add('hidden');
 }
