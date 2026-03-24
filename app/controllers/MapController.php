@@ -16,8 +16,9 @@ class MapController extends Controller
     {
         $categories = $this->categories->active();
         $this->analytics->track('map_view');
-        $preloadId = (is_numeric($id) && (int)$id > 0) ? (int)$id : 0;
-        $this->view('map.index', compact('categories', 'preloadId'));
+        $preloadId  = (is_numeric($id) && (int)$id > 0) ? (int)$id : 0;
+        $preloadCat = (!is_numeric($id) && $id !== '') ? $id : '';
+        $this->view('map.index', compact('categories', 'preloadId', 'preloadCat'));
     }
 
     /** API: devuelve POIs en JSON para el mapa */
