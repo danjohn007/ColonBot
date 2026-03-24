@@ -38,7 +38,7 @@ class MapController extends Controller
             'category_color' => $b['category_color'],
             'category_icon'  => $b['category_icon'],
             'rating'         => (float)$b['rating'],
-            'cover'          => $b['cover_image'] ? asset('uploads/' . $b['cover_image']) : asset('img/placeholder.svg'),
+            'cover'          => $b['cover_image'] ? imageUrl($b['cover_image']) : asset('img/placeholder.svg'),
             'url'            => url('lugar/' . $b['slug']),
         ], $businesses);
 

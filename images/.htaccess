@@ -1,0 +1,25 @@
+# Permitir acceso a imágenes
+<IfModule mod_rewrite.c>
+    RewriteEngine Off
+</IfModule>
+
+# Permitir acceso desde cualquier origen
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+</IfModule>
+
+# Tipos MIME para imágenes
+<IfModule mod_mime.c>
+    AddType image/jpeg jpg jpeg
+    AddType image/png png
+    AddType image/gif gif
+    AddType image/webp webp
+</IfModule>
+
+# Evitar listado de directorio
+Options -Indexes
+
+# Permitir acceso a archivos de imagen
+<FilesMatch "\.(jpg|jpeg|png|gif|webp)$">
+    Require all granted
+</FilesMatch>

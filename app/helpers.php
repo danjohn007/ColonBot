@@ -13,6 +13,12 @@ function asset(string $path): string
     return '/assets/' . ltrim($path, '/');
 }
 
+function imageUrl(string $filename): string
+{
+    if (empty($filename)) return '';
+    return UPLOAD_URL . '/' . ltrim($filename, '/');
+}
+
 function e(mixed $val): string
 {
     return htmlspecialchars((string)$val, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');

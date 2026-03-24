@@ -79,18 +79,18 @@ if ($dbOk) {
     }
 }
 
-// ─── 6. Directorio de uploads ────────────────────────────────────────────
-$uploadDir = __DIR__ . '/public/uploads';
+// ─── 6. Directorio de imágenes ────────────────────────────────────────────
+$uploadDir = __DIR__ . '/images';
 $uploadOk  = is_dir($uploadDir) && is_writable($uploadDir);
 if (!is_dir($uploadDir)) {
     @mkdir($uploadDir, 0755, true);
     $uploadOk = is_dir($uploadDir) && is_writable($uploadDir);
 }
 $results[] = [
-    'test'   => 'Directorio uploads',
+    'test'   => 'Directorio images',
     'value'  => $uploadDir,
     'ok'     => $uploadOk,
-    'detail' => $uploadOk ? 'Escribible ✓' : 'Sin permisos de escritura – ejecuta: chmod 755 public/uploads',
+    'detail' => $uploadOk ? 'Escribible ✓' : 'Sin permisos de escritura – ejecuta: chmod 755 images',
 ];
 
 // ─── 7. mod_rewrite ──────────────────────────────────────────────────────

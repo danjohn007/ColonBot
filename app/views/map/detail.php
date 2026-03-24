@@ -17,7 +17,7 @@ require APP_PATH . '/views/layout/head.php';
       <?php if ($images): ?>
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 rounded-2xl overflow-hidden">
         <?php foreach (array_slice($images, 0, 5) as $i => $img): ?>
-        <img src="<?= $i === 0 ? asset('uploads/' . $img['path']) : asset('uploads/' . $img['path']) ?>"
+        <img src="<?= imageUrl($img['path']) ?>"
           alt="<?= e($img['caption'] ?: $business['name']) ?>"
           class="<?= $i === 0 ? 'col-span-2 row-span-2 sm:col-span-2 sm:row-span-2' : '' ?> w-full h-48 object-cover">
         <?php endforeach; ?>
@@ -113,7 +113,7 @@ require APP_PATH . '/views/layout/head.php';
           <?php foreach ($products as $p): ?>
           <div class="border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition">
             <?php if ($p['image']): ?>
-            <img src="<?= asset('uploads/' . $p['image']) ?>" alt="<?= e($p['name']) ?>" class="w-full h-32 object-cover">
+            <img src="<?= imageUrl($p['image']) ?>" alt="<?= e($p['name']) ?>" class="w-full h-32 object-cover">
             <?php else: ?>
             <div class="w-full h-32 bg-gray-100 flex items-center justify-center text-3xl">🛍️</div>
             <?php endif; ?>

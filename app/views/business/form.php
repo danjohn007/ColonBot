@@ -165,7 +165,7 @@ require APP_PATH . '/views/layout/head.php';
           <label class="label">Imagen de portada</label>
           <input type="file" name="cover" accept="image/*" class="input">
           <?php if (!empty($business['cover_image'])): ?>
-          <img src="<?= asset('uploads/' . $business['cover_image']) ?>" class="mt-2 h-24 rounded-lg object-cover">
+          <img src="<?= imageUrl($business['cover_image']) ?>" class="mt-2 h-24 rounded-lg object-cover">
           <?php endif; ?>
         </div>
 
@@ -175,7 +175,7 @@ require APP_PATH . '/views/layout/head.php';
         <div class="flex flex-wrap gap-2">
           <?php foreach ($images as $img): ?>
           <div class="relative group">
-            <img src="<?= asset('uploads/' . $img['path']) ?>" class="h-20 w-20 object-cover rounded-lg">
+            <img src="<?= imageUrl($img['path']) ?>" class="h-20 w-20 object-cover rounded-lg">
             <button type="button" onclick="deleteImage(<?= $img['id'] ?>, this)"
               class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition">✕</button>
           </div>

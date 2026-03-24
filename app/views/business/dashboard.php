@@ -30,7 +30,7 @@ require APP_PATH . '/views/layout/head.php';
     <?php foreach ($businesses as $b): ?>
     <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden flex flex-col">
       <?php if ($b['cover_image']): ?>
-      <img src="<?= asset('uploads/' . $b['cover_image']) ?>" alt="<?= e($b['name']) ?>" class="w-full h-40 object-cover">
+      <img src="<?= imageUrl($b['cover_image']) ?>" alt="<?= e($b['name']) ?>" class="w-full h-40 object-cover">
       <?php else: ?>
       <div class="w-full h-40 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center text-4xl">🏢</div>
       <?php endif; ?>

@@ -178,7 +178,7 @@ class BusinessController extends Controller
         }
 
         $this->businesses->addImage($businessId, $path, $_POST['caption'] ?? '');
-        $this->json(['ok' => true, 'path' => asset('uploads/' . $path)]);
+        $this->json(['ok' => true, 'path' => imageUrl($path)]);
     }
 
     public function saveService(string $id): void
