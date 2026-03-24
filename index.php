@@ -32,6 +32,7 @@ $router = new Router();
 $router->get('',                        'MapController',       'index');
 $router->get('mapa',                    'MapController',       'index');
 $router->get('mapa/poi',                'MapController',       'poi');
+$router->get('mapa/{id}',              'MapController',       'index');
 $router->get('lugar/{slug}',            'MapController',       'detail');
 $router->post('lugar/{slug}/contactar', 'MapController',       'contact');
 

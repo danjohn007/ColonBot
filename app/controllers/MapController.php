@@ -12,11 +12,12 @@ class MapController extends Controller
         $this->analytics  = new AnalyticsModel();
     }
 
-    public function index(): void
+    public function index(string $id = ''): void
     {
         $categories = $this->categories->active();
         $this->analytics->track('map_view');
-        $this->view('map.index', compact('categories'));
+        $preloadId = (is_numeric($id) && (int)$id > 0) ? (int)$id : 0;
+        $this->view('map.index', compact('categories', 'preloadId'));
     }
 
     /** API: devuelve POIs en JSON para el mapa */
