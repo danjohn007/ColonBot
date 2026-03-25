@@ -72,7 +72,8 @@ const BASE_URL = '<?= BASE_URL ?>';
 const MAP_LAT  = <?= setting('map_lat','20.2862') ?>;
 const MAP_LNG  = <?= setting('map_lng','-99.7242') ?>;
 const MAP_ZOOM = <?= setting('map_zoom','13') ?>;
-const PRELOAD_ID = <?= (int)($preloadId ?? 0) ?>;
+const PRELOAD_ID  = <?= (int)($preloadId ?? 0) ?>;
+const PRELOAD_CAT = '<?= e($preloadCat ?? '') ?>';
 
 // Initialise map
 const map = L.map('map', { zoomControl: true }).setView([MAP_LAT, MAP_LNG], MAP_ZOOM);
@@ -93,7 +94,7 @@ if (navigator.geolocation) {
 }
 
 let markers = [];
-let currentCat = '';
+let currentCat = PRELOAD_CAT;
 let currentSearch = '';
 
 function createIcon(color) {
@@ -196,7 +197,8 @@ function showPOI(poi) {
 }
 
 function resetMapUrl() {
-  history.pushState({ poiId: null }, '', `${BASE_URL}/mapa`);
+  const url = currentCat ? `${BASE_URL}/mapa/${currentCat}` : `${BASE_URL}/mapa`;
+  history.pushState({ poiId: null }, '', url);
 }
 
 function closePanel() {
@@ -210,8 +212,7 @@ function closeBottomSheet() {
   document.getElementById('bottom-sheet-overlay').classList.add('hidden');
 }
 
-function filterCat(cat) {
-  currentCat = cat;
+function setActiveCatButton(cat) {
   document.querySelectorAll('.cat-btn').forEach(b => {
     const active = b.dataset.cat === cat;
     b.classList.toggle('bg-blue-600', active);
@@ -219,6 +220,13 @@ function filterCat(cat) {
     b.classList.toggle('bg-gray-100', !active);
     b.classList.toggle('text-gray-700', !active);
   });
+}
+
+function filterCat(cat) {
+  currentCat = cat;
+  const url = cat ? `${BASE_URL}/mapa/${cat}` : `${BASE_URL}/mapa`;
+  history.pushState({ cat }, '', url);
+  setActiveCatButton(cat);
   loadPOIs();
 }
 
@@ -244,6 +252,9 @@ function toggleReservarMenu(btn) {
   menu.classList.toggle('hidden');
 }
 
+if (PRELOAD_CAT) {
+  setActiveCatButton(PRELOAD_CAT);
+}
 loadPOIs();
 </script>
 <?php require APP_PATH . '/views/layout/footer.php'; ?>
