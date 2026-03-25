@@ -156,25 +156,21 @@ require APP_PATH . '/views/layout/head.php';
         <form method="POST" action="<?= url('configuraciones/guardar') ?>" class="space-y-4">
           <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
           <input type="hidden" name="group" value="chatbot">
-          <div>
-            <label class="label">Token de acceso (Meta/WhatsApp Business API)</label>
-            <input type="password" name="wa_token" value="<?= $v('wa_token','chatbot') ?>" class="input font-mono text-sm" placeholder="Bearer token de la API de Meta">
+          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+            <div>
+              <p class="text-sm font-medium text-gray-900">Activar ChatBot</p>
+              <p class="text-xs text-gray-500 mt-0.5">Cuando está activo, "Reservar/Comprar" abre un chat de WhatsApp en lugar de mostrar las opciones del negocio.</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+              <input type="hidden" name="chatbot_active" value="0">
+              <input type="checkbox" name="chatbot_active" value="1" class="sr-only peer" <?= $v('chatbot_active','chatbot') === '1' ? 'checked' : '' ?>>
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
           </div>
           <div>
-            <label class="label">Phone Number ID</label>
-            <input type="text" name="wa_phone_id" value="<?= $v('wa_phone_id','chatbot') ?>" class="input font-mono text-sm">
-          </div>
-          <div>
-            <label class="label">Verify Token (para el webhook)</label>
-            <input type="text" name="wa_verify_token" value="<?= $v('wa_verify_token','chatbot') ?>" class="input font-mono text-sm">
-          </div>
-          <div>
-            <label class="label">Versión de API de Meta (ej. v19.0)</label>
-            <input type="text" name="wa_api_version" value="<?= $v('wa_api_version','chatbot') ?>" class="input font-mono text-sm" placeholder="v19.0">
-          </div>
-          <div class="bg-blue-50 p-4 rounded-xl text-sm text-blue-700">
-            <p class="font-semibold mb-1">URL del Webhook para Meta:</p>
-            <code class="font-mono break-all"><?= url('chatbot/webhook') ?></code>
+            <label class="label">Número de WhatsApp (con lada del país)</label>
+            <input type="text" name="chatbot_wa_number" value="<?= $v('chatbot_wa_number','chatbot') ?>" class="input font-mono text-sm" placeholder="Ej. 5214761234567">
+            <p class="text-xs text-gray-400 mt-1">Incluye el código de país sin el signo +. Ej. México: 52 seguido del número de 10 dígitos.</p>
           </div>
           <button type="submit" class="btn-primary">Guardar configuración chatbot</button>
         </form>
