@@ -22,6 +22,12 @@ require APP_PATH . '/views/layout/head.php';
           class="<?= $i === 0 ? 'col-span-2 row-span-2 sm:col-span-2 sm:row-span-2' : '' ?> w-full h-48 object-cover">
         <?php endforeach; ?>
       </div>
+      <?php elseif (!empty($business['cover_image'])): ?>
+      <div class="w-full rounded-2xl overflow-hidden">
+        <img src="<?= imageUrl($business['cover_image']) ?>"
+          alt="<?= e($business['name']) ?>"
+          class="w-full h-64 object-cover">
+      </div>
       <?php else: ?>
       <div class="w-full h-64 bg-gradient-to-br from-blue-100 to-indigo-200 rounded-2xl flex items-center justify-center text-blue-400 text-6xl">
         🗺️

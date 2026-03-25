@@ -18,6 +18,13 @@ require APP_PATH . '/views/layout/head.php';
           </svg>
         </button>
       </div>
+      <!-- Mis Favoritos -->
+      <button id="btn-mis-favoritos" onclick="openFavoritos()"
+        class="flex items-center gap-1.5 text-sm px-3 py-2 rounded-full bg-pink-50 text-pink-600 border border-pink-200 hover:bg-pink-100 transition font-medium whitespace-nowrap">
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        Mis Favoritos
+        <span id="fav-count" class="hidden bg-pink-500 text-white text-xs rounded-full px-1.5 py-0.5 font-bold leading-none"></span>
+      </button>
       <!-- Category filters -->
       <div class="flex gap-2 flex-wrap">
         <button onclick="filterCat('')" data-cat=""
@@ -54,6 +61,27 @@ require APP_PATH . '/views/layout/head.php';
     </div>
   </div>
 </main>
+
+<!-- Mis Favoritos modal -->
+<div id="favoritos-modal" class="fixed inset-0 z-50 hidden" style="display:none;">
+  <div class="absolute inset-0 bg-black bg-opacity-40 flex items-start justify-center pt-16 px-4">
+    <div class="absolute inset-0" onclick="closeFavoritos()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col z-10">
+      <div class="flex items-center justify-between p-4 border-b">
+        <h2 class="font-bold text-gray-900 flex items-center gap-2">
+          <svg class="w-5 h-5 text-pink-500 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          Mis Favoritos
+        </h2>
+        <button onclick="closeFavoritos()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div id="favoritos-list" class="overflow-y-auto p-4 space-y-3 flex-1"></div>
+    </div>
+  </div>
+</div>
 
 <!-- Mobile bottom sheet -->
 <div id="bottom-sheet" class="md:hidden fixed bottom-16 left-0 right-0 bg-white rounded-t-2xl shadow-2xl z-40 transform translate-y-full transition-transform duration-300" style="max-height: 70vh; overflow-y: auto;">
@@ -94,6 +122,7 @@ if (navigator.geolocation) {
 }
 
 let markers = [];
+let allPois = [];
 let currentCat = PRELOAD_CAT;
 let currentSearch = '';
 
@@ -112,6 +141,7 @@ function loadPOIs() {
     .then(pois => {
       markers.forEach(m => map.removeLayer(m));
       markers = [];
+      allPois = pois;
       pois.forEach(poi => {
         if (!poi.lat || !poi.lng) return;
         const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#3B82F6') });
@@ -136,11 +166,21 @@ function showPOI(poi) {
     body: `event=map_view&business_id=${poi.id}`,
   });
 
+  const isFav = isFavorito(poi.id);
   const html = `
     <img src="${poi.cover}" class="w-full h-40 object-cover rounded-xl mb-3" onerror="this.src='/assets/img/placeholder.svg'">
     <div class="flex items-start justify-between gap-2 mb-2">
       <h3 class="font-bold text-gray-900 text-base leading-tight">${poi.name}</h3>
-      <span class="text-xs px-2 py-1 rounded-full text-white font-medium shrink-0" style="background:${poi.category_color}">${poi.category}</span>
+      <div class="flex items-center gap-1 shrink-0">
+        <span class="text-xs px-2 py-1 rounded-full text-white font-medium" style="background:${poi.category_color}">${poi.category}</span>
+        <button onclick="toggleFavorito(${poi.id})" id="fav-btn-${poi.id}"
+          class="p-1.5 rounded-full hover:bg-pink-50 transition" title="${isFav ? 'Quitar de favoritos' : 'Añadir a favoritos'}">
+          <svg class="w-5 h-5 ${isFav ? 'text-pink-500 fill-current' : 'text-gray-300'}" viewBox="0 0 24 24">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+              ${isFav ? '' : 'stroke="currentColor" stroke-width="1.5" fill="none"'}/>
+          </svg>
+        </button>
+      </div>
     </div>
     <div class="flex items-center gap-1 text-yellow-400 text-sm mb-4">
       ${'★'.repeat(Math.round(poi.rating))}${'☆'.repeat(5-Math.round(poi.rating))}
@@ -252,9 +292,110 @@ function toggleReservarMenu(btn) {
   menu.classList.toggle('hidden');
 }
 
+// ── Favorites (localStorage) ──────────────────────────────────────────────────
+const FAV_KEY = 'colonbot_favoritos';
+
+function getFavoritos() {
+  try { return JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); } catch (e) { console.error('Favoritos parse error:', e); return []; }
+}
+
+function saveFavoritos(favs) {
+  localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+  updateFavCount();
+}
+
+function isFavorito(id) {
+  return getFavoritos().some(f => f.id === id);
+}
+
+function toggleFavorito(id) {
+  let favs = getFavoritos();
+  if (isFavorito(id)) {
+    favs = favs.filter(f => f.id !== id);
+  } else {
+    const poi = allPois.find(p => p.id === id);
+    if (poi) favs.push(poi);
+  }
+  saveFavoritos(favs);
+  // Update all heart buttons for this POI (desktop panel + mobile sheet)
+  document.querySelectorAll(`#fav-btn-${id}`).forEach(btn => {
+    const isFav = isFavorito(id);
+    const svg = btn.querySelector('svg');
+    svg.className = `w-5 h-5 ${isFav ? 'text-pink-500 fill-current' : 'text-gray-300'}`;
+    const path = svg.querySelector('path');
+    if (isFav) {
+      path.removeAttribute('stroke');
+      path.removeAttribute('stroke-width');
+      path.setAttribute('fill', 'currentColor');
+    } else {
+      path.setAttribute('stroke', 'currentColor');
+      path.setAttribute('stroke-width', '1.5');
+      path.setAttribute('fill', 'none');
+    }
+    btn.title = isFav ? 'Quitar de favoritos' : 'Añadir a favoritos';
+  });
+}
+
+function updateFavCount() {
+  const count = getFavoritos().length;
+  const el = document.getElementById('fav-count');
+  if (count > 0) {
+    el.textContent = count;
+    el.classList.remove('hidden');
+  } else {
+    el.classList.add('hidden');
+  }
+}
+
+function openFavoritos() {
+  const favs = getFavoritos();
+  const list = document.getElementById('favoritos-list');
+  if (favs.length === 0) {
+    list.innerHTML = '<p class="text-center text-gray-400 py-8">Aún no tienes favoritos.<br>Toca el corazón en cualquier negocio para añadirlo.</p>';
+  } else {
+    list.innerHTML = favs.map(poi => `
+      <div class="flex items-center gap-3 p-3 border border-gray-100 rounded-xl hover:bg-gray-50 cursor-pointer fav-item" data-poi-id="${poi.id}">
+        <img src="${poi.cover}" class="w-14 h-14 object-cover rounded-lg shrink-0" onerror="this.src='/assets/img/placeholder.svg'">
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-gray-900 text-sm truncate">${poi.name}</p>
+          <span class="text-xs px-2 py-0.5 rounded-full text-white font-medium" style="background:${poi.category_color}">${poi.category}</span>
+        </div>
+        <button data-remove-id="${poi.id}" class="p-1.5 text-pink-500 hover:bg-pink-50 rounded-full transition shrink-0 fav-remove-btn" title="Quitar de favoritos">
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </button>
+      </div>
+    `).join('');
+    list.querySelectorAll('.fav-item').forEach(item => {
+      item.addEventListener('click', function(e) {
+        if (e.target.closest('.fav-remove-btn')) return;
+        const id = parseInt(this.dataset.poiId, 10);
+        const poi = getFavoritos().find(f => f.id === id);
+        if (poi) { closeFavoritos(); showPOI(poi); }
+      });
+    });
+    list.querySelectorAll('.fav-remove-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleFavoritoFromList(parseInt(this.dataset.removeId, 10));
+      });
+    });
+  }
+  document.getElementById('favoritos-modal').style.display = 'block';
+}
+
+function closeFavoritos() {
+  document.getElementById('favoritos-modal').style.display = 'none';
+}
+
+function toggleFavoritoFromList(id) {
+  toggleFavorito(id);
+  openFavoritos(); // refresh list
+}
+
 if (PRELOAD_CAT) {
   setActiveCatButton(PRELOAD_CAT);
 }
+updateFavCount();
 loadPOIs();
 </script>
 <?php require APP_PATH . '/views/layout/footer.php'; ?>
