@@ -52,6 +52,7 @@ $router->get('admin/negocio/{id}',      'BusinessController',  'edit');
 $router->post('admin/negocio/{id}',     'BusinessController',  'update');
 $router->post('admin/negocio/{id}/eliminar', 'BusinessController', 'destroy');
 $router->post('admin/upload',           'BusinessController',  'upload');
+$router->post('admin/imagen/{id}/eliminar', 'BusinessController', 'deleteImage');
 $router->post('admin/negocio/{id}/servicio', 'BusinessController', 'saveService');
 $router->post('admin/negocio/{id}/servicio/{sid}/eliminar', 'BusinessController', 'deleteService');
 $router->post('admin/negocio/{id}/producto', 'BusinessController', 'saveProduct');
