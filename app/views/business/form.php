@@ -519,7 +519,24 @@ function uploadExtra() {
 
 function deleteImage(id, btn) {
   if (!confirm('¿Eliminar imagen?')) return;
-  btn.closest('.relative').remove();
+  const body = new URLSearchParams({ _csrf: CSRF });
+  fetch(`<?= url('admin/imagen/') ?>${id}/eliminar`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString()
+  })
+  .then(r => {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  })
+  .then(d => {
+    if (d.ok) {
+      btn.closest('.relative').remove();
+    } else {
+      alert(d.error || 'Error al eliminar la imagen.');
+    }
+  })
+  .catch(() => alert('Error al eliminar la imagen.'));
 }
 
 // ── Services ─────────────────────────────────────────────────────────────────

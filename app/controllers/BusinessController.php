@@ -157,6 +157,28 @@ class BusinessController extends Controller
         $this->redirect('admin/negocio');
     }
 
+    public function deleteImage(string $id): void
+    {
+        $this->requireAuth('admin');
+        $this->verifyCsrf();
+
+        $image = $this->businesses->findImage((int)$id);
+        if (!$image) { $this->json(['error' => 'not found'], 404); }
+
+        $business = $this->businesses->find((int)$image['business_id']);
+        if (!$business) { $this->json(['error' => 'not found'], 404); }
+
+        $this->ownerOrAdmin($business);
+
+        $filePath = UPLOAD_PATH . '/' . $image['path'];
+        if (is_file($filePath)) {
+            unlink($filePath);
+        }
+
+        $this->businesses->deleteImage((int)$id);
+        $this->json(['ok' => true]);
+    }
+
     public function upload(): void
     {
         $this->requireAuth('admin');

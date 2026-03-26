@@ -137,6 +137,11 @@ class BusinessModel extends Model
         );
     }
 
+    public function findImage(int $id): ?array
+    {
+        return $this->queryOne('SELECT * FROM business_images WHERE id = ? LIMIT 1', [$id]);
+    }
+
     public function deleteImage(int $id): void
     {
         $this->execute('DELETE FROM business_images WHERE id = ?', [$id]);
