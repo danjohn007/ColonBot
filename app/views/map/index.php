@@ -1,6 +1,67 @@
 <?php
 $pageTitle = 'Mapa Turístico – ' . e(setting('site_name', APP_NAME));
 require APP_PATH . '/views/layout/head.php';
+
+// ── Obtener límite municipal de Colón desde OSM (server-side, sin CORS) ──
+$boundaryLatLngs = '[]';
+$osmUrl = 'https://www.openstreetmap.org/api/0.6/relation/2671516/full.json';
+$context = stream_context_create([
+  'http' => [
+    'timeout' => 10,
+    'user_agent' => 'ColonBot/1.0',
+  ],
+]);
+$json = @file_get_contents($osmUrl, false, $context);
+if ($json) {
+  $data = json_decode($json, true);
+  if ($data && isset($data['elements'])) {
+    // Indexar nodos por id
+    $nodes = [];
+    foreach ($data['elements'] as $e) {
+      if ($e['type'] === 'node') {
+        $nodes[$e['id']] = [$e['lat'], $e['lon']];
+      }
+    }
+    // Encontrar la relation
+    $relation = null;
+    foreach ($data['elements'] as $e) {
+      if ($e['type'] === 'relation' && $e['id'] === 2671516) {
+        $relation = $e;
+        break;
+      }
+    }
+    if ($relation && isset($relation['members'])) {
+      // Obtener IDs de ways con rol "outer"
+      $outerIds = [];
+      foreach ($relation['members'] as $m) {
+        if ($m['type'] === 'way' && $m['role'] === 'outer') {
+          $outerIds[] = $m['ref'];
+        }
+      }
+      // Indexar ways por id
+      $ways = [];
+      foreach ($data['elements'] as $e) {
+        if ($e['type'] === 'way') {
+          $ways[$e['id']] = $e['nodes'];
+        }
+      }
+      // Unir puntos de todos los ways outer
+      $allPoints = [];
+      foreach ($outerIds as $wid) {
+        if (isset($ways[$wid])) {
+          foreach ($ways[$wid] as $nid) {
+            if (isset($nodes[$nid])) {
+              $allPoints[] = $nodes[$nid];
+            }
+          }
+        }
+      }
+      if (count($allPoints) >= 3) {
+        $boundaryLatLngs = json_encode($allPoints);
+      }
+    }
+  }
+}
 ?>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
 
@@ -106,6 +167,9 @@ const PRELOAD_CAT = '<?= e($preloadCat ?? '') ?>';
 const CHATBOT_ACTIVE    = <?= setting('chatbot_active', '0') === '1' ? 'true' : 'false' ?>;
 const CHATBOT_WA_NUMBER = '<?= e(setting('chatbot_wa_number', '')) ?>';
 
+// ─── Datos del límite municipal obtenidos desde el servidor (sin CORS) ────
+const BOUNDARY_COORDS = <?= $boundaryLatLngs ?>;
+
 // ─── Icon name → emoji mapping for category symbols ────────────────────
 const ICON_MAP = {
   'utensils':      '🍽️',
@@ -164,73 +228,12 @@ function drawBoundary(latlngs) {
   console.log('✅ Límite municipal de Colón dibujado correctamente');
 }
 
-/**
- * Intenta obtener el límite desde Overpass API (soporta CORS, fiable).
- */
-function fetchBoundaryFromOverpass() {
-  const query = '[out:json];relation(2671516);out%20geom;';
-  fetch('https://overpass-api.de/api/interpreter?data=' + query)
-    .then(r => r.json())
-    .then(data => {
-      if (!data || !data.elements || data.elements.length === 0) throw new Error('Overpass: sin datos');
-      // Buscar la relation con id=2671516
-      const rel = data.elements.find(e => e.type === 'relation' && e.id === 2671516);
-      if (!rel || !rel.members) throw new Error('Overpass: relation no encontrada');
-      // Filtrar los miembros de tipo "way" que forman el outer boundary
-      const outerWays = rel.members
-        .filter(m => m.type === 'way' && (m.role === 'outer' || !m.role))
-        .map(m => m.ref);
-      if (outerWays.length === 0) throw new Error('Overpass: sin ways outer');
-      // Extraer geometría de cada way
-      let allPoints = [];
-      outerWays.forEach(ref => {
-        const way = data.elements.find(e => e.type === 'way' && e.id === ref);
-        if (way && way.geometry) {
-          const pts = way.geometry.map(p => [parseFloat(p.lat), parseFloat(p.lon)]);
-          allPoints = allPoints.concat(pts);
-        }
-      });
-      if (allPoints.length < 3) throw new Error('Overpass: muy pocos puntos');
-      drawBoundary(allPoints);
-    })
-    .catch(err => {
-      console.warn('Overpass falló, intentando fuente alternativa…', err.message);
-      fetchBoundaryFromNominatim();
-    });
+// Dibujar el límite municipal directamente desde los datos obtenidos por PHP (sin CORS)
+if (BOUNDARY_COORDS && BOUNDARY_COORDS.length >= 3) {
+  drawBoundary(BOUNDARY_COORDS);
+} else {
+  console.error('No se pudieron obtener las coordenadas del límite municipal de Colón');
 }
-
-/**
- * Intenta obtener el límite desde Nominatim API (soporta CORS, formato GeoJSON).
- */
-function fetchBoundaryFromNominatim() {
-  fetch('https://nominatim.openstreetmap.org/lookup?osm_ids=R2671516&format=geojson')
-    .then(r => r.json())
-    .then(geojson => {
-      if (!geojson || !geojson.features || geojson.features.length === 0) {
-        throw new Error('Nominatim: sin features');
-      }
-      const feat = geojson.features[0];
-      if (!feat || !feat.geometry || !feat.geometry.coordinates) {
-        throw new Error('Nominatim: geometría vacía');
-      }
-      // Extraer anillo exterior de Polygon o MultiPolygon [lng, lat] → [lat, lng]
-      const coords = feat.geometry.coordinates;
-      let ring;
-      if (feat.geometry.type === 'MultiPolygon') {
-        ring = coords[0][0];
-      } else {
-        ring = coords[0];
-      }
-      const latlngs = ring.map(c => [c[1], c[0]]);
-      drawBoundary(latlngs);
-    })
-    .catch(err => {
-      console.error('No se pudo cargar el límite municipal de Colón:', err.message);
-    });
-}
-
-// Iniciar la carga del límite municipal
-fetchBoundaryFromOverpass();
 
 // ─── Geolocalización ─────────────────────────────────────────────────────
 if (navigator.geolocation) {
