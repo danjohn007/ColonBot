@@ -113,7 +113,61 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 18,
 }).addTo(map);
 
-// Geolocation
+// ─── Límite municipal de Colón ────────────────────────────────────────────
+// Polígono que delimita el municipio de Colón, Querétaro
+const colonBoundary = [
+  // Límites aproximados del municipio (en sentido horario)
+  [20.845, -100.210], // Noroeste
+  [20.865, -100.140], // Norte
+  [20.870, -100.080], // Norte
+  [20.860, -100.000], // Noreste
+  [20.825, -99.955],  // Noreste
+  [20.765, -99.910],  // Este (cerca de Soriano)
+  [20.700, -99.880],  // Este
+  [20.645, -99.870],  // Sureste
+  [20.590, -99.880],  // Sureste
+  [20.540, -99.900],  // Sur
+  [20.490, -99.930],  // Sur
+  [20.435, -99.970],  // Suroeste
+  [20.400, -100.015], // Suroeste
+  [20.390, -100.060], // Suroeste
+  [20.395, -100.110], // Oeste
+  [20.410, -100.155], // Oeste
+  [20.445, -100.195], // Oeste
+  [20.495, -100.220], // Noroeste
+  [20.555, -100.235], // Noroeste
+  [20.615, -100.240], // Noroeste
+  [20.675, -100.240], // Noroeste
+  [20.730, -100.235], // Noroeste
+  [20.790, -100.225], // Noroeste
+];
+
+const boundaryPolygon = L.polygon(colonBoundary, {
+  color: '#1E40AF',        // Borde azul intenso
+  weight: 4,               // Línea gruesa visible
+  opacity: 0.9,            // Opacidad del borde
+  fillColor: '#3B82F6',    // Relleno azul
+  fillOpacity: 0.08,       // Muy sutil para no ocultar el mapa
+  dashArray: '8, 6',       // Línea discontinua para notoriedad
+  dashOffset: '0',
+}).addTo(map);
+
+// Etiqueta flotante que identifica el municipio
+const boundaryLabel = L.marker(
+  [20.630, -100.060], // Centro aproximado del municipio
+  {
+    icon: L.divIcon({
+      className: 'colon-boundary-label',
+      html: '<div style="background:#1E40AF;color:white;padding:6px 16px;border-radius:20px;font-weight:700;font-size:14px;letter-spacing:0.5px;box-shadow:0 2px 12px rgba(0,0,0,0.3);white-space:nowrap;border:2px solid white;">🗺️ MUNICIPIO DE COLÓN</div>',
+      iconSize: [0, 0],
+      iconAnchor: [0, 0],
+    }),
+    interactive: false,
+    zIndexOffset: 1000,
+  }
+).addTo(map);
+
+// ─── Geolocalización ─────────────────────────────────────────────────────
 if (navigator.geolocation) {
   navigator.geolocation.getCurrentPosition(pos => {
     const { latitude: lat, longitude: lng } = pos.coords;
