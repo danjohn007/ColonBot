@@ -77,6 +77,7 @@ $router->post('superadmin/negocios/{id}/rechazar', 'DashboardController', 'rejec
 $router->post('superadmin/negocios/{id}/eliminar', 'DashboardController', 'deleteBusiness');
 $router->get('superadmin/categorias',   'DashboardController', 'categories');
 $router->post('superadmin/categorias/crear', 'DashboardController', 'createCategory');
+$router->post('superadmin/categorias/{id}',   'DashboardController', 'updateCategory');
 $router->post('superadmin/categorias/{id}/eliminar', 'DashboardController', 'deleteCategory');
 $router->get('superadmin/analitica',    'DashboardController', 'analytics');
 $router->get('superadmin/bitacora',     'DashboardController', 'actionLog');

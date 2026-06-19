@@ -113,41 +113,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 18,
 }).addTo(map);
 
-// ─── Límite municipal de Colón ────────────────────────────────────────────
-// Polígono que delimita el municipio de Colón, Querétaro
-const colonBoundary = [
-  // Límites aproximados del municipio (en sentido horario)
-  [20.845, -100.210], // Noroeste
-  [20.865, -100.140], // Norte
-  [20.870, -100.080], // Norte
-  [20.860, -100.000], // Noreste
-  [20.825, -99.955],  // Noreste
-  [20.765, -99.910],  // Este (cerca de Soriano)
-  [20.700, -99.880],  // Este
-  [20.645, -99.870],  // Sureste
-  [20.590, -99.880],  // Sureste
-  [20.540, -99.900],  // Sur
-  [20.490, -99.930],  // Sur
-  [20.435, -99.970],  // Suroeste
-  [20.400, -100.015], // Suroeste
-  [20.390, -100.060], // Suroeste
-  [20.395, -100.110], // Oeste
-  [20.410, -100.155], // Oeste
-  [20.445, -100.195], // Oeste
-  [20.495, -100.220], // Noroeste
-  [20.555, -100.235], // Noroeste
-  [20.615, -100.240], // Noroeste
-  [20.675, -100.240], // Noroeste
-  [20.730, -100.235], // Noroeste
-  [20.790, -100.225], // Noroeste
-];
-
-const boundaryPolygon = L.polygon(colonBoundary, {
-  color: '#DC2626',        // Borde rojo para máxima claridad
-  weight: 2.5,             // Línea visible pero no abrumadora
-  opacity: 0.85,           // Opacidad del borde
-  fillOpacity: 0,          // Sin relleno
-}).addTo(map);
+// (El límite municipal se ha retirado por solicitud)
 
 // ─── Geolocalización ─────────────────────────────────────────────────────
 if (navigator.geolocation) {

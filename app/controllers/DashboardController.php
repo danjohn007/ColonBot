@@ -159,6 +159,25 @@ class DashboardController extends Controller
         $this->redirect('superadmin/categorias');
     }
 
+    public function updateCategory(string $id): void
+    {
+        $this->requireAuth('superadmin');
+        $this->verifyCsrf();
+
+        $name = trim($_POST['name'] ?? '');
+        $this->categories->update((int)$id, [
+            'name'       => $name,
+            'slug'       => slugify($name),
+            'icon'       => trim($_POST['icon'] ?? 'map-pin'),
+            'color'      => trim($_POST['color'] ?? '#3B82F6'),
+            'sort_order' => (int)($_POST['sort_order'] ?? 0),
+            'active'     => isset($_POST['active']) ? 1 : 0,
+        ]);
+        $this->logAction('update_category', 'categories', (int)$id, $name);
+        $this->flash('success', 'Categoría actualizada.');
+        $this->redirect('superadmin/categorias');
+    }
+
     public function deleteCategory(string $id): void
     {
         $this->requireAuth('superadmin');
