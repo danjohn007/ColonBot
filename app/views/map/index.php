@@ -143,29 +143,11 @@ const colonBoundary = [
 ];
 
 const boundaryPolygon = L.polygon(colonBoundary, {
-  color: '#1E40AF',        // Borde azul intenso
-  weight: 4,               // Línea gruesa visible
-  opacity: 0.9,            // Opacidad del borde
-  fillColor: '#3B82F6',    // Relleno azul
-  fillOpacity: 0.08,       // Muy sutil para no ocultar el mapa
-  dashArray: '8, 6',       // Línea discontinua para notoriedad
-  dashOffset: '0',
+  color: '#DC2626',        // Borde rojo para máxima claridad
+  weight: 2.5,             // Línea visible pero no abrumadora
+  opacity: 0.85,           // Opacidad del borde
+  fillOpacity: 0,          // Sin relleno
 }).addTo(map);
-
-// Etiqueta flotante que identifica el municipio
-const boundaryLabel = L.marker(
-  [20.630, -100.060], // Centro aproximado del municipio
-  {
-    icon: L.divIcon({
-      className: 'colon-boundary-label',
-      html: '<div style="background:#1E40AF;color:white;padding:6px 16px;border-radius:20px;font-weight:700;font-size:14px;letter-spacing:0.5px;box-shadow:0 2px 12px rgba(0,0,0,0.3);white-space:nowrap;border:2px solid white;">🗺️ MUNICIPIO DE COLÓN</div>',
-      iconSize: [0, 0],
-      iconAnchor: [0, 0],
-    }),
-    interactive: false,
-    zIndexOffset: 1000,
-  }
-).addTo(map);
 
 // ─── Geolocalización ─────────────────────────────────────────────────────
 if (navigator.geolocation) {

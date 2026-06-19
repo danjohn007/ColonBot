@@ -26,22 +26,3 @@
 
 /* ─── Map height fix ────────────────────────────────────────── */
 #map { min-height: 400px; }
-
-/* ─── Límite municipal de Colón ─────────────────────────────── */
-.colon-boundary-label { background: none; border: none; }
-.colon-boundary-label div {
-  animation: colon-boundary-pulse 3s ease-in-out infinite;
-}
-@keyframes colon-boundary-pulse {
-  0%, 100% { box-shadow: 0 2px 12px rgba(30, 64, 175, 0.3); }
-  50% { box-shadow: 0 2px 20px rgba(30, 64, 175, 0.6); }
-}
-.colon-boundary-label div::before {
-  content: '▼';
-  display: block;
-  text-align: center;
-  color: #1E40AF;
-  font-size: 12px;
-  line-height: 1;
-  margin-top: -2px;
-}
