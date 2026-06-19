@@ -131,7 +131,32 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 18,
 }).addTo(map);
 
-// (El límite municipal se ha retirado por solicitud)
+// ─── Límite municipal de Colón, Querétaro ──────────────────────────────
+const BOUNDARY_STYLE = {
+  color: '#1D4ED8',
+  weight: 4,
+  opacity: 0.9,
+  fillColor: '#3B82F6',
+  fillOpacity: 0.08,
+};
+
+// Overpass query: get all ways of the boundary relation for Colón municipality
+fetch('https://overpass-api.de/api/interpreter?data=[out:json];relation[boundary=administrative][admin_level=8][name="Colón"](area:area[boundary=administrative][admin_level=4][name="Querétaro"]);(._;>>;);out geom;')
+  .then(r => r.json())
+  .then(data => {
+    if (!data.elements || !data.elements.length) { throw new Error('No data'); }
+    // Build a polygon from all way nodes ordered by relation members
+    const ways = data.elements.filter(el => el.type === 'way');
+    if (!ways.length) throw new Error('No ways');
+    // Collect all coordinates from all ways
+    const coords = ways.flatMap(way => {
+      if (!way.geometry) return [];
+      return way.geometry.map(g => [g.lat, g.lon]);
+    });
+    if (coords.length < 3) throw new Error('Not enough coordinates');
+    L.polygon(coords, BOUNDARY_STYLE).addTo(map);
+  })
+  .catch(() => {});
 
 // ─── Geolocalización ─────────────────────────────────────────────────────
 if (navigator.geolocation) {
