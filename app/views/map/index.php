@@ -149,24 +149,88 @@ const BOUNDARY_GLOW_STYLE = {
   fill: false,
 };
 
-// Obtiene el límite municipal de Colón desde polygons.openstreetmap.fr (OpenStreetMap data)
-// Usa el relation ID conocido de Colón, Querétaro
-fetch('https://polygons.openstreetmap.fr/get_geojson.php?id=2671516&params=0')
-  .then(r => r.json())
-  .then(geojson => {
-    if (!geojson || !geojson.coordinates) { throw new Error('Sin geometría'); }
-    // El GeoJSON viene como Polygon o MultiPolygon en [lng, lat]
-    const ring = geojson.type === 'MultiPolygon'
-      ? geojson.coordinates[0][0]
-      : geojson.coordinates[0];
-    // Convertir [lng, lat] a [lat, lng] para Leaflet
-    const latlngs = ring.map(c => [c[1], c[0]]);
-    if (latlngs.length < 3) throw new Error('Muy pocos puntos');
-    const boundary = L.polygon(latlngs, BOUNDARY_STYLE).addTo(map);
-    // Capa de resplandor exterior (se dibuja debajo)
-    L.polygon(latlngs, BOUNDARY_GLOW_STYLE).addTo(map).bringToBack();
-  })
-  .catch(() => {});
+/**
+ * Dibuja el límite municipal en el mapa a partir de un arreglo de coordenadas [lat, lng].
+ */
+function drawBoundary(latlngs) {
+  if (!latlngs || latlngs.length < 3) {
+    console.error('Coordenadas insuficientes para dibujar el límite');
+    return;
+  }
+  // Capa de resplandor exterior (se dibuja debajo)
+  L.polygon(latlngs, BOUNDARY_GLOW_STYLE).addTo(map).bringToBack();
+  // Capa principal (se dibuja encima)
+  L.polygon(latlngs, BOUNDARY_STYLE).addTo(map);
+  console.log('✅ Límite municipal de Colón dibujado correctamente');
+}
+
+/**
+ * Intenta obtener el límite desde Overpass API (soporta CORS, fiable).
+ */
+function fetchBoundaryFromOverpass() {
+  const query = '[out:json];relation(2671516);out%20geom;';
+  fetch('https://overpass-api.de/api/interpreter?data=' + query)
+    .then(r => r.json())
+    .then(data => {
+      if (!data || !data.elements || data.elements.length === 0) throw new Error('Overpass: sin datos');
+      // Buscar la relation con id=2671516
+      const rel = data.elements.find(e => e.type === 'relation' && e.id === 2671516);
+      if (!rel || !rel.members) throw new Error('Overpass: relation no encontrada');
+      // Filtrar los miembros de tipo "way" que forman el outer boundary
+      const outerWays = rel.members
+        .filter(m => m.type === 'way' && (m.role === 'outer' || !m.role))
+        .map(m => m.ref);
+      if (outerWays.length === 0) throw new Error('Overpass: sin ways outer');
+      // Extraer geometría de cada way
+      let allPoints = [];
+      outerWays.forEach(ref => {
+        const way = data.elements.find(e => e.type === 'way' && e.id === ref);
+        if (way && way.geometry) {
+          const pts = way.geometry.map(p => [parseFloat(p.lat), parseFloat(p.lon)]);
+          allPoints = allPoints.concat(pts);
+        }
+      });
+      if (allPoints.length < 3) throw new Error('Overpass: muy pocos puntos');
+      drawBoundary(allPoints);
+    })
+    .catch(err => {
+      console.warn('Overpass falló, intentando fuente alternativa…', err.message);
+      fetchBoundaryFromNominatim();
+    });
+}
+
+/**
+ * Intenta obtener el límite desde Nominatim API (soporta CORS, formato GeoJSON).
+ */
+function fetchBoundaryFromNominatim() {
+  fetch('https://nominatim.openstreetmap.org/lookup?osm_ids=R2671516&format=geojson')
+    .then(r => r.json())
+    .then(geojson => {
+      if (!geojson || !geojson.features || geojson.features.length === 0) {
+        throw new Error('Nominatim: sin features');
+      }
+      const feat = geojson.features[0];
+      if (!feat || !feat.geometry || !feat.geometry.coordinates) {
+        throw new Error('Nominatim: geometría vacía');
+      }
+      // Extraer anillo exterior de Polygon o MultiPolygon [lng, lat] → [lat, lng]
+      const coords = feat.geometry.coordinates;
+      let ring;
+      if (feat.geometry.type === 'MultiPolygon') {
+        ring = coords[0][0];
+      } else {
+        ring = coords[0];
+      }
+      const latlngs = ring.map(c => [c[1], c[0]]);
+      drawBoundary(latlngs);
+    })
+    .catch(err => {
+      console.error('No se pudo cargar el límite municipal de Colón:', err.message);
+    });
+}
+
+// Iniciar la carga del límite municipal
+fetchBoundaryFromOverpass();
 
 // ─── Geolocalización ─────────────────────────────────────────────────────
 if (navigator.geolocation) {
