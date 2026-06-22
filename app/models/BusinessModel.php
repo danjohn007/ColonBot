@@ -203,6 +203,22 @@ class BusinessModel extends Model
         return $this->query('SELECT * FROM events WHERE business_id = ? ORDER BY date, id', [$businessId]);
     }
 
+    public function tripTypes(int $businessId): array
+    {
+        return $this->query('SELECT trip_type FROM business_trip_types WHERE business_id = ? ORDER BY trip_type', [$businessId]);
+    }
+
+    public function syncTripTypes(int $businessId, array $tripTypes): void
+    {
+        $this->execute('DELETE FROM business_trip_types WHERE business_id = ?', [$businessId]);
+        foreach ($tripTypes as $type) {
+            $this->execute(
+                'INSERT IGNORE INTO business_trip_types (business_id, trip_type) VALUES (?,?)',
+                [$businessId, trim($type)]
+            );
+        }
+    }
+
     public function upsertEvent(int $businessId, array $data, int $eventId = 0): void
     {
         if ($eventId > 0) {

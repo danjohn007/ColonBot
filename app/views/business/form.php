@@ -70,6 +70,49 @@ require APP_PATH . '/views/layout/head.php';
             </div>
           </div>
 
+          <!-- Tipo de viaje -->
+          <div class="sm:col-span-2">
+            <label class="label">Tipo de viaje <span class="text-xs text-gray-400">(selecciona uno o varios)</span></label>
+            <div class="flex flex-wrap gap-3 mt-1" id="trip-types-container">
+              <?php $tripTypeOptions = ['familiar'=>'👨‍👩‍👧‍👦 Familiar', 'amigos'=>'🧑‍🤝‍🧑 Viaje de amigos', 'pareja'=>'💑 Pareja', 'petfriendly'=>'🐾 Petfriendly']; ?>
+              <?php foreach ($tripTypeOptions as $val => $label): ?>
+              <label class="flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" name="trip_types[]" value="<?= $val ?>"
+                  <?= in_array($val, $businessTripTypes ?? [], true) ? 'checked' : '' ?>
+                  class="w-4 h-4 rounded text-blue-600 trip-type-checkbox">
+                <span class="text-sm text-gray-700"><?= $label ?></span>
+              </label>
+              <?php endforeach; ?>
+              <label class="flex items-center gap-2 cursor-pointer select-none border-t border-gray-200 pt-2 mt-1 w-full">
+                <input type="checkbox" id="trip-type-all" value="todos"
+                  class="w-4 h-4 rounded text-blue-600">
+                <span class="text-sm font-medium text-blue-600">✅ Todos</span>
+              </label>
+            </div>
+          </div>
+          <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            const allCheckbox = document.getElementById('trip-type-all');
+            const typeCheckboxes = document.querySelectorAll('.trip-type-checkbox');
+            const allValues = <?= json_encode(array_keys($tripTypeOptions)) ?>;
+
+            function updateAllState() {
+              const checked = Array.from(typeCheckboxes).filter(cb => cb.checked);
+              allCheckbox.checked = checked.length === typeCheckboxes.length;
+            }
+
+            allCheckbox.addEventListener('change', function() {
+              typeCheckboxes.forEach(cb => cb.checked = this.checked);
+            });
+
+            typeCheckboxes.forEach(cb => {
+              cb.addEventListener('change', updateAllState);
+            });
+
+            updateAllState();
+          });
+          </script>
+
           <div>
             <label class="label">Estado</label>
             <select name="status" class="input">

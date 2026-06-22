@@ -73,6 +73,10 @@ class BusinessController extends Controller
         $amenityIds = array_map('intval', $_POST['amenities'] ?? []);
         $this->businesses->syncAmenities($id, $amenityIds);
 
+        // Tipos de viaje
+        $tripTypes = $_POST['trip_types'] ?? [];
+        $this->businesses->syncTripTypes($id, $tripTypes);
+
         // Imagen de portada
         $this->handleCoverUpload($id);
 
@@ -93,6 +97,7 @@ class BusinessController extends Controller
         $amenities          = $this->amenities->active();
         $businessAmen       = array_column($this->businesses->amenities((int)$id), 'id');
         $businessCategoryIds = array_column($this->businesses->businessCategories((int)$id), 'id');
+        $businessTripTypes   = array_column($this->businesses->tripTypes((int)$id), 'trip_type');
         $images             = $this->businesses->images((int)$id);
         $services           = $this->businesses->allServices((int)$id);
         $products           = $this->businesses->allProducts((int)$id);
@@ -104,6 +109,7 @@ class BusinessController extends Controller
             'amenities'          => $amenities,
             'businessAmenIds'    => $businessAmen,
             'businessCategoryIds' => $businessCategoryIds,
+            'businessTripTypes'   => $businessTripTypes,
             'images'             => $images,
             'services'           => $services,
             'products'           => $products,
@@ -137,6 +143,10 @@ class BusinessController extends Controller
 
         $amenityIds = array_map('intval', $_POST['amenities'] ?? []);
         $this->businesses->syncAmenities((int)$id, $amenityIds);
+
+        // Tipos de viaje
+        $tripTypes = $_POST['trip_types'] ?? [];
+        $this->businesses->syncTripTypes((int)$id, $tripTypes);
 
         $this->handleCoverUpload((int)$id);
 
