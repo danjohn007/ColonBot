@@ -74,7 +74,7 @@ require APP_PATH . '/views/layout/head.php';
           <div class="sm:col-span-2">
             <label class="label">Tipo de viaje <span class="text-xs text-gray-400">(selecciona uno o varios)</span></label>
             <div class="flex flex-wrap gap-3 mt-1" id="trip-types-container">
-              <?php $tripTypeOptions = ['familiar'=>'👨‍👩‍👧‍👦 Familiar', 'amigos'=>'🧑‍🤝‍🧑 Viaje de amigos', 'pareja'=>'💑 Pareja', 'petfriendly'=>'🐾 Petfriendly']; ?>
+              <?php $tripTypeOptions = ['familiar'=>'👨‍👩‍👧‍👦 Familiar', 'amigos'=>'🧑‍🤝‍🧑 Viaje de amigos', 'pareja'=>'💑 Pareja', 'petfriendly'=>'🐾 Petfriendly', 'adultos_mayores'=>'👴 Adultos Mayores']; ?>
               <?php foreach ($tripTypeOptions as $val => $label): ?>
               <label class="flex items-center gap-2 cursor-pointer select-none">
                 <input type="checkbox" name="trip_types[]" value="<?= $val ?>"
@@ -112,6 +112,22 @@ require APP_PATH . '/views/layout/head.php';
             updateAllState();
           });
           </script>
+
+          <!-- Tipo de Isotipo -->
+          <div class="sm:col-span-2">
+            <label class="label">Tipo de Isotipo <span class="text-xs text-gray-400">(selecciona uno)</span></label>
+            <div class="flex flex-wrap gap-3 mt-1">
+              <?php $isotipoOptions = ['restaurante'=>'🍽️ Restaurante', 'lugares_historicos'=>'🏛️ Lugares hist&oacute;ricos', 'viniedo'=>'🍷 Vi&ntilde;edo', 'hotel'=>'🏨 Hotel', 'paisaje_cerro'=>'⭐ Paisaje/cerro', 'lago_presa'=>'🌊 Lago/presa', 'lugar_compras'=>'🛍️ Lugar de compras', 'indeterminado'=>'📍 Indeterminado']; ?>
+              <?php foreach ($isotipoOptions as $val => $label): ?>
+              <label class="flex items-center gap-2 cursor-pointer select-none">
+                <input type="radio" name="isotipo" value="<?= $val ?>"
+                  <?= ($business['isotipo'] ?? '') === $val ? 'checked' : '' ?>
+                  class="w-4 h-4 text-blue-600">
+                <span class="text-sm text-gray-700"><?= $label ?></span>
+              </label>
+              <?php endforeach; ?>
+            </div>
+          </div>
 
           <div>
             <label class="label">Estado</label>

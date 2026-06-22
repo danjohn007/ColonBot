@@ -78,6 +78,35 @@ require APP_PATH . '/views/layout/head.php';
         📍 Indeterminado
       </button>
     </div>
+
+    <!-- Tipo de viaje Filter -->
+    <div class="max-w-7xl mx-auto flex flex-wrap gap-2 items-center mt-2">
+      <span class="text-xs font-semibold text-gray-500 mr-1">Tipo de viaje:</span>
+      <button onclick="filterTripType('')" data-trip-type=""
+        class="trip-type-btn text-xs px-3 py-1.5 rounded-full bg-blue-600 text-white transition font-medium">
+        Todos
+      </button>
+      <button onclick="filterTripType('familiar')" data-trip-type="familiar"
+        class="trip-type-btn text-xs px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition font-medium">
+        👨‍👩‍👧‍👦 Familiar
+      </button>
+      <button onclick="filterTripType('amigos')" data-trip-type="amigos"
+        class="trip-type-btn text-xs px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition font-medium">
+        🧑‍🤝‍🧑 Amigos
+      </button>
+      <button onclick="filterTripType('pareja')" data-trip-type="pareja"
+        class="trip-type-btn text-xs px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition font-medium">
+        💑 Pareja
+      </button>
+      <button onclick="filterTripType('petfriendly')" data-trip-type="petfriendly"
+        class="trip-type-btn text-xs px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition font-medium">
+        🐾 Petfriendly
+      </button>
+      <button onclick="filterTripType('adultos_mayores')" data-trip-type="adultos_mayores"
+        class="trip-type-btn text-xs px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition font-medium">
+        👴 Adultos Mayores
+      </button>
+    </div>
   </div>
 
   <!-- Map + Sidebar layout -->
@@ -246,6 +275,7 @@ let allPois = [];
 let currentCat = PRELOAD_CAT;
 let currentSearch = '';
 let currentIsotipo = '';
+let currentTripType = '';
 
 function createIcon(color, iconName) {
   const emoji = iconToEmoji(iconName);
@@ -408,6 +438,36 @@ function setActiveIsotipoButton(isotipo) {
     b.classList.toggle('text-white', active);
     b.classList.toggle('bg-gray-100', !active);
     b.classList.toggle('text-gray-700', !active);
+  });
+}
+
+function setActiveTripTypeButton(tripType) {
+  document.querySelectorAll('.trip-type-btn').forEach(b => {
+    const active = b.dataset.tripType === tripType;
+    b.classList.toggle('bg-blue-600', active);
+    b.classList.toggle('text-white', active);
+    b.classList.toggle('bg-gray-100', !active);
+    b.classList.toggle('text-gray-700', !active);
+  });
+}
+
+function filterTripType(tripType) {
+  currentTripType = tripType;
+  setActiveTripTypeButton(tripType);
+  // Filter POIs client-side based on the trip type
+  let filtered = allPois;
+  if (currentTripType) {
+    filtered = allPois.filter(poi => poi.trip_types && poi.trip_types.includes(currentTripType));
+  }
+  // Clear existing markers
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+  filtered.forEach(poi => {
+    if (!poi.lat || !poi.lng) return;
+    const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#3B82F6', poi.category_icon) });
+    m.addTo(map);
+    m.on('click', () => showPOI(poi));
+    markers.push(m);
   });
 }
 

@@ -52,6 +52,10 @@ class BusinessModel extends Model
             $params[] = $like;
             $params[] = $like;
         }
+        if (!empty($filters['trip_type'])) {
+            $sql .= ' AND b.id IN (SELECT business_id FROM business_trip_types WHERE trip_type = ?)';
+            $params[] = $filters['trip_type'];
+        }
         $sql .= ' ORDER BY b.featured DESC, b.rating DESC';
         return $this->query($sql, $params);
     }

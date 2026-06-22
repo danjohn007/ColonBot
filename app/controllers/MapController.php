@@ -30,19 +30,24 @@ class MapController extends Controller
         ];
         $businesses = $this->businesses->withFilters($filters);
 
-        $pois = array_map(fn($b) => [
-            'id'             => $b['id'],
-            'name'           => $b['name'],
-            'slug'           => $b['slug'],
-            'lat'            => (float)$b['lat'],
-            'lng'            => (float)$b['lng'],
-            'category'       => $b['category_name'],
-            'category_color' => $b['category_color'],
-            'category_icon'  => $b['category_icon'],
-            'rating'         => (float)$b['rating'],
-            'cover'          => $b['cover_image'] ? imageUrl($b['cover_image']) : asset('img/placeholder.svg'),
-            'url'            => url('lugar/' . $b['slug']),
-        ], $businesses);
+        $pois = array_map(function($b) {
+            $tripTypes = array_column($this->businesses->tripTypes((int)$b['id']), 'trip_type');
+            return [
+                'id'             => $b['id'],
+                'name'           => $b['name'],
+                'slug'           => $b['slug'],
+                'lat'            => (float)$b['lat'],
+                'lng'            => (float)$b['lng'],
+                'category'       => $b['category_name'],
+                'category_color' => $b['category_color'],
+                'category_icon'  => $b['category_icon'],
+                'rating'         => (float)$b['rating'],
+                'cover'          => $b['cover_image'] ? imageUrl($b['cover_image']) : asset('img/placeholder.svg'),
+                'url'            => url('lugar/' . $b['slug']),
+                'isotipo'        => $b['isotipo'] ?? '',
+                'trip_types'     => $tripTypes,
+            ];
+        }, $businesses);
 
         $this->json($pois);
     }

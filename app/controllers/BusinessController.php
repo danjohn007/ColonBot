@@ -58,6 +58,7 @@ class BusinessController extends Controller
         }
 
         $data = $this->buildData();
+        $data['isotipo'] = trim($_POST['isotipo'] ?? '');
         // The first selected category is stored as primary for display/map joins (backward compat)
         $data['category_id'] = $categoryIds[0];
         $slug = $this->uniqueSlug($data['name']);
@@ -136,6 +137,7 @@ class BusinessController extends Controller
         }
 
         $data = $this->buildData();
+        $data['isotipo'] = trim($_POST['isotipo'] ?? '');
         // The first selected category is stored as primary for display/map joins
         $data['category_id'] = $categoryIds[0];
         $this->businesses->syncCategories((int)$id, $categoryIds);
