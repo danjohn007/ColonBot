@@ -16,7 +16,9 @@ class BusinessController extends Controller
     {
         $this->requireAuth('admin');
         $user      = currentUser();
-        $businesses = $this->businesses->byUser((int)$user['id']);
+        $businesses = $user['role'] === 'superadmin'
+            ? $this->businesses->allWithCategory()
+            : $this->businesses->byUser((int)$user['id']);
         $this->view('business.dashboard', compact('businesses', 'user'));
     }
 
@@ -24,7 +26,9 @@ class BusinessController extends Controller
     {
         $this->requireAuth('admin');
         $user      = currentUser();
-        $businesses = $this->businesses->byUser((int)$user['id']);
+        $businesses = $user['role'] === 'superadmin'
+            ? $this->businesses->allWithCategory()
+            : $this->businesses->byUser((int)$user['id']);
         $this->view('business.index', compact('businesses'));
     }
 
