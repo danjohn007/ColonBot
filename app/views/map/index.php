@@ -106,7 +106,7 @@ const PRELOAD_CAT = '<?= e($preloadCat ?? '') ?>';
 const CHATBOT_ACTIVE    = <?= setting('chatbot_active', '0') === '1' ? 'true' : 'false' ?>;
 const CHATBOT_WA_NUMBER = '<?= e(setting('chatbot_wa_number', '')) ?>';
 
-// ─── Icon name → emoji mapping for category symbols ────────────────────
+// ─── Icon name → emoji mapping for category symbols (panels/modals) ────
 const ICON_MAP = {
   'utensils':      '🍽️',
   'hotel':         '🏨',
@@ -121,6 +121,22 @@ const ICON_MAP = {
 
 function iconToEmoji(iconName) {
   return ICON_MAP[iconName] || ICON_MAP['default'];
+}
+
+// ─── SVG isotipos for map markers (type of place) ───────────────────────
+const MARKER_SVG = {
+  'utensils':     '<svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>',
+  'hotel':        '<svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/></svg>',
+  'wine':         '<svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M6 2l.01 6L6 8.01c0 1.79 1.12 3.33 2.78 3.89C10.02 12.31 12 12.95 12 14v6H8v2h8v-2h-4v-6c0-1.05 1.98-1.69 3.22-2.1C16.87 11.34 18 9.8 18 8.01L17.99 2H6zm3 6H9V4h2v4h-2zm4 0h-2V4h2v4z"/></svg>',
+  'landmark':     '<svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M7 9H2v11h3v-9h2v9h2V9H7zm9-7l-7 5v12h14V7l-7-5zm-1 7h-2v-2h2v2zm0 4h-2v-2h2v2zm0 4h-2v-2h2v2zm4-8h-2v-2h2v2zm0 4h-2v-2h2v2zm0 4h-2v-2h2v2z"/></svg>',
+  'star':         '<svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>',
+  'waves':        '<svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M12 2c-5.33 4.55-8 8.48-8 11.8 0 4.98 3.8 8.2 8 8.2s8-3.22 8-8.2c0-3.32-2.67-7.25-8-11.8zm0 18c-3.35 0-6-2.57-6-6.2 0-2.34 1.95-5.44 6-9.14 4.05 3.7 6 6.79 6 9.14 0 3.63-2.65 6.2-6 6.2z"/></svg>',
+  'shopping-bag': '<svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6-2c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2zm6 16H6V8h2v2h2V8h4v2h2V8h2v12z"/></svg>',
+  'default':      '<svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>',
+};
+
+function getMarkerSvg(iconName) {
+  return MARKER_SVG[iconName] || MARKER_SVG['default'];
 }
 
 // Initialise map
@@ -209,11 +225,11 @@ let currentCat = PRELOAD_CAT;
 let currentSearch = '';
 
 function createIcon(color, iconName) {
-  const emoji = iconToEmoji(iconName);
+  const svg = getMarkerSvg(iconName);
   return L.divIcon({
     className: '',
     html: `<div style="background:${color};width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center">
-      <span style="transform:rotate(45deg);font-size:15px;line-height:1;display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,0.2))">${emoji}</span>
+      <span style="transform:rotate(45deg);display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 1px 1px rgba(0,0,0,0.2))">${svg}</span>
     </div>`,
     iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -36],
   });
