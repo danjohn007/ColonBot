@@ -171,18 +171,10 @@ function isotipoToEmoji(isotipo) {
 // Initialise map
 const map = L.map('map', { zoomControl: true }).setView([MAP_LAT, MAP_LNG], MAP_ZOOM);
 
-// Usar CartoDB Positron que tiene límites administrativos SUTILES
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light/{z}/{x}/{y}{r}.png', {
-  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>',
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   maxZoom: 18,
-  subdomains: 'abcd',
 }).addTo(map);
-
-// Aplicar filtro CSS oscuro suave al mapa base para que el límite rojo destaque
-const mapContainer = document.getElementById('map');
-if (mapContainer) {
-  mapContainer.style.filter = 'contrast(0.95) saturate(1.05)';
-}
 
 // ─── Límite municipal de Colón, Querétaro ──────────────────────────────
 // Colores súper vibrantes para destacar el municipio al máximo
