@@ -125,6 +125,8 @@ function getCategoryEmoji(string $icon): string
         'waves'         => '🌊',
         'shopping-bag'  => '🛍️',
         'map-pin'       => '📍',
+        'cross'         => '✝️',     // Turismo religioso
+        'ecoturismo'    => '⭐',     // Ecoturismo y Aventura (estrella)
     ];
     return $map[$icon] ?? '📍';
 }

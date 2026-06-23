@@ -145,6 +145,8 @@ const ICON_MAP = {
   'waves':         '🌊',
   'shopping-bag':  '🛍️',
   'map-pin':       '📍',
+  'cross':         '✝️',     // Turismo religioso
+  'ecoturismo':    '⭐',     // Ecoturismo y Aventura (estrella)
   'default':       '📍',
 };
 
