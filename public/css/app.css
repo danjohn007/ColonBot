@@ -105,12 +105,60 @@
   opacity: 0.2 !important;
 }
 
+/* FORZAR VISIBILIDAD DEL LÍMITE DE COLÓN */
+/* Selectores para asegurar que los polígonos del límite sean visibles */
+.leaflet-overlay-pane path[class*="colon-boundary"] {
+  opacity: 1 !important;
+  pointer-events: none !important;
+}
+
 /* Asegurar máxima visibilidad del límite de Colón */
 .leaflet-overlay-pane .colon-boundary-layer,
 .leaflet-overlay-pane .colon-boundary-glow,
 .leaflet-overlay-pane .colon-boundary-dash,
 .leaflet-overlay-pane .colon-boundary-fill {
   z-index: 10000 !important;
+  opacity: 1 !important;
+}
+
+/* Estilos específicos para cada capa */
+.leaflet-overlay-pane polygon[class*="colon-boundary-layer"],
+.leaflet-overlay-pane path.colon-boundary-layer {
+  stroke: #DC2626 !important;
+  stroke-width: 3 !important;
+  opacity: 1 !important;
+  fill-opacity: 0.08 !important;
+  fill: #DC2626 !important;
+  paint-order: stroke !important;
+}
+
+.leaflet-overlay-pane polygon[class*="colon-boundary-glow"],
+.leaflet-overlay-pane path.colon-boundary-glow {
+  stroke: #FF6B6B !important;
+  stroke-width: 4 !important;
+  opacity: 0.35 !important;
+  fill: none !important;
+  paint-order: stroke !important;
+}
+
+.leaflet-overlay-pane polygon[class*="colon-boundary-dash"],
+.leaflet-overlay-pane path.colon-boundary-dash {
+  stroke: #FFFFFF !important;
+  stroke-width: 2 !important;
+  opacity: 0.95 !important;
+  fill: none !important;
+  stroke-dasharray: 10, 8 !important;
+  paint-order: stroke !important;
+}
+
+.leaflet-overlay-pane polygon[class*="colon-boundary-fill"],
+.leaflet-overlay-pane path.colon-boundary-fill {
+  stroke: #DC2626 !important;
+  stroke-width: 1 !important;
+  opacity: 0.5 !important;
+  fill: #DC2626 !important;
+  fill-opacity: 0.18 !important;
+  paint-order: stroke !important;
 }
 
 /* Pulsing animation for the boundary ring */
