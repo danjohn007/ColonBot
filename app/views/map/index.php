@@ -179,17 +179,8 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 18,
 }).addTo(map);
 
-// ─── Límite municipal de Colón, Querétaro ──────────────────────────────
-// Datos cargados desde el servidor (evita problemas de CORS)
-const colonBoundary = <?= $boundaryData ?? '[]' ?>;
-if (colonBoundary.length >= 3) {
-  L.polygon(colonBoundary, {
-    color: '#DC2626',
-    weight: 2,
-    opacity: 0.6,
-    fillOpacity: 0
-  }).addTo(map);
-}
+// ─── Sin división territorial ─────────────────────────────────────────
+// El mapa muestra únicamente los lugares turísticos sin líneas divisorias
 
 // ─── Geolocalización ─────────────────────────────────────────────────────
 if (navigator.geolocation) {
