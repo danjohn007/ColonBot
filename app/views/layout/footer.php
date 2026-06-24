@@ -11,9 +11,9 @@
     }
   </script>
   <!-- Footer -->
-  <footer class="border-t border-gray-200 bg-white py-3 px-4 text-center">
-    <img src="<?= asset('img/logo-header.png') ?>" alt="Plataforma Turística de Colón" class="h-8 mx-auto mb-1">
-    <p class="text-xs text-gray-400">&copy; <?= date('Y') ?> Municipio de Colón, Querétaro. Todos los derechos reservados.</p>
+  <footer class="py-3 px-4 text-white text-xs flex items-center justify-between" style="background-color: var(--color-primary)">
+    <span class="font-medium">Plataforma Turística de Colón</span>
+    <span class="opacity-80">&copy; <?= date('Y') ?> Municipio de Colón, Querétaro. Todos los derechos reservados.</span>
   </footer>
 </body>
 </html>

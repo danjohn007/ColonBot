@@ -10,7 +10,7 @@ function url(string $path = ''): string
 
 function asset(string $path): string
 {
-    return '/assets/' . ltrim($path, '/');
+    return BASE_URL . '/assets/' . ltrim($path, '/');
 }
 
 function imageUrl(string $filename): string

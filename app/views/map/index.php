@@ -181,42 +181,14 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 // ─── Límite municipal de Colón, Querétaro ──────────────────────────────
 // Datos cargados desde el servidor (evita problemas de CORS)
-const BOUNDARY_COLOR = '#4A0E4E';      // Morado oscuro para resaltar la división territorial
-const BOUNDARY_FILL_COLOR = '#DC2626'; // Relleno rojo (se mantiene igual)
-
-const BOUNDARY_STYLE = {
-  color: BOUNDARY_COLOR,
-  weight: 3,
-  opacity: 0.9,
-  fillColor: BOUNDARY_FILL_COLOR,
-  fillOpacity: 0.04,
-};
-
-// Dibujar el límite con los datos precargados desde el servidor
-let colonBoundary = <?= $boundaryData ?? '[]' ?>;
-// Fallback: coordenadas del municipio de Colón, Querétaro (OSM Relation R2671516)
-if (!colonBoundary || colonBoundary.length < 3) {
-  console.warn('⚠️ Usando coordenadas de respaldo para el límite de Colón');
-  colonBoundary = [
-    [20.885095, -100.185355],[20.893404, -100.154712],[20.881239, -100.098754],
-    [20.867834, -100.045648],[20.834221, -100.023454],[20.789415, -99.987612],
-    [20.745648, -99.964235],[20.712299, -99.991247],[20.678901, -100.023454],
-    [20.684504, -100.123456],[20.723431, -100.187654],[20.768914, -100.192345],
-    [20.823456, -100.194321],[20.885095, -100.185355]
-  ];
-}
+const colonBoundary = <?= $boundaryData ?? '[]' ?>;
 if (colonBoundary.length >= 3) {
-  const polygon = L.polygon(colonBoundary, {
+  L.polygon(colonBoundary, {
     color: '#DC2626',
-    weight: 3,
-    opacity: 0.9,
-    fillColor: '#DC2626',
-    fillOpacity: 0.05
+    weight: 2,
+    opacity: 0.6,
+    fillOpacity: 0
   }).addTo(map);
-  // Ajustar el mapa para mostrar el área completa
-  map.fitBounds(polygon.getBounds().pad(0.1));
-} else {
-  console.warn('⚠️ No se pudieron cargar los datos del límite de Colón');
 }
 
 // ─── Geolocalización ─────────────────────────────────────────────────────
