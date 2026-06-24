@@ -207,6 +207,32 @@ class BusinessModel extends Model
         return $this->query('SELECT * FROM events WHERE business_id = ? ORDER BY date, id', [$businessId]);
     }
 
+    public function reviews(int $businessId): array
+    {
+        return $this->query(
+            'SELECT * FROM reviews WHERE business_id = ? ORDER BY created_at DESC',
+            [$businessId]
+        );
+    }
+
+    public function addReview(int $businessId, string $userName, string $comment, int $rating): bool
+    {
+        return $this->execute(
+            'INSERT INTO reviews (business_id, user_name, comment, rating) VALUES (?,?,?,?)',
+            [$businessId, $userName, $comment, $rating]
+        );
+    }
+
+    public function updateRating(int $businessId): void
+    {
+        $row = $this->queryOne(
+            'SELECT ROUND(AVG(rating), 2) AS avg_rating FROM reviews WHERE business_id = ?',
+            [$businessId]
+        );
+        $avg = $row['avg_rating'] ?? 0;
+        $this->execute('UPDATE businesses SET rating = ? WHERE id = ?', [$avg, $businessId]);
+    }
+
     public function tripTypes(int $businessId): array
     {
         return $this->query('SELECT trip_type FROM business_trip_types WHERE business_id = ? ORDER BY trip_type', [$businessId]);

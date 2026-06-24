@@ -38,6 +38,23 @@ class ApiController extends Controller
         $this->json($b);
     }
 
+    public function submitReview(): void
+    {
+        $businessId = (int)($_POST['business_id'] ?? 0);
+        $userName   = trim($_POST['user_name'] ?? '');
+        $comment    = trim($_POST['comment'] ?? '');
+        $rating     = (int)($_POST['rating'] ?? 5);
+
+        if ($businessId <= 0 || empty($userName)) {
+            $this->json(['error' => 'Faltan datos requeridos'], 422);
+        }
+        if ($rating < 1 || $rating > 5) $rating = 5;
+
+        $this->businesses->addReview($businessId, $userName, $comment, $rating);
+        $this->businesses->updateRating($businessId);
+        $this->json(['ok' => true]);
+    }
+
     public function trackEvent(): void
     {
         $event      = trim($_POST['event']       ?? '');

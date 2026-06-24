@@ -241,6 +241,98 @@ require APP_PATH . '/views/layout/head.php';
         </div>
       </div>
       <?php endif; ?>
+
+      <!-- Valoraciones y Comentarios -->
+      <div id="valoraciones" class="bg-white rounded-2xl shadow-sm p-6">
+        <h2 class="font-semibold text-gray-900 mb-4">⭐ Valoraciones y Comentarios</h2>
+
+        <!-- Formulario para dejar valoración -->
+        <form id="review-form" class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200" onsubmit="return submitReview(event, <?= (int)$business['id'] ?>)">
+          <h3 class="text-sm font-semibold text-gray-700 mb-3">Deja tu valoración</h3>
+          <div class="mb-3">
+            <label class="text-xs font-medium text-gray-500 block mb-1">Tu nombre</label>
+            <input type="text" id="review-name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nombre">
+          </div>
+          <div class="mb-3">
+            <label class="text-xs font-medium text-gray-500 block mb-1">Calificación</label>
+            <div class="flex gap-1 text-2xl" id="star-rating">
+              <?php for ($i = 1; $i <= 5; $i++): ?>
+              <span class="star cursor-pointer text-gray-300 hover:text-yellow-400 transition" data-value="<?= $i ?>" onclick="setRating(<?= $i ?>)">★</span>
+              <?php endfor; ?>
+            </div>
+            <input type="hidden" id="review-rating" value="5">
+          </div>
+          <div class="mb-3">
+            <label class="text-xs font-medium text-gray-500 block mb-1">Comentario</label>
+            <textarea id="review-comment" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Escribe tu comentario..."></textarea>
+          </div>
+          <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-blue-700 transition">
+            Enviar valoración
+          </button>
+        </form>
+
+        <!-- Lista de valoraciones -->
+        <div id="reviews-list" class="space-y-4">
+          <?php if (empty($reviews)): ?>
+          <p class="text-sm text-gray-400 text-center py-4">Aún no hay valoraciones. ¡Sé el primero en comentar!</p>
+          <?php else: ?>
+          <?php foreach ($reviews as $rv): ?>
+          <div class="border-b border-gray-100 pb-4 last:border-0">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-medium text-gray-800 text-sm"><?= e($rv['user_name']) ?></span>
+              <span class="text-yellow-400 text-sm"><?= str_repeat('★', (int)$rv['rating']) . str_repeat('☆', 5 - (int)$rv['rating']) ?></span>
+            </div>
+            <?php if ($rv['comment']): ?>
+            <p class="text-sm text-gray-600"><?= e($rv['comment']) ?></p>
+            <?php endif; ?>
+            <p class="text-xs text-gray-400 mt-1"><?= date('d/m/Y', strtotime($rv['created_at'])) ?></p>
+          </div>
+          <?php endforeach; ?>
+          <?php endif; ?>
+        </div>
+      </div>
+
+      <script>
+      function setRating(val) {
+        document.getElementById('review-rating').value = val;
+        document.querySelectorAll('#star-rating .star').forEach((s, i) => {
+          s.classList.toggle('text-yellow-400', i < val);
+          s.classList.toggle('text-gray-300', i >= val);
+        });
+      }
+
+      function submitReview(e, businessId) {
+        e.preventDefault();
+        const name = document.getElementById('review-name').value.trim();
+        const rating = document.getElementById('review-rating').value;
+        const comment = document.getElementById('review-comment').value.trim();
+        if (!name) { alert('Por favor ingresa tu nombre.'); return false; }
+
+        const body = new URLSearchParams({
+          business_id: businessId,
+          user_name: name,
+          rating: rating,
+          comment: comment
+        });
+
+        fetch('<?= BASE_URL ?>/api/review', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: body.toString()
+        })
+        .then(r => r.json())
+        .then(d => {
+          if (d.ok) {
+            alert('¡Gracias por tu valoración!');
+            location.reload();
+          } else {
+            alert(d.error || 'Error al enviar la valoración.');
+          }
+        })
+        .catch(() => alert('Error de conexión.'));
+        return false;
+      }
+      </script>
     </div>
 
     <!-- Sidebar Contact -->

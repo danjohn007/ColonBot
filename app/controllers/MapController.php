@@ -74,8 +74,9 @@ class MapController extends Controller
         $products  = $this->businesses->products($business['id']);
         $events    = $this->businesses->allEvents($business['id']);
         $tripTypes = array_column($this->businesses->tripTypes((int)$business['id']), 'trip_type');
+        $reviews   = $this->businesses->reviews((int)$business['id']);
 
-        $this->view('map.detail', compact('business', 'images', 'amenities', 'services', 'products', 'events', 'tripTypes'));
+        $this->view('map.detail', compact('business', 'images', 'amenities', 'services', 'products', 'events', 'tripTypes', 'reviews'));
     }
 
     public function contact(string $slug): void

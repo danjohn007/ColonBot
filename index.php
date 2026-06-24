@@ -104,6 +104,7 @@ $router->post('chatbot/webhook',        'ChatbotController',   'receive');
 $router->get('api/negocios',            'ApiController',       'businesses');
 $router->get('api/negocios/{id}',       'ApiController',       'business');
 $router->post('api/analitica',          'ApiController',       'trackEvent');
+$router->post('api/review',             'ApiController',       'submitReview');
 $router->get('api/hikvision/{id}/stream', 'ApiController',     'hikStream');
 $router->get('api/shelly/{id}/estado',  'ApiController',       'shellyStatus');
 $router->post('api/shelly/{id}/toggle', 'ApiController',       'shellyToggle');
