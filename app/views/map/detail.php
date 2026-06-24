@@ -139,6 +139,7 @@ require APP_PATH . '/views/layout/head.php';
             'arcos_queretaro'   => '🌉 Los Arcos de Querétaro',
             'estacion_tren'     => '🚂 Estación del tren México-Querétaro',
             'lugar_religioso'   => '⛪ Lugar religioso',
+            'apicultura'        => '🐝 Apicultura',
           ];
           $tripTypeMap = [
             'familiar'       => '👨‍👩‍👧‍👦 Familiar',

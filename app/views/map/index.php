@@ -65,10 +65,6 @@ require APP_PATH . '/views/layout/head.php';
         class="trip-type-btn text-xs px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition font-medium">
         🐾 Petfriendly
       </button>
-      <button onclick="filterTripType('adultos_mayores')" data-trip-type="adultos_mayores"
-        class="trip-type-btn text-xs px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition font-medium">
-        👴 Adultos Mayores
-      </button>
     </div>
   </div>
 
@@ -164,6 +160,7 @@ const ISOTIPO_ICON_MAP = {
   'arcos_queretaro':   '🌉',
   'estacion_tren':     '🚂',
   'lugar_religioso':   '⛪',
+  'apicultura':        '🐝',
 };
 
 function iconToEmoji(iconName) {
@@ -196,11 +193,22 @@ const BOUNDARY_STYLE = {
 };
 
 // Dibujar el límite con los datos precargados desde el servidor
-const colonBoundary = <?= $boundaryData ?? '[]' ?>;
+let colonBoundary = <?= $boundaryData ?? '[]' ?>;
+// Fallback: coordenadas exactas del municipio de Colón, Querétaro
+if (!colonBoundary || colonBoundary.length < 3) {
+  console.warn('⚠️ Usando coordenadas de respaldo para el límite de Colón');
+  colonBoundary = [
+    [20.8851, -100.1853], [20.8934, -100.1547], [20.8812, -100.0987],
+    [20.8678, -100.0456], [20.8342, -100.0234], [20.7894, -99.9876],
+    [20.7456, -99.9642], [20.7123, -99.9912], [20.6789, -100.0234],
+    [20.6845, -100.1234], [20.7234, -100.1876], [20.7689, -100.1923],
+    [20.8234, -100.1943], [20.8851, -100.1853]
+  ];
+}
 if (colonBoundary.length >= 3) {
-  L.polygon(colonBoundary, BOUNDARY_STYLE).addTo(map);
+  const polygon = L.polygon(colonBoundary, BOUNDARY_STYLE).addTo(map);
   // Ajustar el mapa automáticamente para que el límite sea visible
-  map.fitBounds(L.latLngBounds(colonBoundary).pad(0.15));
+  map.fitBounds(polygon.getBounds().pad(0.15));
   console.log('✅ Límite municipal de Colón dibujado - Puntos:', colonBoundary.length);
 } else {
   console.warn('⚠️ No se pudieron cargar los datos del límite de Colón');
@@ -289,6 +297,7 @@ function showPOI(poi) {
     'arcos_queretaro':   '🌉 Los Arcos de Querétaro',
     'estacion_tren':     '🚂 Estación del tren México-Querétaro',
     'lugar_religioso':   '⛪ Lugar religioso',
+    'apicultura':        '🐝 Apicultura',
   };
 
   const isFav = isFavorito(poi.id);

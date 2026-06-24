@@ -117,7 +117,7 @@ require APP_PATH . '/views/layout/head.php';
           <div class="sm:col-span-2">
             <label class="label">Tipo de lugar <span class="text-xs text-gray-400">(selecciona uno)</span></label>
             <div class="flex flex-wrap gap-3 mt-1">
-<?php $isotipoOptions = ['restaurante'=>'🍽️ Restaurante', 'lugares_historicos'=>'🏛️ Lugares hist&oacute;ricos', 'viniedo'=>'🍷 Vi&ntilde;edo', 'hotel'=>'🏨 Hotel', 'paisaje_cerro'=>'⭐ Paisaje/cerro', 'lago_presa'=>'🌊 Lago/presa', 'lugar_compras'=>'🛍️ Lugar de compras', 'pena_bernal'=>'🏔️ Pe&ntilde;a de Bernal', 'aeropuerto'=>'✈️ Aeropuerto', 'zoologico_wameru'=>'🦁 Zool&oacute;gico Wamer&uacute;', 'arcos_queretaro'=>'🌉 Los Arcos de Quer&eacute;taro', 'estacion_tren'=>'🚂 Estaci&oacute;n del tren M&eacute;xico-Quer&eacute;taro', 'lugar_religioso'=>'⛪ Lugar religioso']; ?>
+<?php $isotipoOptions = ['restaurante'=>'🍽️ Restaurante', 'lugares_historicos'=>'🏛️ Lugares hist&oacute;ricos', 'viniedo'=>'🍷 Vi&ntilde;edo', 'hotel'=>'🏨 Hotel', 'paisaje_cerro'=>'⭐ Paisaje/cerro', 'lago_presa'=>'🌊 Lago/presa', 'lugar_compras'=>'🛍️ Lugar de compras', 'pena_bernal'=>'🏔️ Pe&ntilde;a de Bernal', 'aeropuerto'=>'✈️ Aeropuerto', 'zoologico_wameru'=>'🦁 Zool&oacute;gico Wamer&uacute;', 'arcos_queretaro'=>'🌉 Los Arcos de Quer&eacute;taro', 'estacion_tren'=>'🚂 Estaci&oacute;n del tren M&eacute;xico-Quer&eacute;taro', 'lugar_religioso'=>'⛪ Lugar religioso', 'apicultura'=>'🐝 Apicultura']; ?>
               <?php foreach ($isotipoOptions as $val => $label): ?>
               <label class="flex items-center gap-2 cursor-pointer select-none">
                 <input type="radio" name="isotipo" value="<?= $val ?>"
