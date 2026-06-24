@@ -195,104 +195,42 @@ const BOUNDARY_STYLE = {
   fillOpacity: 0.04,
 };
 
+// Cargar el límite desde Nominatim (API con CORS habilitado)
 function loadColonBoundary() {
-  console.log('📍 Cargando límite exacto de Colón desde OSM...');
+  console.log('📍 Cargando límite de Colón desde Nominatim API...');
   
-  // Usamos la API de OSM directamente para obtener el GeoJSON exacto de la relación
-  fetch('https://www.openstreetmap.org/api/0.6/relation/2671516/full', {
+  fetch('https://nominatim.openstreetmap.org/lookup?osm_ids=R2671516&format=geojson', {
     timeout: 10000,
   })
     .then(r => {
       if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.text();
+      return r.json();
     })
-    .then(xmlStr => {
-      // Parseamos el XML de OSM para extraer las coordenadas
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(xmlStr, 'text/xml');
+    .then(geojson => {
+      if (!geojson || !geojson.features || geojson.features.length === 0)
+        throw new Error('Nominatim: sin datos');
       
-      // Extraemos los nodes que forman los ways del boundary
-      const nodes = {};
-      xml.querySelectorAll('node').forEach(node => {
-        const id = node.getAttribute('id');
-        const lat = parseFloat(node.getAttribute('lat'));
-        const lon = parseFloat(node.getAttribute('lon'));
-        nodes[id] = [lat, lon];
-      });
-      
-      // Buscamos el way que tiene el rol 'outer' (el perímetro exterior)
-      const relations = xml.querySelectorAll('relation');
-      let outerWayId = null;
-      relations.forEach(rel => {
-        rel.querySelectorAll('member').forEach(member => {
-          if (member.getAttribute('type') === 'way' && member.getAttribute('role') === 'outer') {
-            outerWayId = member.getAttribute('ref');
-          }
-        });
-      });
-      
-      if (!outerWayId) throw new Error('No se encontró el way outer');
-      
-      // Extraemos las coordenadas del way en orden
-      const ways = xml.querySelectorAll('way');
-      let latlngs = [];
-      ways.forEach(way => {
-        if (way.getAttribute('id') === outerWayId) {
-          way.querySelectorAll('nd').forEach(nd => {
-            const ref = nd.getAttribute('ref');
-            if (nodes[ref]) {
-              latlngs.push(nodes[ref]);
-            }
-          });
-        }
-      });
-      
-      if (latlngs.length < 3) throw new Error('Coordenadas insuficientes');
-      
-      console.log('✅ Límite exacto cargado desde OSM - Puntos:', latlngs.length);
-      
+      const feat = geojson.features[0];
+      const coords = feat.geometry.coordinates;
+      let ring;
+      if (feat.geometry.type === 'MultiPolygon') {
+        ring = coords[0][0];
+      } else {
+        ring = coords[0];
+      }
+      const latlngs = ring.map(c => [c[1], c[0]]);
+      console.log('✅ Límite cargado desde Nominatim - Puntos:', latlngs.length);
       L.polygon(latlngs, BOUNDARY_STYLE).addTo(map);
       console.log('✅ Límite municipal de Colón dibujado correctamente');
     })
     .catch(err => {
-      console.warn('⚠️ Falló la carga desde OSM, intentando con Nominatim:', err.message);
-      // Fallback: intentar con Nominatim
-      fetch('https://nominatim.openstreetmap.org/lookup?osm_ids=R2671516&format=geojson', {
-        timeout: 5000,
-      })
-        .then(r => {
-          if (!r.ok) throw new Error('HTTP ' + r.status);
-          return r.json();
-        })
-        .then(geojson => {
-          if (!geojson || !geojson.features || geojson.features.length === 0) {
-            throw new Error('Nominatim: sin datos');
-          }
-          const feat = geojson.features[0];
-          const coords = feat.geometry.coordinates;
-          let ring;
-          if (feat.geometry.type === 'MultiPolygon') {
-            ring = coords[0][0];
-          } else {
-            ring = coords[0];
-          }
-          const latlngs = ring.map(c => [c[1], c[0]]);
-          console.log('✅ Límite cargado desde Nominatim - Puntos:', latlngs.length);
-          L.polygon(latlngs, BOUNDARY_STYLE).addTo(map);
-          console.log('✅ Límite municipal de Colón dibujado correctamente');
-        })
-        .catch(err2 => {
-          console.warn('⚠️ Nominatim también falló:', err2.message);
-        });
+      console.warn('⚠️ Error cargando límite:', err.message);
     });
 }
 
-console.log('⏳ Esperando disponibilidad de Leaflet...');
-if (typeof L !== 'undefined') {
-  loadColonBoundary();
-} else {
-  setTimeout(loadColonBoundary, 500);
-}
+console.log('⏳ Inicializando límite de Colón...');
+// Esperar un breve momento para que el mapa termine de renderizar
+setTimeout(loadColonBoundary, 1000);
 
 // ─── Geolocalización ─────────────────────────────────────────────────────
 if (navigator.geolocation) {
