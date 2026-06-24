@@ -539,6 +539,46 @@ function updateCoords(latlng) {
   document.getElementById('lng-input').value = latlng.lng.toFixed(7);
 }
 
+// ── Punto de referencia: bloquear Tipo de viaje y Amenidades ──────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  function togglePuntoReferencia() {
+    const puntoRef = document.querySelector('.category-checkbox[value="8"]');
+    if (!puntoRef) return;
+    
+    const tripTypesContainer = document.getElementById('trip-types-container');
+    const amenitiesDiv = document.querySelector('.bg-white.rounded-2xl.shadow-sm.p-6 h2:contains("Amenidades")')?.closest('.bg-white');
+    
+    function updateDisabledState() {
+      const isChecked = puntoRef.checked;
+      
+      // Bloquear/desbloquear Tipo de viaje
+      if (tripTypesContainer) {
+        tripTypesContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+          if (cb.id !== 'trip-type-all') {
+            cb.disabled = isChecked;
+            if (isChecked) cb.checked = false;
+          }
+        });
+        tripTypesContainer.style.opacity = isChecked ? '0.5' : '1';
+      }
+      
+      // Bloquear/desbloquear Amenidades
+      document.querySelectorAll('input[name="amenities[]"]').forEach(cb => {
+        cb.disabled = isChecked;
+        if (isChecked) cb.checked = false;
+      });
+      document.querySelectorAll('input[name="amenities[]"]').forEach(cb => {
+        cb.closest('label').style.opacity = isChecked ? '0.5' : '1';
+      });
+    }
+    
+    puntoRef.addEventListener('change', updateDisabledState);
+    updateDisabledState();
+  }
+  
+  togglePuntoReferencia();
+});
+
 <?php if ($isEdit): ?>
 // ── Tab switching ────────────────────────────────────────────────────────────
 function switchTab(tab) {

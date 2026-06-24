@@ -290,6 +290,7 @@ function showPOI(poi) {
 
   const isFav = isFavorito(poi.id);
   const categoryEmoji = iconToEmoji(poi.category_icon);
+  const isPuntoReferencia = poi.category_slug === 'punto-de-referencia';
 
   // Build trip type badges HTML
   const tripTypeBadges = (poi.trip_types && poi.trip_types.length > 0)
@@ -320,17 +321,21 @@ function showPOI(poi) {
         </button>
       </div>
     </div>
+    ${!isPuntoReferencia ? `
     <div class="flex items-center gap-1 text-yellow-400 text-sm mb-3">
       ${'★'.repeat(Math.round(poi.rating))}${'☆'.repeat(5-Math.round(poi.rating))}
       <span class="text-gray-500 ml-1">${poi.rating.toFixed(1)}</span>
     </div>
+    ` : ''}
     ${isotipoBadge ? `<div class="flex items-center gap-2 mb-3">${isotipoBadge}</div>` : ''}
     ${tripTypeBadges ? `<div class="flex flex-wrap gap-1 mb-3">${tripTypeBadges}</div>` : ''}
     <div class="grid grid-cols-2 gap-2">
+      ${!isPuntoReferencia ? `
       <a href="${poi.url}" class="col-span-2 flex items-center justify-center gap-2 bg-blue-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 transition">
         Ver detalle
       </a>
-      ${CHATBOT_ACTIVE && CHATBOT_WA_NUMBER
+      ` : ''}
+      ${!isPuntoReferencia ? (CHATBOT_ACTIVE && CHATBOT_WA_NUMBER
         ? `<a href="https://wa.me/${CHATBOT_WA_NUMBER}?text=${encodeURIComponent('Hola, quiero ver las opciones para ' + poi.name)}" target="_blank"
             class="col-span-2 flex items-center justify-center gap-2 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-purple-700 transition">
             🛒 Reservar/Comprar
@@ -354,8 +359,7 @@ function showPOI(poi) {
                 🎉 Eventos
               </a>
             </div>
-          </div>`
-      }
+          </div>`) : ''}
       <a href="https://wa.me/?text=Estoy%20en%20${encodeURIComponent(poi.name)}%20Colón%20Qro" target="_blank"
         onclick="trackWA(${poi.id})"
         class="flex items-center justify-center gap-1.5 bg-green-500 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-green-600 transition">

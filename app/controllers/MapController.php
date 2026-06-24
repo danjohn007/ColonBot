@@ -43,6 +43,7 @@ class MapController extends Controller
                 'lat'            => (float)$b['lat'],
                 'lng'            => (float)$b['lng'],
                 'category'       => $b['category_name'],
+                'category_slug'  => $b['category_slug'] ?? '',
                 'category_color' => $b['category_color'],
                 'category_icon'  => $b['category_icon'],
                 'rating'         => (float)$b['rating'],
