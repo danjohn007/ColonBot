@@ -182,14 +182,29 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 // ─── División territorial (límite municipal de Colón) ──────────────────
 if (BOUNDARY_DATA && BOUNDARY_DATA.length > 0) {
-  L.polygon(BOUNDARY_DATA, {
-    color: '#8B5CF6',
-    weight: 2,
-    opacity: 0.8,
-    fillColor: '#8B5CF6',
-    fillOpacity: 0.05,
-    dashArray: '8, 8',
-  }).addTo(map);
+  // Si es array de arrays (múltiples anillos), dibujar cada uno
+  if (Array.isArray(BOUNDARY_DATA[0])) {
+    BOUNDARY_DATA.forEach(ring => {
+      L.polygon(ring, {
+        color: '#8B5CF6',
+        weight: 2,
+        opacity: 0.8,
+        fillColor: '#8B5CF6',
+        fillOpacity: 0.05,
+        dashArray: '8, 8',
+      }).addTo(map);
+    });
+  } else {
+    // Compatibilidad con formato plano anterior
+    L.polygon(BOUNDARY_DATA, {
+      color: '#8B5CF6',
+      weight: 2,
+      opacity: 0.8,
+      fillColor: '#8B5CF6',
+      fillOpacity: 0.05,
+      dashArray: '8, 8',
+    }).addTo(map);
+  }
 }
 
 // ─── Geolocalización ─────────────────────────────────────────────────────

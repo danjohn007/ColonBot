@@ -395,28 +395,29 @@ class MapController extends Controller
             return '[]';
         }
 
-        // Extraer coordenadas del primer elemento (relación)
+        // Extraer coordenadas de TODOS los miembros outer de la relación
         $element = $data['elements'][0] ?? null;
         if (!$element || empty($element['members'])) {
             return '[]';
         }
 
-        // Buscar el primer way miembro con geometría
-        $ring = [];
+        // Devolver un arreglo de anillos (cada miembro outer es un anillo independiente)
+        // El límite de Colón tiene múltiples ways "outer" que deben dibujarse por separado
+        $rings = [];
         foreach ($element['members'] as $member) {
-            if (!empty($member['geometry'])) {
+            if ($member['role'] === 'outer' && !empty($member['geometry'])) {
+                $ring = [];
                 foreach ($member['geometry'] as $pt) {
                     $ring[] = [$pt['lat'], $pt['lon']];
                 }
-                // Solo tomamos el primer anillo (outer)
-                break;
+                $rings[] = $ring;
             }
         }
 
-        if (empty($ring)) {
+        if (empty($rings)) {
             return '[]';
         }
 
-        return json_encode($ring);
+        return json_encode($rings);
     }
 }
