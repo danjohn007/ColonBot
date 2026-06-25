@@ -8,8 +8,7 @@ $flash = flash();
     <div class="flex items-center justify-between h-16">
       <!-- Logo -->
       <a href="<?= url() ?>" class="flex items-center gap-3 font-bold text-white text-lg">
-        <img src="<?= asset('img/ssc.png') ?>" alt="SSC" class="h-12 w-auto">
-        <img src="<?= asset('img/logo-header.png') ?>" alt="Colón" class="h-10 w-auto">
+        <img src="<?= asset('img/logo-header-nuevo.jpeg') ?>" alt="Colón" class="h-12 w-auto">
       </a>
 
       <!-- Desktop menu -->
