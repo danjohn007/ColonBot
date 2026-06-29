@@ -72,6 +72,7 @@ require APP_PATH . '/views/layout/head.php';
       <select name="role" class="w-full input">
         <option value="admin">Admin de Negocio</option>
         <option value="superadmin">Super Administrador</option>
+        <option value="colaborador">Colaborador de Turismo</option>
       </select>
       <div class="flex gap-2 pt-2">
         <button type="submit" class="flex-1 bg-blue-600 text-white py-2.5 rounded-xl font-semibold hover:bg-blue-700 transition">Crear</button>
@@ -93,6 +94,7 @@ require APP_PATH . '/views/layout/head.php';
       <select name="role" id="edit-role" class="w-full input">
         <option value="admin">Admin de Negocio</option>
         <option value="superadmin">Super Administrador</option>
+        <option value="colaborador">Colaborador de Turismo</option>
       </select>
       <label class="flex items-center gap-2 text-sm">
         <input type="checkbox" name="active" id="edit-active" value="1" class="rounded">

@@ -99,6 +99,10 @@ $router->post('colaborador/negocios/{id}/reestablecer-valoraciones', 'Colaborado
 $router->get('colaborador/negocios/{id}/contactar', 'ColaboradorController', 'contactProvider');
 $router->get('colaborador/metricas',           'ColaboradorController', 'metrics');
 
+// ─── Perfil ────────────────────────────────────────────────────────
+$router->get('mi-perfil',                   'ProfileController',   'index');
+$router->post('mi-perfil/actualizar',       'ProfileController',   'update');
+
 // ─── Turista ──────────────────────────────────────────────────────
 $router->get('turista',                    'TouristController', 'dashboard');
 $router->post('turista/registrar',         'TouristController', 'register');

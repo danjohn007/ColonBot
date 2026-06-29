@@ -33,6 +33,11 @@ class BusinessController extends Controller
             : $this->businesses->byUser((int)$user['id']);
 
         if (empty($businesses)) {
+            // Allow admin/superadmin to proceed even without businesses
+            if ($user['role'] === 'admin' || $user['role'] === 'superadmin') {
+                $this->view('business.microsite', compact('businesses', 'user'));
+                return;
+            }
             $this->flash('info', 'Primero debes registrar un negocio.');
             $this->redirect('admin/negocio/crear');
         }
@@ -453,7 +458,7 @@ class BusinessController extends Controller
 
     private function buildData(): array
     {
-        return [
+        $data = [
             'name'        => trim($_POST['name'] ?? ''),
             'description' => trim($_POST['description'] ?? ''),
             'address'     => trim($_POST['address'] ?? ''),
@@ -465,10 +470,16 @@ class BusinessController extends Controller
             'website'     => trim($_POST['website'] ?? ''),
             'facebook'    => trim($_POST['facebook'] ?? ''),
             'instagram'   => trim($_POST['instagram'] ?? ''),
-            'schedule'    => trim($_POST['schedule'] ?? ''),
-            'status'      => in_array($_POST['status'] ?? '', ['draft','pending','published'], true)
-                             ? $_POST['status'] : 'draft',
         ];
+
+        // Only superadmin can change business status
+        $user = currentUser();
+        if ($user['role'] === 'superadmin') {
+            $data['status'] = in_array($_POST['status'] ?? '', ['draft','pending','published'], true)
+                             ? $_POST['status'] : 'draft';
+        }
+
+        return $data;
     }
 
     private function uniqueSlug(string $name): string

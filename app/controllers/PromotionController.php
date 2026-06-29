@@ -44,6 +44,13 @@ class PromotionController extends Controller
         $this->verifyCsrf();
 
         $businessId = (int)($_POST['business_id'] ?? 0);
+        
+        // Admin users cannot create public events (without business_id)
+        $user = currentUser();
+        if ($businessId <= 0 && $user['role'] === 'admin') {
+            $this->json(['error' => 'No tienes permiso para crear eventos públicos'], 403);
+        }
+        
         if ($businessId > 0) {
             $business = $this->businesses->find($businessId);
             if (!$business) { $this->json(['error' => 'not found'], 404); }

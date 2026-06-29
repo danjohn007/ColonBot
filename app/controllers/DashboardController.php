@@ -48,7 +48,7 @@ class DashboardController extends Controller
             'name'     => trim($_POST['name'] ?? ''),
             'email'    => $email,
             'password' => $this->users->hashPassword($_POST['password'] ?? ''),
-            'role'     => in_array($_POST['role'] ?? '', ['admin','superadmin'], true) ? $_POST['role'] : 'admin',
+            'role'     => in_array($_POST['role'] ?? '', ['admin','superadmin','colaborador'], true) ? $_POST['role'] : 'admin',
             'phone'    => trim($_POST['phone'] ?? ''),
             'active'   => 1,
         ]);
@@ -64,7 +64,7 @@ class DashboardController extends Controller
 
         $data = [
             'name'   => trim($_POST['name'] ?? ''),
-            'role'   => in_array($_POST['role'] ?? '', ['admin','superadmin'], true) ? $_POST['role'] : 'admin',
+            'role'   => in_array($_POST['role'] ?? '', ['admin','superadmin','colaborador'], true) ? $_POST['role'] : 'admin',
             'active' => isset($_POST['active']) ? 1 : 0,
         ];
         if (!empty($_POST['password'])) {

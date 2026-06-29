@@ -16,7 +16,7 @@ class ColaboradorController extends Controller
 
     public function dashboard(): void
     {
-        $this->requireAuth('colaborador');
+        $this->requireAuth('admin');
 
         // Metrics
         $totalBiz = $this->businesses->count();

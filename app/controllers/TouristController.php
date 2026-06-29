@@ -16,9 +16,12 @@ class TouristController extends Controller
 
     public function dashboard(): void
     {
-        $this->requireAuth('turista');
+        // Allow access without login for public tourist page
         $user = currentUser();
-        $profile = $this->profiles->findByUserId((int)$user['id']);
+        $profile = null;
+        if ($user) {
+            $profile = $this->profiles->findByUserId((int)$user['id']);
+        }
 
         // Top visited & recommended
         $topVisited = $this->businesses->query(

@@ -11,9 +11,15 @@ class ContactModel extends Model
                 FROM contacts c WHERE c.business_id = ?';
         $params = [$businessId];
 
-        if ($category && in_array($category, ['prospecto', 'cliente', 'lovemark'])) {
+        if ($category && in_array($category, ['prospecto', 'cliente', 'lovemark', 'prospecto_sin_historial', 'prospecto_recurrente', 'cliente_frecuente'])) {
             $sql .= ' AND c.category = ?';
             $params[] = $category;
+        } elseif ($category === 'prospecto_sin_historial') {
+            $sql .= " AND c.category = 'prospecto' AND c.last_contact_at IS NULL";
+        } elseif ($category === 'prospecto_recurrente') {
+            $sql .= " AND c.category = 'prospecto' AND c.last_contact_at IS NOT NULL";
+        } elseif ($category === 'cliente_frecuente') {
+            $sql .= " AND (SELECT COUNT(*) FROM contact_purchases cp WHERE cp.contact_id = c.id) >= 3";
         }
 
         $sql .= ' ORDER BY c.updated_at DESC';

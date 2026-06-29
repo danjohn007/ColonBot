@@ -27,10 +27,11 @@ require APP_PATH . '/views/layout/head.php';
 
   <!-- Category filter tabs -->
   <div class="flex gap-2 mb-6" id="category-tabs">
-    <button onclick="filterCategory('')" data-cat="" class="cat-filter px-4 py-2 rounded-full text-sm font-medium bg-blue-600 text-white transition">Todos</button>
-    <button onclick="filterCategory('prospecto')" data-cat="prospecto" class="cat-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-blue-100 transition">📋 Prospectos</button>
+    <button onclick="filterCategory('')" data-cat="" class="cat-filter px-4 py-2 rounded-full text-sm font-medium bg-blue-600 text-white transition">📊 Todos</button>
+    <button onclick="filterCategory('prospecto_sin_historial')" data-cat="prospecto_sin_historial" class="cat-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-blue-100 transition">🆕 Prospectos sin historial</button>
+    <button onclick="filterCategory('prospecto_recurrente')" data-cat="prospecto_recurrente" class="cat-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-blue-100 transition">🔄 Prospectos recurrentes</button>
     <button onclick="filterCategory('cliente')" data-cat="cliente" class="cat-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-blue-100 transition">✅ Clientes</button>
-    <button onclick="filterCategory('lovemark')" data-cat="lovemark" class="cat-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-blue-100 transition">⭐ Lovemarks</button>
+    <button onclick="filterCategory('cliente_frecuente')" data-cat="cliente_frecuente" class="cat-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-blue-100 transition">⭐ Clientes frecuentes</button>
   </div>
 
   <!-- Contacts table -->

@@ -2,76 +2,186 @@
 $user = currentUser();
 $flash = flash();
 ?>
-<!-- Top Navigation -->
+<!-- Top Navigation Bar (slim - only logo + hamburger) -->
 <nav class="shadow-sm sticky top-0 z-50 bg-white">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
-      <!-- Logo -->
-      <a href="<?= url() ?>" class="flex items-center gap-3 font-bold text-white text-lg">
-        <img src="<?= asset('img/logo-header-nuevo.jpeg') ?>" alt="Colón" class="h-12 w-auto">
-        <img src="<?= asset('img/colon.png') ?>" alt="Colón" class="h-12 w-auto">
-        <span class="text-base font-medium whitespace-nowrap" style="color: #8B5CF6">Plataforma Turística de Colón</span>
-      </a>
-
-      <!-- Desktop menu -->
-      <div class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
-        <a href="<?= url('mapa') ?>" class="hover:opacity-80 transition">🗺️ Mapa</a>
-        <?php if ($user): ?>
-          <?php if (hasRole('admin')): ?>
-            <a href="<?= url('admin/notificaciones') ?>" class="hover:opacity-80 transition">🔔 Notificaciones</a>
-          <?php endif; ?>
-          <?php if (hasRole('superadmin')): ?>
-            <a href="<?= url('superadmin') ?>" class="hover:opacity-80 transition">📊 Dashboard</a>
-            <a href="<?= url('configuraciones') ?>" class="hover:opacity-80 transition">⚙️ Config</a>
-          <?php endif; ?>
-          <?php if (hasRole('prestador')): ?>
-            <a href="<?= url('admin/micrositio') ?>" class="hover:opacity-80 transition">🏢 Micrositio</a>
-            <a href="<?= url('admin/crm') ?>" class="hover:opacity-80 transition">📇 CRM</a>
-            <a href="<?= url('admin/promociones') ?>" class="hover:opacity-80 transition">🎉 Promos</a>
-          <?php endif; ?>
-          <?php if (hasRole('colaborador')): ?>
-            <a href="<?= url('colaborador') ?>" class="hover:opacity-80 transition">📊 Turismo</a>
-            <a href="<?= url('colaborador/eventos') ?>" class="hover:opacity-80 transition">🎉 Eventos</a>
-          <?php endif; ?>
-          <?php if (hasRole('turista')): ?>
-            <a href="<?= url('turista') ?>" class="hover:opacity-80 transition">👤 Mi Perfil</a>
-          <?php endif; ?>
-          <a href="<?= url('admin') ?>" class="hover:opacity-80 transition">🏢 Negocio</a>
-          <a href="<?= url('logout') ?>" class="text-red-600 hover:text-red-700 transition">Salir</a>
-        <?php else: ?>
-          <a href="<?= url('login') ?>" class="bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition">Ingresar</a>
-        <?php endif; ?>
-      </div>
-
-      <!-- Mobile hamburger -->
-      <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition text-gray-700">
+      <!-- Hamburger button (always visible on desktop too now) -->
+      <button id="sidebar-toggle" class="p-2 rounded-lg hover:bg-gray-100 transition text-gray-700 focus:outline-none">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
         </svg>
       </button>
-    </div>
-  </div>
 
-  <!-- Mobile menu -->
-  <div id="mobile-menu" class="hidden md:hidden border-t border-gray-200 bg-white">
-    <div class="px-4 py-3 space-y-2 text-sm font-medium text-gray-700">
-      <a href="<?= url('mapa') ?>" class="block py-2 hover:opacity-80">🗺️ Mapa Turístico</a>
-      <?php if ($user): ?>
-        <?php if (hasRole('admin')): ?>
-          <a href="<?= url('admin/notificaciones') ?>" class="block py-2 hover:opacity-80">🔔 Notificaciones</a>
+      <!-- Logo -->
+      <a href="<?= url() ?>" class="flex items-center gap-3 font-bold text-white text-lg">
+        <img src="<?= asset('img/logo-header-nuevo.jpeg') ?>" alt="Colón" class="h-12 w-auto">
+        <img src="<?= asset('img/colon.png') ?>" alt="Colón" class="h-12 w-auto">
+        <span class="text-base font-medium whitespace-nowrap hidden sm:inline" style="color: #8B5CF6">Plataforma Turística de Colón</span>
+      </a>
+
+      <!-- User / Login on the right -->
+      <div class="flex items-center gap-2">
+        <?php if ($user): ?>
+          <a href="<?= url('logout') ?>" class="text-xs text-red-600 hover:text-red-700 transition hidden sm:inline">Salir</a>
+        <?php else: ?>
+          <a href="<?= url('login') ?>" class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs hover:opacity-90 transition">Ingresar</a>
         <?php endif; ?>
-        <?php if (hasRole('superadmin')): ?>
-          <a href="<?= url('superadmin') ?>" class="block py-2 hover:opacity-80">📊 Dashboard</a>
-          <a href="<?= url('configuraciones') ?>" class="block py-2 hover:opacity-80">⚙️ Configuraciones</a>
-        <?php endif; ?>
-        <a href="<?= url('admin') ?>" class="block py-2 hover:opacity-80">🏢 Mi Negocio</a>
-        <a href="<?= url('logout') ?>" class="block py-2 text-red-500">Cerrar sesión</a>
-      <?php else: ?>
-        <a href="<?= url('login') ?>" class="block py-2 font-semibold" style="color: var(--color-primary)">Ingresar</a>
-      <?php endif; ?>
+      </div>
     </div>
   </div>
 </nav>
+
+<!-- Left Sidebar Overlay -->
+<div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-40 hidden"></div>
+
+<!-- Left Sidebar -->
+<div id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-white shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+  <div class="p-4">
+    <!-- Sidebar header -->
+    <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+      <span class="font-bold text-gray-900 text-lg">Menú</span>
+      <button id="sidebar-close" class="p-1 rounded-lg hover:bg-gray-100 transition text-gray-500">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- User info -->
+    <?php if ($user): ?>
+    <div class="mb-4 px-3 py-2 bg-gray-50 rounded-xl">
+      <p class="text-sm font-medium text-gray-900"><?= e($user['name']) ?></p>
+      <p class="text-xs text-gray-500"><?= e($user['role']) ?></p>
+    </div>
+    <?php endif; ?>
+
+    <!-- Menu items -->
+    <div class="space-y-1 text-sm font-medium text-gray-700">
+
+      <!-- Map - always visible -->
+      <a href="<?= url('mapa') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+        <span class="text-lg">🗺️</span> Mapa Turístico
+      </a>
+
+      <?php if ($user): ?>
+
+        <!-- SUPERADMIN -->
+        <?php if (hasRole('superadmin')): ?>
+        <div class="pt-3 pb-1 text-xs uppercase tracking-wide text-gray-400 font-semibold px-3">Administración</div>
+        <a href="<?= url('superadmin') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">📊</span> Dashboard
+        </a>
+        <a href="<?= url('configuraciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">⚙️</span> Configuraciones
+        </a>
+        <?php endif; ?>
+
+        <!-- ADMIN -->
+        <?php if (hasRole('admin')): ?>
+        <div class="pt-3 pb-1 text-xs uppercase tracking-wide text-gray-400 font-semibold px-3">Gestión</div>
+        <a href="<?= url('admin') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">🏢</span> Mis Negocios
+        </a>
+        <a href="<?= url('admin/micrositio') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">🏢</span> Micrositio
+        </a>
+        <a href="<?= url('admin/crm') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">📇</span> CRM
+        </a>
+        <a href="<?= url('admin/notificaciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">🔔</span> Notificaciones
+        </a>
+        <a href="<?= url('colaborador') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">📊</span> Turismo
+        </a>
+        <a href="<?= url('mi-perfil') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">👤</span> Mi Perfil
+        </a>
+        <?php endif; ?>
+
+        <!-- PRESTADOR -->
+        <?php if (hasRole('prestador')): ?>
+        <div class="pt-3 pb-1 text-xs uppercase tracking-wide text-gray-400 font-semibold px-3">Gestión</div>
+        <a href="<?= url('admin/micrositio') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">🏢</span> Mi Micrositio
+        </a>
+        <a href="<?= url('admin/crm') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">📇</span> CRM
+        </a>
+        <a href="<?= url('admin/promociones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">🎉</span> Promociones
+        </a>
+        <a href="<?= url('mi-perfil') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">👤</span> Mi Perfil
+        </a>
+        <?php endif; ?>
+
+        <!-- COLABORADOR -->
+        <?php if (hasRole('colaborador')): ?>
+        <div class="pt-3 pb-1 text-xs uppercase tracking-wide text-gray-400 font-semibold px-3">Turismo</div>
+        <a href="<?= url('colaborador') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">📊</span> Dashboard Turismo
+        </a>
+        <a href="<?= url('colaborador/eventos') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">🎉</span> Eventos
+        </a>
+        <a href="<?= url('colaborador/metricas') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">📈</span> Métricas
+        </a>
+        <?php endif; ?>
+
+        <!-- TURISTA -->
+        <?php if (hasRole('turista')): ?>
+        <a href="<?= url('turista') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">👤</span> Mi Perfil Turista
+        </a>
+        <?php endif; ?>
+
+        <!-- Divider -->
+        <div class="border-t border-gray-200 my-3"></div>
+
+        <!-- Logout -->
+        <a href="<?= url('logout') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-600 hover:bg-red-50 transition">
+          <span class="text-lg">🚪</span> Cerrar sesión
+        </a>
+
+      <?php else: ?>
+        <!-- Not logged in -->
+        <div class="border-t border-gray-200 my-3"></div>
+        <a href="<?= url('login') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition justify-center">
+          Ingresar / Registrarse
+        </a>
+      <?php endif; ?>
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar Toggle Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  const toggleBtn = document.getElementById('sidebar-toggle');
+  const closeBtn = document.getElementById('sidebar-close');
+
+  function openSidebar() {
+    sidebar.classList.remove('-translate-x-full');
+    overlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  if (toggleBtn) toggleBtn.addEventListener('click', openSidebar);
+  if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+  if (overlay) overlay.addEventListener('click', closeSidebar);
+});
+</script>
 
 <!-- Flash Messages -->
 <?php if ($flash): ?>

@@ -1,12 +1,13 @@
 <?php
-$pageTitle = 'Mi Perfil Turista – ' . APP_NAME;
+$pageTitle = 'Turista – ' . APP_NAME;
 require APP_PATH . '/views/layout/head.php';
 ?>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
 
 <main class="max-w-6xl mx-auto px-4 py-8 mb-24">
-  <!-- Profile Section -->
+  <!-- Profile Section / Registration -->
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+    <?php if ($user): ?>
     <div class="flex items-center justify-between mb-4">
       <h1 class="text-2xl font-bold text-gray-900">👋 ¡Hola, <?= e($user['name']) ?>!</h1>
       <button onclick="toggleProfileForm()" class="text-sm text-blue-600 hover:underline">Editar perfil</button>
@@ -32,6 +33,15 @@ require APP_PATH . '/views/layout/head.php';
         Guardar cambios
       </button>
     </form>
+    <?php else: ?>
+    <div class="text-center mb-4">
+      <h1 class="text-2xl font-bold text-gray-900">👋 ¡Bienvenido a la Plataforma Turística de Colón!</h1>
+      <p class="text-gray-500 mt-2">Explora los mejores lugares, valora servicios y contacta directamente con los prestadores.</p>
+      <a href="<?= url('login') ?>" class="mt-4 inline-block bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 transition">
+        Iniciar sesión / Registrarse
+      </a>
+    </div>
+    <?php endif; ?>
   </div>
 
   <!-- Top Visited & Recommended -->
