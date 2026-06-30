@@ -8,7 +8,7 @@ require APP_PATH . '/views/layout/head.php';
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold text-gray-900">🎉 Promociones y Eventos</h1>
     <button onclick="openCreateModal()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition">
-      + Nueva promoción
+      + Nueva Promoción/Evento
     </button>
   </div>
 
@@ -18,7 +18,7 @@ require APP_PATH . '/views/layout/head.php';
     <div class="text-center py-16 bg-white rounded-2xl shadow-sm">
       <p class="text-gray-400 text-lg">No hay promociones creadas.</p>
       <button onclick="openCreateModal()" class="mt-4 bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition">
-        Crear primera promoción
+        Crear primera Promoción/Evento
       </button>
     </div>
     <?php else: ?>
@@ -145,7 +145,7 @@ const CSRF = '<?= e($csrf) ?>';
 const BASE_URL = '<?= BASE_URL ?>';
 
 function openCreateModal() {
-  document.getElementById('modal-title').textContent = 'Nueva promoción';
+    document.getElementById('modal-title').textContent = 'Nueva Promoción/Evento';
   document.getElementById('promo-id').value = '';
   document.getElementById('promo-title').value = '';
   document.getElementById('promo-description').value = '';
@@ -162,7 +162,7 @@ function openCreateModal() {
 }
 
 function editPromotion(p) {
-  document.getElementById('modal-title').textContent = 'Editar promoción';
+    document.getElementById('modal-title').textContent = 'Editar Promoción/Evento';
   document.getElementById('promo-id').value = p.id;
   document.getElementById('promo-title').value = p.title;
   document.getElementById('promo-description').value = p.description || '';

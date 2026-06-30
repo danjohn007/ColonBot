@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="<?= e(setting('color_primary','#3B82F6')) ?>">
-  <title><?= e($pageTitle ?? APP_NAME) ?></title>
+  <title><?= e($pageTitle ?? setting('site_name', APP_NAME)) ?></title>
   <!-- Tailwind CSS CDN (production: use compiled CSS) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>

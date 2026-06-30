@@ -16,7 +16,7 @@ class ColaboradorController extends Controller
 
     public function dashboard(): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth('colaborador');
 
         // Metrics
         $totalBiz = $this->businesses->count();
@@ -69,7 +69,7 @@ class ColaboradorController extends Controller
 
     public function events(): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth('colaborador');
 
         $pendingPromos = $this->promotions->pendingForApproval();
         $activePromos = $this->promotions->active();
@@ -129,7 +129,7 @@ class ColaboradorController extends Controller
 
     public function resetRatings(string $businessId): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth('colaborador');
         $this->verifyCsrf();
 
         $db = Database::getInstance();

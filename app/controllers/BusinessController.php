@@ -27,6 +27,11 @@ class BusinessController extends Controller
     public function microsite(): void
     {
         $this->requireAuth('prestador');
+        // Colaborador can also view microsite dashboards
+        $userRole = currentUser()['role'] ?? '';
+        if ($userRole === 'colaborador') {
+            $this->requireAuth('colaborador');
+        }
         $user = currentUser();
         $businesses = $user['role'] === 'superadmin'
             ? $this->businesses->allWithCategory()
@@ -48,6 +53,11 @@ class BusinessController extends Controller
     public function micrositeDashboard(string $id): void
     {
         $this->requireAuth('prestador');
+        // Colaborador can also view microsite dashboards
+        $userRole = currentUser()['role'] ?? '';
+        if ($userRole === 'colaborador') {
+            $this->requireAuth('colaborador');
+        }
         $business = $this->businesses->find((int)$id);
         if (!$business) { http_response_code(404); return; }
         $this->ownerOrAdmin($business);
@@ -429,12 +439,29 @@ class BusinessController extends Controller
 
         if ($name === '') { $this->json(['error' => 'El nombre es requerido'], 422); }
 
-        $this->businesses->upsertEvent((int)$id, [
-            'name'        => $name,
-            'description' => $desc,
-            'price'       => $price,
-            'date'        => $date,
-        ], $eid);
+        // Use promotions table for unified event storage (same as colaborador global events)
+        $promotions = new PromotionModel();
+        if ($eid > 0) {
+            $promotions->update($eid, [
+                'title' => $name,
+                'description' => $desc,
+                'price' => $price,
+                'start_date' => $date,
+                'type' => 'evento',
+            ]);
+        } else {
+            $promotions->insert([
+                'business_id' => (int)$id,
+                'user_id' => currentUser()['id'],
+                'title' => $name,
+                'description' => $desc,
+                'price' => $price,
+                'type' => 'evento',
+                'target_segment' => 'todos',
+                'status' => 'active',
+                'start_date' => $date,
+            ]);
+        }
 
         $events = $this->businesses->allEvents((int)$id);
         $this->json(['ok' => true, 'events' => $events]);
@@ -450,7 +477,9 @@ class BusinessController extends Controller
 
         $this->ownerOrAdmin($business);
 
-        $this->businesses->deleteEvent((int)$eid, (int)$id);
+        // Delete from promotions table (unified events)
+        $promotions = new PromotionModel();
+        $promotions->delete((int)$eid);
         $this->json(['ok' => true]);
     }
 
@@ -506,6 +535,10 @@ class BusinessController extends Controller
     private function ownerOrAdmin(array $business): void
     {
         $user = currentUser();
+        // Colaborador can view any business (read-only)
+        if ($user['role'] === 'colaborador') {
+            return;
+        }
         if ($user['role'] !== 'superadmin' && (int)$business['user_id'] !== (int)$user['id']) {
             http_response_code(403);
             die('No tienes permiso para editar este negocio.');

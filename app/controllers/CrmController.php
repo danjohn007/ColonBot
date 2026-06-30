@@ -30,6 +30,32 @@ class CrmController extends Controller
 
         $category = $_GET['category'] ?? '';
         $contacts = $this->contacts->byBusiness((int)$businessId, $category);
+
+        // Add chatbot sessions as prospects (auto-imported from chatbot)
+        $db = Database::getInstance();
+        $chatbotContacts = $db->query(
+            "SELECT cs.id AS id, cs.wa_id AS phone, cs.last_message AS notes,
+                    'Chatbot' AS name, '' AS email, 'prospecto' AS category,
+                    0 AS total_visits, 0 AS total_spent,
+                    'chatbot' AS source, cs.updated_at AS last_contact_at,
+                    0 AS purchase_count
+             FROM chatbot_sessions cs
+             WHERE cs.wa_id NOT IN (
+                SELECT COALESCE(c.wa_id, '') FROM contacts c WHERE c.business_id = ?
+             )
+             AND cs.wa_id NOT IN (
+                SELECT COALESCE(c.phone, '') FROM contacts c WHERE c.business_id = ?
+             )
+             ORDER BY cs.updated_at DESC
+             LIMIT 50",
+            [(int)$businessId, (int)$businessId]
+        )->fetchAll();
+
+        // Merge chatbot contacts as prospects
+        if (empty($category) || $category === 'prospecto' || $category === 'prospecto_sin_historial') {
+            $contacts = array_merge($chatbotContacts, $contacts);
+        }
+
         $this->json($contacts);
     }
 
@@ -90,6 +116,10 @@ class CrmController extends Controller
         $this->json(['ok' => true]);
     }
 
+    /**
+     * Convertir PROSPECTO a CLIENTE (Customer Journey etapa B)
+     * Modal solicita: Nombre del Cliente, Producto o Servicio, Monto total, Email (opcional), Notas
+     */
     public function upgradeToCliente(string $id): void
     {
         $this->requireAuth('prestador');
@@ -101,16 +131,28 @@ class CrmController extends Controller
         $business = $this->businesses->find($contact['business_id']);
         $this->ownerOrAdmin($business);
 
+        $name = trim($_POST['name'] ?? $contact['name']);
         $amount = (float)($_POST['amount'] ?? 0);
         $products = trim($_POST['products'] ?? '');
+        $email = trim($_POST['email'] ?? $contact['email'] ?? '');
         $notes = trim($_POST['notes'] ?? '');
+
+        // Update contact info
+        $this->contacts->update((int)$id, [
+            'name' => $name,
+            'email' => $email ?: $contact['email'],
+        ]);
 
         $this->contacts->upgradeToCliente((int)$id, $amount, $products, $notes);
 
-        $this->logAction('upgrade_contact', 'contacts', (int)$id, "Contacto {$contact['name']} upgrade a cliente");
+        $this->logAction('upgrade_contact', 'contacts', (int)$id, "Contacto {$name} upgrade a cliente");
         $this->json(['ok' => true]);
     }
 
+    /**
+     * Agregar compra (Customer Journey - seguimiento)
+     * Si acumula 3+ compras, automáticamente se convierte a Lovemark
+     */
     public function addPurchase(string $id): void
     {
         $this->requireAuth('prestador');
@@ -122,12 +164,21 @@ class CrmController extends Controller
         $business = $this->businesses->find($contact['business_id']);
         $this->ownerOrAdmin($business);
 
+        $name = trim($_POST['name'] ?? $contact['name']);
         $amount = (float)($_POST['amount'] ?? 0);
         $products = trim($_POST['products'] ?? '');
+        $email = trim($_POST['email'] ?? $contact['email'] ?? '');
         $notes = trim($_POST['notes'] ?? '');
+
+        // Update contact info
+        $this->contacts->update((int)$id, [
+            'name' => $name,
+            'email' => $email ?: $contact['email'],
+        ]);
 
         $this->contacts->addPurchase((int)$id, (int)$contact['business_id'], $amount, $products, $notes);
 
+        $this->logAction('add_purchase', 'contacts', (int)$id, "Compra de {$products} por \${$amount}");
         $this->json(['ok' => true]);
     }
 

@@ -17,7 +17,8 @@ $flash = flash();
       <a href="<?= url() ?>" class="flex items-center gap-3 font-bold text-white text-lg">
         <img src="<?= asset('img/logo-header-nuevo.jpeg') ?>" alt="Colón" class="h-12 w-auto">
         <img src="<?= asset('img/colon.png') ?>" alt="Colón" class="h-12 w-auto">
-        <span class="text-base font-medium whitespace-nowrap hidden sm:inline" style="color: #8B5CF6">Plataforma Turística de Colón</span>
+        <img src="<?= asset('img/cristobot.png') ?>" alt="CristobalBot" class="h-10 w-auto hidden sm:inline-block">
+        <span class="text-base font-medium whitespace-nowrap hidden sm:inline" style="color: #8B5CF6">CristobalBot: Mapa interactivo del turismo en Colón</span>
       </a>
 
       <!-- User / Login on the right -->
@@ -74,14 +75,11 @@ $flash = flash();
         <a href="<?= url('superadmin') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">📊</span> Dashboard
         </a>
-        <a href="<?= url('configuraciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
-          <span class="text-lg">⚙️</span> Configuraciones
-        </a>
         <a href="<?= url('admin') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">🏢</span> Mis Negocios
         </a>
-        <a href="<?= url('admin/micrositio') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
-          <span class="text-lg">🏢</span> Micrositio
+        <a href="<?= url('admin/promociones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">🎉</span> Promociones
         </a>
         <a href="<?= url('admin/crm') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">📇</span> CRM
@@ -97,8 +95,8 @@ $flash = flash();
         <a href="<?= url('admin') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">🏢</span> Mis Negocios
         </a>
-        <a href="<?= url('admin/micrositio') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
-          <span class="text-lg">🏢</span> Micrositio
+        <a href="<?= url('admin/promociones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">🎉</span> Promociones
         </a>
         <a href="<?= url('admin/crm') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">📇</span> CRM
@@ -117,14 +115,14 @@ $flash = flash();
         <!-- PRESTADOR (strict) -->
         <?php if ($role === 'prestador'): ?>
         <div class="pt-3 pb-1 text-xs uppercase tracking-wide text-gray-400 font-semibold px-3">Gestión</div>
-        <a href="<?= url('admin/micrositio') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
-          <span class="text-lg">🏢</span> Mi Micrositio
-        </a>
-        <a href="<?= url('admin/crm') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
-          <span class="text-lg">📇</span> CRM
+        <a href="<?= url('admin') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">🏢</span> Mis Negocios
         </a>
         <a href="<?= url('admin/promociones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">🎉</span> Promociones
+        </a>
+        <a href="<?= url('admin/crm') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">📇</span> CRM
         </a>
         <a href="<?= url('mi-perfil') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">👤</span> Mi Perfil
@@ -157,6 +155,13 @@ $flash = flash();
 
         <!-- Divider -->
         <div class="border-t border-gray-200 my-3"></div>
+
+        <!-- Configuraciones above logout -->
+        <?php if (in_array($role, ['superadmin', 'admin', 'prestador', 'colaborador'])): ?>
+        <a href="<?= url('configuraciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">⚙️</span> Configuraciones
+        </a>
+        <?php endif; ?>
 
         <!-- Logout -->
         <a href="<?= url('logout') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-600 hover:bg-red-50 transition">

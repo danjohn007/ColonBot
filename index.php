@@ -110,6 +110,15 @@ $router->post('turista/valorar',           'TouristController', 'submitReview');
 $router->get('turista/emergencia',         'TouristController', 'emergency');
 $router->get('turista/reservar/{id}',      'TouristController', 'makeReservation');
 
+// ─── Registro Público (Visitantes y Prestadores) ──────────────────
+$router->get('registro/visitante',              'PublicRegisterController', 'visitorForm');
+$router->post('registro/visitante/guardar',     'PublicRegisterController', 'visitorRegister');
+$router->get('registro/prestador',              'PublicRegisterController', 'prestadorForm');
+$router->post('registro/prestador/guardar',     'PublicRegisterController', 'prestadorRegister');
+$router->get('registro/verificar',              'PublicRegisterController', 'verifyForm');
+$router->post('registro/verificar/codigo',      'PublicRegisterController', 'verifyCode');
+$router->post('registro/reenviar-codigo',       'PublicRegisterController', 'resendCode');
+
 // ─── API Pública ──────────────────────────────────────────────────
 $router->get('api/promociones',            'PromotionController', 'apiPromotions');
 

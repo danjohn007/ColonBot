@@ -99,30 +99,76 @@ require APP_PATH . '/views/layout/head.php';
   </div>
 </div>
 
-<!-- Upgrade to Cliente Modal -->
+<!-- Upgrade to Cliente Modal (Customer Journey - Etapa A → B) -->
 <div id="upgrade-modal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-40 flex items-center justify-center px-4">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 relative">
     <button onclick="closeUpgradeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">✕</button>
-    <h2 class="text-lg font-bold text-gray-900 mb-4">Convertir a Cliente</h2>
+    <h2 class="text-lg font-bold text-gray-900 mb-1">Convertir PROSPECTO a CLIENTE</h2>
+    <p class="text-xs text-gray-500 mb-4">Customer Journey — Etapa A → B: Captura los datos de la venta</p>
     <p class="text-sm text-gray-500 mb-4" id="upgrade-contact-name"></p>
     <form onsubmit="upgradeToCliente(event)" class="space-y-4">
       <input type="hidden" id="upgrade-contact-id" value="">
+      <div>
+        <label class="label block text-sm font-medium text-gray-700 mb-1">Nombre del Cliente *</label>
+        <input type="text" id="upgrade-name" required class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="Nombre del cliente">
+      </div>
+      <div>
+        <label class="label block text-sm font-medium text-gray-700 mb-1">Email (opcional)</label>
+        <input type="email" id="upgrade-email" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="cliente@ejemplo.com">
+      </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="label block text-sm font-medium text-gray-700 mb-1">Monto de compra</label>
-          <input type="number" id="upgrade-amount" step="0.01" min="0" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="0.00">
+          <label class="label block text-sm font-medium text-gray-700 mb-1">Producto o Servicio vendido *</label>
+          <input type="text" id="upgrade-products" required class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="Ej. Vino, Tour">
         </div>
         <div>
-          <label class="label block text-sm font-medium text-gray-700 mb-1">Productos/Servicios</label>
-          <input type="text" id="upgrade-products" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="Ej. Vino, Tour">
+          <label class="label block text-sm font-medium text-gray-700 mb-1">Monto total de compra</label>
+          <input type="number" id="upgrade-amount" step="0.01" min="0" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="0.00">
+        </div>
+      </div>
+      <div>
+        <label class="label block text-sm font-medium text-gray-700 mb-1">Notas / Anotaciones del perfil</label>
+        <textarea id="upgrade-notes" rows="2" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="Comentarios adicionales..."></textarea>
+      </div>
+      <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 transition">
+        Convertir a Cliente
+      </button>
+    </form>
+  </div>
+</div>
+<!-- Purchase Modal (Customer Journey - Etapa B → C seguimiento) -->
+<div id="purchase-modal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-40 flex items-center justify-center px-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 relative">
+    <button onclick="closePurchaseModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">✕</button>
+    <h2 class="text-lg font-bold text-gray-900 mb-1">Registrar Nueva Compra</h2>
+    <p class="text-xs text-gray-500 mb-4">Customer Journey — 3 compras o más = Lovemark ⭐ (automático)</p>
+    <p class="text-sm text-gray-500 mb-4" id="purchase-contact-name"></p>
+    <form onsubmit="addPurchase(event)" class="space-y-4">
+      <input type="hidden" id="purchase-contact-id" value="">
+      <div>
+        <label class="label block text-sm font-medium text-gray-700 mb-1">Nombre del Cliente *</label>
+        <input type="text" id="purchase-name" required class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="Nombre del cliente">
+      </div>
+      <div>
+        <label class="label block text-sm font-medium text-gray-700 mb-1">Email (opcional)</label>
+        <input type="email" id="purchase-email" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="cliente@ejemplo.com">
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="label block text-sm font-medium text-gray-700 mb-1">Producto o Servicio *</label>
+          <input type="text" id="purchase-products" required class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="Ej. Vino, Tour">
+        </div>
+        <div>
+          <label class="label block text-sm font-medium text-gray-700 mb-1">Monto de compra</label>
+          <input type="number" id="purchase-amount" step="0.01" min="0" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="0.00">
         </div>
       </div>
       <div>
         <label class="label block text-sm font-medium text-gray-700 mb-1">Notas</label>
-        <textarea id="upgrade-notes" rows="2" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm"></textarea>
+        <textarea id="purchase-notes" rows="2" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="Comentarios adicionales..."></textarea>
       </div>
-      <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 transition">
-        Convertir a Cliente
+      <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition">
+        Registrar Compra
       </button>
     </form>
   </div>
@@ -170,6 +216,7 @@ function loadContacts() {
           <td class="px-4 py-3">
             <div class="flex gap-1">
               ${c.category !== 'cliente' && c.category !== 'lovemark' ? `<button onclick="openUpgradeModal(${c.id}, '${escHtml(c.name)}')" class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" title="Convertir a cliente">⬆</button>` : ''}
+              ${c.category === 'cliente' || c.category === 'lovemark' ? `<button onclick="openPurchaseModal(${c.id}, '${escHtml(c.name)}')" class="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100" title="Registrar compra">💰</button>` : ''}
               ${phone !== '—' ? `<a href="https://wa.me/${phone.replace(/\D/g,'')}" target="_blank" class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" title="WhatsApp">💬</a>` : ''}
             </div>
           </td>
@@ -268,6 +315,49 @@ function upgradeToCliente(e) {
       document.getElementById('upgrade-amount').value = '';
       document.getElementById('upgrade-products').value = '';
       document.getElementById('upgrade-notes').value = '';
+      loadContacts();
+    } else {
+      alert(d.error || 'Error');
+    }
+  });
+}
+
+function openPurchaseModal(id, name) {
+  document.getElementById('purchase-contact-id').value = id;
+  document.getElementById('purchase-contact-name').textContent = `Registrar compra para "${name}"`;
+  document.getElementById('purchase-modal').classList.remove('hidden');
+}
+
+function closePurchaseModal() {
+  document.getElementById('purchase-modal').classList.add('hidden');
+}
+
+function addPurchase(e) {
+  e.preventDefault();
+  const id = document.getElementById('purchase-contact-id').value;
+  const body = new URLSearchParams({
+    _csrf: CSRF,
+    name: document.getElementById('purchase-name').value.trim(),
+    email: document.getElementById('purchase-email').value.trim(),
+    amount: document.getElementById('purchase-amount').value || '0',
+    products: document.getElementById('purchase-products').value.trim(),
+    notes: document.getElementById('purchase-notes').value.trim(),
+  });
+
+  fetch(`${BASE_URL}/admin/crm/${id}/compra`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) {
+      closePurchaseModal();
+      document.getElementById('purchase-name').value = '';
+      document.getElementById('purchase-email').value = '';
+      document.getElementById('purchase-amount').value = '';
+      document.getElementById('purchase-products').value = '';
+      document.getElementById('purchase-notes').value = '';
       loadContacts();
     } else {
       alert(d.error || 'Error');

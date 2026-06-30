@@ -120,6 +120,32 @@ require APP_PATH . '/views/layout/head.php';
 
 <?php require APP_PATH . '/views/layout/bottom_nav.php'; ?>
 
+<!-- Banners de registro público entre mapa y footer -->
+<div class="bg-gradient-to-r from-purple-50 to-blue-50 border-t border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+    <!-- Banner 1: Visitante -->
+    <a href="<?= url('registro/visitante') ?>" class="block bg-white rounded-2xl shadow-sm border border-purple-100 p-6 hover:shadow-md hover:border-purple-300 transition group">
+      <div class="flex items-start gap-4">
+        <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition">👤</div>
+        <div>
+          <h3 class="font-bold text-gray-900 text-sm mb-1">Regístrate como visitante y obtén descuentos exclusivos</h3>
+          <p class="text-xs text-gray-500">Califica y deja comentarios de nuestros atractivos turísticos, aquí</p>
+        </div>
+      </div>
+    </a>
+    <!-- Banner 2: Prestador -->
+    <a href="<?= url('registro/prestador') ?>" class="block bg-white rounded-2xl shadow-sm border border-blue-100 p-6 hover:shadow-md hover:border-blue-300 transition group">
+      <div class="flex items-start gap-4">
+        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition">🏪</div>
+        <div>
+          <h3 class="font-bold text-gray-900 text-sm mb-1">¿Eres prestador de servicio?</h3>
+          <p class="text-xs text-gray-500">Da de alta tu negocio aquí</p>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const BASE_URL = '<?= BASE_URL ?>';
