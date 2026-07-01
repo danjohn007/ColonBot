@@ -37,7 +37,9 @@ $flash = flash();
 <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-40 hidden"></div>
 
 <!-- Left Sidebar -->
-<div id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-white shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+<div id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-white shadow-2xl z-50 overflow-y-auto
+  <?= isset($_COOKIE['sidebar_pinned']) && $_COOKIE['sidebar_pinned'] === 'true' ? '' : '-translate-x-full' ?>
+  transition-transform duration-300 ease-in-out">
   <div class="p-4">
     <!-- Sidebar header -->
     <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
@@ -79,7 +81,7 @@ $flash = flash();
           <span class="text-lg">🏢</span> Mis Negocios
         </a>
         <a href="<?= url('admin/promociones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
-          <span class="text-lg">🎉</span> Promociones
+          <span class="text-lg">🎉</span> PROMOCIONES y EVENTOS
         </a>
         <a href="<?= url('admin/crm') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">📇</span> CRM
@@ -96,7 +98,7 @@ $flash = flash();
           <span class="text-lg">🏢</span> Mis Negocios
         </a>
         <a href="<?= url('admin/promociones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
-          <span class="text-lg">🎉</span> Promociones
+          <span class="text-lg">🎉</span> PROMOCIONES y EVENTOS
         </a>
         <a href="<?= url('admin/crm') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">📇</span> CRM
@@ -119,7 +121,7 @@ $flash = flash();
           <span class="text-lg">🏢</span> Mis Negocios
         </a>
         <a href="<?= url('admin/promociones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
-          <span class="text-lg">🎉</span> Promociones
+          <span class="text-lg">🎉</span> PROMOCIONES y EVENTOS
         </a>
         <a href="<?= url('admin/crm') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">📇</span> CRM
@@ -187,19 +189,47 @@ document.addEventListener('DOMContentLoaded', function() {
   const toggleBtn = document.getElementById('sidebar-toggle');
   const closeBtn = document.getElementById('sidebar-close');
 
-  function openSidebar() {
-    sidebar.classList.remove('-translate-x-full');
-    overlay.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
+  // Check if sidebar is pinned
+  const isPinned = document.cookie.split('; ').find(row => row.startsWith('sidebar_pinned='));
+  const pinned = isPinned ? isPinned.split('=')[1] === 'true' : false;
 
-  function closeSidebar() {
-    sidebar.classList.add('-translate-x-full');
+  if (pinned) {
+    sidebar.classList.remove('-translate-x-full');
     overlay.classList.add('hidden');
     document.body.style.overflow = '';
   }
 
-  if (toggleBtn) toggleBtn.addEventListener('click', openSidebar);
+  function toggleSidebar() {
+    const currentlyPinned = document.cookie.split('; ').find(row => row.startsWith('sidebar_pinned='));
+    const isCurrentlyPinned = currentlyPinned ? currentlyPinned.split('=')[1] === 'true' : false;
+
+    if (isCurrentlyPinned) {
+      // Unpin: close sidebar
+      sidebar.classList.add('-translate-x-full');
+      document.cookie = 'sidebar_pinned=false; path=/; max-age=' + (60*60*24*365);
+      overlay.classList.add('hidden');
+      document.body.style.overflow = '';
+    } else {
+      // Pin: open and keep open
+      sidebar.classList.remove('-translate-x-full');
+      document.cookie = 'sidebar_pinned=true; path=/; max-age=' + (60*60*24*365);
+      overlay.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+  }
+
+  function closeSidebar() {
+    // Close only if not pinned
+    const currentlyPinned = document.cookie.split('; ').find(row => row.startsWith('sidebar_pinned='));
+    const isCurrentlyPinned = currentlyPinned ? currentlyPinned.split('=')[1] === 'true' : false;
+    if (!isCurrentlyPinned) {
+      sidebar.classList.add('-translate-x-full');
+      overlay.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+  }
+
+  if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
   if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
   if (overlay) overlay.addEventListener('click', closeSidebar);
 });

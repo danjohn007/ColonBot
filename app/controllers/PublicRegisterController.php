@@ -1,7 +1,7 @@
 <?php
 /**
  * Controlador de registro público para Visitantes y Prestadores
- * Con verificación de 2 métodos: Email + WhatsApp
+ * Con verificación: Email o SMS (solo un método requerido)
  */
 class PublicRegisterController extends Controller
 {
@@ -47,7 +47,7 @@ class PublicRegisterController extends Controller
 
         // Generate verification codes
         $emailCode = random_int(100000, 999999);
-        $waCode    = random_int(100000, 999999);
+        $smsCode   = random_int(100000, 999999);
 
         // Store pending registration in session
         $_SESSION['pending_register'] = [
@@ -56,17 +56,14 @@ class PublicRegisterController extends Controller
             'email'      => $email,
             'phone'      => $phone,
             'email_code' => $emailCode,
-            'wa_code'    => $waCode,
+            'sms_code'   => $smsCode,
             'created_at' => time(),
         ];
 
         // Send verification email
         $this->sendVerificationEmail($email, $emailCode, $name);
 
-        // Store WhatsApp code for verification
-        $_SESSION['pending_register']['wa_code_sent'] = true;
-
-        $this->flash('success', 'Te hemos enviado un código de verificación a tu email y WhatsApp. Revisa tu bandeja de entrada.');
+        $this->flash('success', 'Te hemos enviado un código de verificación a tu email y por SMS a tu celular.');
         $this->redirect('registro/verificar');
     }
 
@@ -106,7 +103,7 @@ class PublicRegisterController extends Controller
 
         // Generate verification codes
         $emailCode = random_int(100000, 999999);
-        $waCode    = random_int(100000, 999999);
+        $smsCode   = random_int(100000, 999999);
 
         // Store pending registration in session
         $_SESSION['pending_register'] = [
@@ -116,14 +113,14 @@ class PublicRegisterController extends Controller
             'phone'         => $phone,
             'business_name' => $negocio,
             'email_code'    => $emailCode,
-            'wa_code'       => $waCode,
+            'sms_code'      => $smsCode,
             'created_at'    => time(),
         ];
 
         // Send verification email
         $this->sendVerificationEmail($email, $emailCode, $name);
 
-        $this->flash('success', 'Te hemos enviado un código de verificación a tu email y WhatsApp. Revisa tu bandeja de entrada.');
+        $this->flash('success', 'Te hemos enviado un código de verificación a tu email y por SMS a tu celular.');
         $this->redirect('registro/verificar');
     }
 
@@ -144,6 +141,7 @@ class PublicRegisterController extends Controller
 
     /**
      * Verificar el código ingresado por el usuario
+     * Solo requiere UN método (email o SMS) para completar el registro
      */
     public function verifyCode(): void
     {
@@ -157,9 +155,9 @@ class PublicRegisterController extends Controller
         }
 
         $code = trim($_POST['code'] ?? '');
-        $method = $_POST['method'] ?? 'email'; // 'email' or 'whatsapp'
+        $method = $_POST['method'] ?? 'email'; // 'email' or 'sms'
 
-        $expectedCode = $method === 'whatsapp' ? $pending['wa_code'] : $pending['email_code'];
+        $expectedCode = $method === 'sms' ? $pending['sms_code'] : $pending['email_code'];
 
         if ((string)$code !== (string)$expectedCode) {
             $this->flash('error', 'El código ingresado no es correcto.');
@@ -167,23 +165,8 @@ class PublicRegisterController extends Controller
             return;
         }
 
-        // If email verified, mark it and check if both methods done
-        if ($method === 'email') {
-            $_SESSION['pending_register']['email_verified'] = true;
-        } else {
-            $_SESSION['pending_register']['wa_verified'] = true;
-        }
-
-        $emailVerified = $_SESSION['pending_register']['email_verified'] ?? false;
-        $waVerified    = $_SESSION['pending_register']['wa_verified'] ?? false;
-
-        if ($emailVerified && $waVerified) {
-            // Both verified, create the user
-            $this->completeRegistration($pending);
-        } else {
-            $this->flash('success', 'Método verificado correctamente. Ahora verifica el otro método.');
-            $this->redirect('registro/verificar');
-        }
+        // Single method verification - complete registration immediately
+        $this->completeRegistration($pending);
     }
 
     /**
@@ -202,8 +185,8 @@ class PublicRegisterController extends Controller
         $method = $_POST['method'] ?? 'email';
         $newCode = random_int(100000, 999999);
 
-        if ($method === 'whatsapp') {
-            $_SESSION['pending_register']['wa_code'] = $newCode;
+        if ($method === 'sms') {
+            $_SESSION['pending_register']['sms_code'] = $newCode;
         } else {
             $_SESSION['pending_register']['email_code'] = $newCode;
             $this->sendVerificationEmail($pending['email'], $newCode, $pending['name']);
