@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'Mapa Turístico – ' . e(setting('site_name', APP_NAME));
+$pageTitle = 'Mapa Turístico Colón';
 require APP_PATH . '/views/layout/head.php';
 ?>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
@@ -225,7 +225,7 @@ const ISOTIPO_ICON_MAP = {
   'lugares_historicos': '\u{1F3DB}\u{FE0F}',
   'viniedo':           '\u{1F347}',
   'hotel':             '\u{1F3E8}',
-  'paisaje_cerro':     '\u{2B50}',
+  'paisaje_cerro':     '\u{1F332}',
   'lago_presa':        '\u{1F30A}',
   'lugar_compras':     '\u{1F6CD}\u{FE0F}',
   'pena_bernal':       '\u{1F3D4}\u{FE0F}',
@@ -288,6 +288,7 @@ if (navigator.geolocation) {
 
 let markers = [];
 let allPois = [];
+let allRefPoints = []; // Puntos de referencia siempre visibles
 let currentCat = PRELOAD_CAT;
 let currentSearch = '';
 let currentIsotipo = '';
@@ -308,10 +309,24 @@ function loadPOIs() {
   fetch(`${BASE_URL}/mapa/poi?${params}`)
     .then(r => r.json())
     .then(pois => {
+      // Separate regular POIs from reference points
+      allPois = pois.filter(p => p.category_slug !== 'punto-de-referencia');
+      allRefPoints = pois.filter(p => p.category_slug === 'punto-de-referencia');
+
       markers.forEach(m => map.removeLayer(m));
       markers = [];
-      allPois = pois;
-      pois.forEach(poi => {
+
+      // Always add reference points with a distinct style
+      allRefPoints.forEach(poi => {
+        if (!poi.lat || !poi.lng) return;
+        const m = L.marker([poi.lat, poi.lng], { icon: createIcon('#8B5CF6', '\u{1F4CD}') });
+        m.addTo(map);
+        m.on('click', () => showPOI(poi));
+        markers.push(m);
+      });
+
+      // Add filtered POIs
+      allPois.forEach(poi => {
         if (!poi.lat || !poi.lng) return;
         const poiEmoji = isotipoToEmoji(poi.isotipo);
         const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#3B82F6', poiEmoji) });
@@ -319,6 +334,7 @@ function loadPOIs() {
         m.on('click', () => showPOI(poi));
         markers.push(m);
       });
+
       if (PRELOAD_ID) {
         const target = pois.find(p => p.id === PRELOAD_ID);
         if (target) showPOI(target);
@@ -350,7 +366,7 @@ function showPOI(poi) {
     'lugares_historicos':'\u{1F3DB}\u{FE0F} Lugares hist\u00F3ricos',
     'viniedo':           '\u{1F347} Vi\u00F1edo',
     'hotel':             '\u{1F3E8} Hotel',
-    'paisaje_cerro':     '\u{2B50} Paisaje/cerro',
+  'paisaje_cerro':     '\u{1F332} Paisaje/cerro',
     'lago_presa':        '\u{1F30A} Lago/presa',
     'lugar_compras':     '\u{1F6CD}\u{FE0F} Lugar de compras',
     'pena_bernal':       '\u{1F3D4}\u{FE0F} Pe\u00F1a de Bernal',
@@ -527,6 +543,17 @@ function filterTripType(tripType) {
   // Clear existing markers
   markers.forEach(m => map.removeLayer(m));
   markers = [];
+
+  // Always add reference points
+  allRefPoints.forEach(poi => {
+    if (!poi.lat || !poi.lng) return;
+    const m = L.marker([poi.lat, poi.lng], { icon: createIcon('#8B5CF6', '\u{1F4CD}') });
+    m.addTo(map);
+    m.on('click', () => showPOI(poi));
+    markers.push(m);
+  });
+
+  // Add filtered POIs
   filtered.forEach(poi => {
     if (!poi.lat || !poi.lng) return;
     const poiEmoji = isotipoToEmoji(poi.isotipo);
