@@ -7,7 +7,7 @@ require APP_PATH . '/views/layout/head.php';
 <main class="max-w-lg mx-auto px-4 py-8 mb-24">
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
     <h1 class="text-2xl font-bold text-gray-900 mb-2">🔐 Verificar Código</h1>
-    <p class="text-sm text-gray-500 mb-6">Hemos enviado un código de verificación a <strong><?= e($email) ?></strong> y por SMS a tu celular. Ingresa el código para completar tu registro.</p>
+    <p class="text-sm text-gray-500 mb-6">Hemos enviado un código de verificación a <strong><?= e($email) ?></strong>. Ingresa el código para completar tu registro.</p>
 
     <!-- Email verification -->
     <div class="mb-6 p-4 border border-blue-200 rounded-xl bg-blue-50">
@@ -19,21 +19,6 @@ require APP_PATH . '/views/layout/head.php';
         <input type="text" name="code" required maxlength="6" pattern="[0-9]{6}" placeholder="000000"
           class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-center text-lg font-bold tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
         <button type="submit" class="px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition">
-          Verificar
-        </button>
-      </form>
-    </div>
-
-    <!-- SMS verification -->
-    <div class="mb-6 p-4 border border-purple-200 rounded-xl bg-purple-50">
-      <h2 class="font-semibold text-gray-900 mb-2">📱 Verificación por SMS</h2>
-      <p class="text-xs text-gray-500 mb-3">Te hemos enviado un código por SMS a tu celular. Ingresa el código de 6 dígitos.</p>
-      <form method="POST" action="<?= url('registro/verificar/codigo') ?>" class="flex gap-2">
-        <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
-        <input type="hidden" name="method" value="sms">
-        <input type="text" name="code" required maxlength="6" pattern="[0-9]{6}" placeholder="000000"
-          class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-center text-lg font-bold tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
-        <button type="submit" class="px-4 py-2.5 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 transition">
           Verificar
         </button>
       </form>

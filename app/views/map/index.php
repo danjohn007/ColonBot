@@ -120,6 +120,53 @@ require APP_PATH . '/views/layout/head.php';
 
 <?php require APP_PATH . '/views/layout/bottom_nav.php'; ?>
 
+<!-- Contenido informativo -->
+<div class="max-w-7xl mx-auto px-4 py-6">
+  <div class="prose prose-sm max-w-none">
+    <h2 class="text-xl font-bold text-gray-900 mb-3">Colón te conquistará</h2>
+    <p class="text-sm text-gray-600 mb-3">Descubre nuestros maravillosos atractivos turísticos que tenemos en nuestro mapa interactivo el cual permite encontrar el mejor destino de acuerdo al estilo de visita que quieras realizar a nuestro municipio: <strong>Familiar, en pareja, con tus mejores amigos, pet friendly</strong>.</p>
+    <p class="text-sm text-gray-600 mb-3">Disfruta de los mejores atractivos turísticos públicos o privados y arma tu ruta de visita, contamos con 5 opciones:</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+      <div class="bg-white rounded-xl p-3 border border-gray-100">
+        <p class="font-semibold text-sm text-gray-900">🏛️ Turismo Cultural</p>
+        <p class="text-xs text-gray-500">Corredores artesanales, museos, mercados, haciendas, recorridos turísticos</p>
+      </div>
+      <div class="bg-white rounded-xl p-3 border border-gray-100">
+        <p class="font-semibold text-sm text-gray-900">⭐ Turismo de Experiencias</p>
+        <p class="text-xs text-gray-500">Viñedos, productos locales y nativos, restaurantes gourmet, queserías, miradores, balnearios, paseos a caballo</p>
+      </div>
+      <div class="bg-white rounded-xl p-3 border border-gray-100">
+        <p class="font-semibold text-sm text-gray-900">🌲 Ecoturismo y Aventura</p>
+        <p class="text-xs text-gray-500">Senderismo, pesca, Mountain Bike (MTB), crosstrail, camping</p>
+      </div>
+      <div class="bg-white rounded-xl p-3 border border-gray-100">
+        <p class="font-semibold text-sm text-gray-900">⛪ Turismo religioso</p>
+        <p class="text-xs text-gray-500">Catedral de Soriano, peregrinaciones, fiestas patronales, iglesias, conventos</p>
+      </div>
+      <div class="bg-white rounded-xl p-3 border border-gray-100 md:col-span-2">
+        <p class="font-semibold text-sm text-gray-900">🍽️ Turismo gastronómico</p>
+        <p class="text-xs text-gray-500">Desde una fonda hasta lo mejor de la gastronomía en los mejores restaurantes del municipio</p>
+      </div>
+    </div>
+    <p class="text-sm text-gray-600 mb-3">Combina el estilo de visita que quieras realizar, con el tipo de ruta a explorar y encuentra la mejor hospitalidad de los Colonenses.</p>
+    <div class="bg-purple-50 rounded-xl p-4 border border-purple-100 mb-3">
+      <h3 class="font-semibold text-sm text-gray-900 mb-2">🤖 Conoce a CristobalBot, nuestro anfitrión a través de WhatsApp</h3>
+      <p class="text-xs text-gray-600 mb-2">Te proporciona la ubicación exacta de todos nuestros atractivos turísticos, información detallada de los productos y servicios creados para nuestros visitantes, mándale un WhatsApp y:</p>
+      <ul class="text-xs text-gray-600 list-disc list-inside space-y-1 mb-3">
+        <li>Haz una reservación</li>
+        <li>Contacta directamente al prestador de servicios turísticos</li>
+        <li>Imágenes de los lugares de tu interés</li>
+        <li>Las mejores rutas para llegar a tu destino a través de Waze o Google Maps</li>
+      </ul>
+      <?php if (setting('chatbot_wa_number', '')): ?>
+      <a href="https://wa.me/<?= e(preg_replace('/\D/', '', setting('chatbot_wa_number', ''))) ?>" target="_blank" class="inline-flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-green-600 transition">
+        📱 Contáctalo aquí
+      </a>
+      <?php endif; ?>
+    </div>
+  </div>
+</div>
+
 <!-- Banners de registro público entre mapa y footer -->
 <div class="bg-gradient-to-r from-purple-50 to-blue-50 border-t border-b border-gray-200">
   <div class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-4">

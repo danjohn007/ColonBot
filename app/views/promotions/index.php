@@ -40,6 +40,13 @@ require APP_PATH . '/views/layout/head.php';
             <?php if ($p['start_date']): ?><span>📅 Inicio: <?= date('d/m/Y', strtotime($p['start_date'])) ?></span><?php endif; ?>
             <?php if ($p['end_date']): ?><span>⏰ Fin: <?= date('d/m/Y', strtotime($p['end_date'])) ?></span><?php endif; ?>
             <span>🎯 Segmento: <?= e($p['target_segment']) ?></span>
+            <?php if ($p['status'] === 'active'): ?>
+            <span>🔗 <a href="<?= url('promocion/' . $p['id']) ?>" target="_blank" class="text-blue-600 hover:underline">URL pública</a></span>
+            <?php endif; ?>
+          </div>
+          <div class="flex flex-wrap gap-2 mt-2 text-xs text-gray-400">
+            <span>👁️ Vistas: <?= (int)($p['view_count'] ?? 0) ?></span>
+            <span>📋 Solicitudes: <?= (int)($p['inquiry_count'] ?? 0) ?></span>
           </div>
         </div>
         <div class="flex flex-col gap-2 shrink-0">

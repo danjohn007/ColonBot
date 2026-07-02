@@ -22,7 +22,7 @@ class AnalyticsModel extends Model
             'total_events'      => (int)$this->db->query('SELECT COUNT(*) FROM analytics')->fetchColumn(),
             'map_views'         => (int)$this->db->query("SELECT COUNT(*) FROM analytics WHERE event='map_view'")->fetchColumn(),
             'whatsapp_clicks'   => (int)$this->db->query("SELECT COUNT(*) FROM analytics WHERE event='whatsapp_click'")->fetchColumn(),
-            'chatbot_sessions'  => (int)$this->db->query("SELECT COUNT(*) FROM analytics WHERE event='chatbot_session'")->fetchColumn(),
+            'chatbot_sessions'  => (int)$this->db->query("SELECT COUNT(*) FROM chatbot_sessions")->fetchColumn(),
             'directions_clicks' => (int)$this->db->query("SELECT COUNT(*) FROM analytics WHERE event='directions_click'")->fetchColumn(),
         ];
     }

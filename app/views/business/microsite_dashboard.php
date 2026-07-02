@@ -25,41 +25,31 @@ require APP_PATH . '/views/layout/head.php';
     </div>
   </div>
 
-  <!-- Stats Cards Row -->
-  <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
+    <!-- Stats Cards Row - Same as superadmin analytics -->
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
     <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-      <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">Solicitudes WhatsApp</p>
-      <p class="text-2xl font-bold text-blue-600 mt-1" id="stat-wa"><?= $waClicks ?></p>
+      <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">🗺️ Vistas Mapa</p>
+      <p class="text-2xl font-bold text-blue-600 mt-1" id="stat-map"><?= $mapViews ?></p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-      <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">Vistas en Mapa</p>
-      <p class="text-2xl font-bold text-green-600 mt-1" id="stat-map"><?= $mapViews ?></p>
+      <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">💬 Clicks WhatsApp</p>
+      <p class="text-2xl font-bold text-green-600 mt-1" id="stat-wa"><?= $waClicks ?></p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-      <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">Prospectos</p>
-      <p class="text-2xl font-bold text-purple-600 mt-1"><?= $metrics['prospectos'] ?></p>
+      <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">🧭 Indicaciones</p>
+      <p class="text-2xl font-bold text-orange-600 mt-1"><?php $dbDir = Database::getInstance(); echo (int)$dbDir->query("SELECT COUNT(*) FROM analytics WHERE business_id = ? AND event = 'directions_click'", [(int)$business['id']])->fetchColumn(); ?></p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-      <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">Clientes</p>
-      <p class="text-2xl font-bold text-orange-600 mt-1"><?= $metrics['clientes'] ?></p>
+      <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">🤖 Sesiones Chatbot</p>
+      <p class="text-2xl font-bold text-purple-600 mt-1"><?php $dbBot = Database::getInstance(); echo (int)$dbBot->query("SELECT COUNT(*) FROM chatbot_sessions cs LEFT JOIN contacts c ON c.wa_id = cs.wa_id WHERE c.business_id = ?", [(int)$business['id']])->fetchColumn(); ?></p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-      <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">⭐ Clientes Frec.</p>
-      <p class="text-2xl font-bold text-pink-600 mt-1"><?= $metrics['lovemarks'] ?></p>
+      <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">🎉 Total eventos</p>
+      <p class="text-2xl font-bold text-pink-600 mt-1"><?= count($events) ?></p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-      <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">Ventas Totales</p>
-      <p class="text-2xl font-bold text-emerald-600 mt-1">$<?= number_format($metrics['total_sales'], 2) ?></p>
-    </div>
-  </div>
-
-  <!-- Rating Card -->
-  <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 mb-6">
-    <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide mb-1">Calificación Promedio</p>
-    <div class="flex items-center gap-2">
-      <span class="text-3xl font-bold text-yellow-500"><?= number_format($business['rating'], 1) ?></span>
-      <span class="text-yellow-400 text-xl"><?= str_repeat('★', max(1, min(5, round($business['rating'])))) . str_repeat('☆', max(0, 5 - round($business['rating']))) ?></span>
-      <span class="text-sm text-gray-400">(<?= count($reviews) ?> reseñas)</span>
+      <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">⭐ Calificación</p>
+      <p class="text-2xl font-bold text-yellow-500 mt-1"><?= number_format($business['rating'], 1) ?></p>
     </div>
   </div>
 
@@ -79,10 +69,21 @@ require APP_PATH . '/views/layout/head.php';
       <canvas id="activityChart" height="200"></canvas>
     </div>
 
-    <!-- Chart: Contacts Growth -->
+    <!-- Top Negocios (same style as analytics page) -->
     <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-      <h2 class="font-semibold text-gray-900 mb-4">👥 Crecimiento de contactos</h2>
-      <canvas id="contactsChart" height="200"></canvas>
+      <h2 class="font-semibold text-gray-900 mb-4">🏆 Visitas acumuladas</h2>
+      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+        <span class="text-sm font-medium text-gray-700">Vistas en mapa</span>
+        <span class="text-lg font-bold text-blue-600"><?= $mapViews ?></span>
+      </div>
+      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mt-2">
+        <span class="text-sm font-medium text-gray-700">Clicks WhatsApp</span>
+        <span class="text-lg font-bold text-green-600"><?= $waClicks ?></span>
+      </div>
+      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mt-2">
+        <span class="text-sm font-medium text-gray-700">Indicaciones</span>
+        <span class="text-lg font-bold text-orange-600"><?php $dbDir2 = Database::getInstance(); echo (int)$dbDir2->query("SELECT COUNT(*) FROM analytics WHERE business_id = ? AND event = 'directions_click'", [(int)$business['id']])->fetchColumn(); ?></span>
+      </div>
     </div>
   </div>
 

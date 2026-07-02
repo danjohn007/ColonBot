@@ -122,6 +122,14 @@ $router->post('registro/reenviar-codigo',       'PublicRegisterController', 'res
 // ─── API Pública ──────────────────────────────────────────────────
 $router->get('api/promociones',            'PromotionController', 'apiPromotions');
 
+// ─── Página pública de promoción ────────────────
+$router->get('promocion/{id}',             'PromotionController', 'publicView');
+$router->post('promocion/{id}/solicitar',  'PromotionController', 'publicInquiry');
+
+// ─── Eventos públicos ──────────────────────────
+$router->get('eventos',                    'PromotionController', 'publicEvents');
+$router->get('evento/{id}',                'PromotionController', 'publicEventView');
+
 // SuperAdmin
 $router->get('superadmin',              'DashboardController', 'index');
 $router->get('superadmin/usuarios',     'DashboardController', 'users');

@@ -31,14 +31,20 @@ class CrmController extends Controller
         $category = $_GET['category'] ?? '';
         $contacts = $this->contacts->byBusiness((int)$businessId, $category);
 
-        // Add chatbot sessions as prospects (auto-imported from chatbot)
+        // Add chatbot sessions as prospects with proper classification
         $db = Database::getInstance();
         $chatbotContacts = $db->query(
             "SELECT cs.id AS id, cs.wa_id AS phone, cs.last_message AS notes,
-                    'Chatbot' AS name, '' AS email, 'prospecto' AS category,
-                    0 AS total_visits, 0 AS total_spent,
+                    COALESCE(cs.category, 'Prospecto sin historial') AS name, '' AS email,
+                    CASE 
+                        WHEN cs.category = 'Lovemark' THEN 'lovemark'
+                        WHEN cs.category = 'Cliente' THEN 'cliente'
+                        WHEN cs.category = 'Prospecto recurrente' THEN 'prospecto_recurrente'
+                        ELSE 'prospecto_sin_historial'
+                    END AS category,
+                    cs.session_count AS total_visits, 0 AS total_spent,
                     'chatbot' AS source, cs.updated_at AS last_contact_at,
-                    0 AS purchase_count
+                    cs.purchase_count AS purchase_count, cs.id AS chatbot_session_id
              FROM chatbot_sessions cs
              WHERE cs.wa_id NOT IN (
                 SELECT COALESCE(c.wa_id, '') FROM contacts c WHERE c.business_id = ?
@@ -52,7 +58,7 @@ class CrmController extends Controller
         )->fetchAll();
 
         // Merge chatbot contacts as prospects
-        if (empty($category) || $category === 'prospecto' || $category === 'prospecto_sin_historial') {
+        if (empty($category) || in_array($category, ['prospecto', 'prospecto_sin_historial', 'prospecto_recurrente'])) {
             $contacts = array_merge($chatbotContacts, $contacts);
         }
 
@@ -81,7 +87,7 @@ class CrmController extends Controller
         if ($notes) {
             $this->contacts->update($contact['id'], [
                 'notes' => $notes,
-                'category' => in_array($category, ['prospecto', 'cliente', 'lovemark']) ? $category : 'prospecto',
+                'category' => in_array($category, ['prospecto', 'prospecto_sin_historial', 'prospecto_recurrente', 'cliente', 'lovemark']) ? $category : 'prospecto_sin_historial',
             ]);
         }
 
@@ -105,7 +111,7 @@ class CrmController extends Controller
         if (isset($_POST['email'])) $data['email'] = trim($_POST['email']);
         if (isset($_POST['phone'])) $data['phone'] = trim($_POST['phone']);
         if (isset($_POST['notes'])) $data['notes'] = trim($_POST['notes']);
-        if (isset($_POST['category']) && in_array($_POST['category'], ['prospecto', 'cliente', 'lovemark'])) {
+        if (isset($_POST['category']) && in_array($_POST['category'], ['prospecto', 'prospecto_sin_historial', 'prospecto_recurrente', 'cliente', 'lovemark'])) {
             $data['category'] = $_POST['category'];
         }
 
@@ -118,7 +124,6 @@ class CrmController extends Controller
 
     /**
      * Convertir PROSPECTO a CLIENTE (Customer Journey etapa B)
-     * Modal solicita: Nombre del Cliente, Producto o Servicio, Monto total, Email (opcional), Notas
      */
     public function upgradeToCliente(string $id): void
     {

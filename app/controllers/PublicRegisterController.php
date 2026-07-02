@@ -29,10 +29,9 @@ class PublicRegisterController extends Controller
 
         $name  = trim($_POST['name'] ?? '');
         $email = trim($_POST['email'] ?? '');
-        $phone = trim($_POST['phone'] ?? '');
 
-        if (!$name || !$email || !$phone) {
-            $this->flash('error', 'Nombre, email y teléfono son requeridos.');
+        if (!$name || !$email) {
+            $this->flash('error', 'Nombre y email son requeridos.');
             $this->redirect('registro/visitante');
             return;
         }
@@ -45,25 +44,23 @@ class PublicRegisterController extends Controller
             return;
         }
 
-        // Generate verification codes
+        // Generate verification code
         $emailCode = random_int(100000, 999999);
-        $smsCode   = random_int(100000, 999999);
 
         // Store pending registration in session
         $_SESSION['pending_register'] = [
             'type'       => 'visitor',
             'name'       => $name,
             'email'      => $email,
-            'phone'      => $phone,
+            'phone'      => '',
             'email_code' => $emailCode,
-            'sms_code'   => $smsCode,
             'created_at' => time(),
         ];
 
         // Send verification email
         $this->sendVerificationEmail($email, $emailCode, $name);
 
-        $this->flash('success', 'Te hemos enviado un código de verificación a tu email y por SMS a tu celular.');
+        $this->flash('success', 'Te hemos enviado un código de verificación a tu email.');
         $this->redirect('registro/verificar');
     }
 
@@ -84,11 +81,10 @@ class PublicRegisterController extends Controller
 
         $name     = trim($_POST['name'] ?? '');
         $email    = trim($_POST['email'] ?? '');
-        $phone    = trim($_POST['phone'] ?? '');
         $negocio  = trim($_POST['business_name'] ?? '');
 
-        if (!$name || !$email || !$phone) {
-            $this->flash('error', 'Nombre, email y teléfono son requeridos.');
+        if (!$name || !$email) {
+            $this->flash('error', 'Nombre y email son requeridos.');
             $this->redirect('registro/prestador');
             return;
         }
@@ -101,26 +97,24 @@ class PublicRegisterController extends Controller
             return;
         }
 
-        // Generate verification codes
+        // Generate verification code
         $emailCode = random_int(100000, 999999);
-        $smsCode   = random_int(100000, 999999);
 
         // Store pending registration in session
         $_SESSION['pending_register'] = [
             'type'          => 'prestador',
             'name'          => $name,
             'email'         => $email,
-            'phone'         => $phone,
+            'phone'         => '',
             'business_name' => $negocio,
             'email_code'    => $emailCode,
-            'sms_code'      => $smsCode,
             'created_at'    => time(),
         ];
 
         // Send verification email
         $this->sendVerificationEmail($email, $emailCode, $name);
 
-        $this->flash('success', 'Te hemos enviado un código de verificación a tu email y por SMS a tu celular.');
+        $this->flash('success', 'Te hemos enviado un código de verificación a tu email.');
         $this->redirect('registro/verificar');
     }
 
@@ -141,7 +135,7 @@ class PublicRegisterController extends Controller
 
     /**
      * Verificar el código ingresado por el usuario
-     * Solo requiere UN método (email o SMS) para completar el registro
+     * Solo verificación por email
      */
     public function verifyCode(): void
     {
@@ -155,9 +149,8 @@ class PublicRegisterController extends Controller
         }
 
         $code = trim($_POST['code'] ?? '');
-        $method = $_POST['method'] ?? 'email'; // 'email' or 'sms'
 
-        $expectedCode = $method === 'sms' ? $pending['sms_code'] : $pending['email_code'];
+        $expectedCode = $pending['email_code'];
 
         if ((string)$code !== (string)$expectedCode) {
             $this->flash('error', 'El código ingresado no es correcto.');
@@ -165,7 +158,7 @@ class PublicRegisterController extends Controller
             return;
         }
 
-        // Single method verification - complete registration immediately
+        // Complete registration immediately
         $this->completeRegistration($pending);
     }
 
@@ -182,15 +175,9 @@ class PublicRegisterController extends Controller
             return;
         }
 
-        $method = $_POST['method'] ?? 'email';
         $newCode = random_int(100000, 999999);
-
-        if ($method === 'sms') {
-            $_SESSION['pending_register']['sms_code'] = $newCode;
-        } else {
-            $_SESSION['pending_register']['email_code'] = $newCode;
-            $this->sendVerificationEmail($pending['email'], $newCode, $pending['name']);
-        }
+        $_SESSION['pending_register']['email_code'] = $newCode;
+        $this->sendVerificationEmail($pending['email'], $newCode, $pending['name']);
 
         $this->json(['ok' => true, 'message' => 'Código reenviado.']);
     }
@@ -207,17 +194,10 @@ class PublicRegisterController extends Controller
             'name'     => $pending['name'],
             'email'    => $pending['email'],
             'password' => password_hash($password, PASSWORD_DEFAULT),
-            'phone'    => $pending['phone'],
+            'phone'    => $pending['phone'] ?? '',
             'role'     => $role,
             'active'   => 1,
         ]);
-
-        // Log the registration in chatbot_sessions for CRM tracking
-        $db = Database::getInstance();
-        $db->execute(
-            'INSERT INTO chatbot_sessions (wa_id, state, last_message, updated_at) VALUES (?,?,?, NOW())',
-            [$pending['phone'], 'registered', "Registro como $role: {$pending['name']}"]
-        );
 
         // Auto-login
         $_SESSION['user'] = [

@@ -12,14 +12,16 @@ class ContactModel extends Model
         $params = [$businessId];
 
         if ($category && in_array($category, ['prospecto', 'cliente', 'lovemark', 'prospecto_sin_historial', 'prospecto_recurrente', 'cliente_frecuente'])) {
-            $sql .= ' AND c.category = ?';
-            $params[] = $category;
-        } elseif ($category === 'prospecto_sin_historial') {
-            $sql .= " AND c.category = 'prospecto' AND c.last_contact_at IS NULL";
-        } elseif ($category === 'prospecto_recurrente') {
-            $sql .= " AND c.category = 'prospecto' AND c.last_contact_at IS NOT NULL";
-        } elseif ($category === 'cliente_frecuente') {
-            $sql .= " AND (SELECT COUNT(*) FROM contact_purchases cp WHERE cp.contact_id = c.id) >= 3";
+            if ($category === 'prospecto_sin_historial') {
+                $sql .= " AND c.category = 'prospecto_sin_historial'";
+            } elseif ($category === 'prospecto_recurrente') {
+                $sql .= " AND c.category = 'prospecto_recurrente'";
+            } elseif ($category === 'cliente_frecuente') {
+                $sql .= " AND (c.category = 'lovemark' OR (SELECT COUNT(*) FROM contact_purchases cp WHERE cp.contact_id = c.id) >= 3)";
+            } else {
+                $sql .= ' AND c.category = ?';
+                $params[] = $category;
+            }
         }
 
         $sql .= ' ORDER BY c.updated_at DESC';
@@ -28,7 +30,7 @@ class ContactModel extends Model
 
     public function prospectos(int $businessId): array
     {
-        return $this->byBusiness($businessId, 'prospecto');
+        return $this->byBusiness($businessId, 'prospecto_sin_historial');
     }
 
     public function clientes(int $businessId): array
@@ -67,6 +69,13 @@ class ContactModel extends Model
         if (!$existing && $phone) {
             $existing = $this->findByPhone($businessId, $phone);
         }
+        // Try by email
+        if (!$existing && $email) {
+            $existing = $this->queryOne(
+                'SELECT * FROM contacts WHERE business_id = ? AND email = ? LIMIT 1',
+                [$businessId, $email]
+            );
+        }
 
         if ($existing) {
             $this->update($existing['id'], [
@@ -84,7 +93,7 @@ class ContactModel extends Model
             'name' => $name,
             'phone' => $phone ?: null,
             'email' => $email ?: null,
-            'category' => 'prospecto',
+            'category' => 'prospecto_sin_historial',
             'source' => $source,
             'last_contact_at' => date('Y-m-d H:i:s'),
         ]);
@@ -105,10 +114,19 @@ class ContactModel extends Model
             [$amount, $contactId]
         );
 
-        // Check if should upgrade to lovemark (3+ visits)
+        // Check if should upgrade based on purchase count
+        $purchaseCount = (int)$this->db->query(
+            'SELECT COUNT(*) FROM contact_purchases WHERE contact_id = ?',
+            [$contactId]
+        )->fetchColumn();
+
         $contact = $this->find($contactId);
-        if ($contact && $contact['total_visits'] >= 3 && $contact['category'] !== 'lovemark') {
-            $this->update($contactId, ['category' => 'lovemark']);
+        if ($contact) {
+            if ($purchaseCount >= 3 && $contact['category'] !== 'lovemark') {
+                $this->update($contactId, ['category' => 'lovemark']);
+            } elseif ($purchaseCount >= 1 && $contact['category'] !== 'cliente' && $contact['category'] !== 'lovemark') {
+                $this->update($contactId, ['category' => 'cliente']);
+            }
         }
     }
 
@@ -119,6 +137,50 @@ class ContactModel extends Model
             $contact = $this->find($contactId);
             $this->addPurchase($contactId, $contact['business_id'], $amount, $products, $notes);
         }
+    }
+
+    /**
+     * Clasificar usuarios web basado en businesses.visits
+     */
+    public function classifyWebUser(int $businessId): array
+    {
+        $db = Database::getInstance();
+        // Obtener visitantes de la tabla businesses (columna visits)
+        $business = $db->query('SELECT visits FROM businesses WHERE id = ?', [$businessId])->fetch();
+
+        $visits = $business ? (int)$business['visits'] : 0;
+
+        // Crear o actualizar contacto basado en visitas
+        $existing = $this->queryOne(
+            'SELECT * FROM contacts WHERE business_id = ? AND source = "mapa" ORDER BY updated_at DESC LIMIT 1',
+            [$businessId]
+        );
+
+        $category = 'prospecto_sin_historial';
+        if ($visits > 0) {
+            $category = 'prospecto_recurrente';
+        }
+        if ($visits > 0) {
+            // Check if there are purchases
+            if ($existing) {
+                $purchaseCount = (int)$db->query(
+                    'SELECT COUNT(*) FROM contact_purchases WHERE contact_id = ?',
+                    [$existing['id']]
+                )->fetchColumn();
+
+                if ($purchaseCount >= 3) {
+                    $category = 'lovemark';
+                } elseif ($purchaseCount >= 1) {
+                    $category = 'cliente';
+                }
+            }
+        }
+
+        return [
+            'category' => $category,
+            'visits' => $visits,
+            'source' => 'mapa',
+        ];
     }
 
     public function getMetrics(int $businessId, string $period = 'all'): array
@@ -135,8 +197,12 @@ class ContactModel extends Model
             "SELECT COUNT(*) FROM contacts c WHERE c.business_id = $businessId $dateFilter"
         )->fetchColumn();
 
-        $prospectos = (int)$this->db->query(
-            "SELECT COUNT(*) FROM contacts c WHERE c.business_id = $businessId AND c.category = 'prospecto' $dateFilter"
+        $prospectosSinHistorial = (int)$this->db->query(
+            "SELECT COUNT(*) FROM contacts c WHERE c.business_id = $businessId AND c.category = 'prospecto_sin_historial' $dateFilter"
+        )->fetchColumn();
+
+        $prospectosRecurrentes = (int)$this->db->query(
+            "SELECT COUNT(*) FROM contacts c WHERE c.business_id = $businessId AND c.category = 'prospecto_recurrente' $dateFilter"
         )->fetchColumn();
 
         $clientes = (int)$this->db->query(
@@ -169,7 +235,9 @@ class ContactModel extends Model
 
         return [
             'total' => $total,
-            'prospectos' => $prospectos,
+            'prospectos_sin_historial' => $prospectosSinHistorial,
+            'prospectos_recurrentes' => $prospectosRecurrentes,
+            'prospectos' => $prospectosSinHistorial + $prospectosRecurrentes,
             'clientes' => $clientes,
             'lovemarks' => $lovemarks,
             'total_sales' => $totalSales,
@@ -186,7 +254,8 @@ class ContactModel extends Model
         return $this->query(
             "SELECT DATE_FORMAT(c.created_at, '$format') AS label,
                     COUNT(*) AS total,
-                    SUM(CASE WHEN c.category = 'prospecto' THEN 1 ELSE 0 END) AS prospectos,
+                    SUM(CASE WHEN c.category = 'prospecto_sin_historial' THEN 1 ELSE 0 END) AS prospectos_sin_historial,
+                    SUM(CASE WHEN c.category = 'prospecto_recurrente' THEN 1 ELSE 0 END) AS prospectos_recurrentes,
                     SUM(CASE WHEN c.category = 'cliente' THEN 1 ELSE 0 END) AS clientes,
                     SUM(CASE WHEN c.category = 'lovemark' THEN 1 ELSE 0 END) AS lovemarks
              FROM contacts c

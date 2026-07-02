@@ -17,7 +17,7 @@ $flash = flash();
       <a href="<?= url() ?>" class="flex items-center gap-3 font-bold text-white text-lg">
         <img src="<?= asset('img/logo-header-nuevo.jpeg') ?>" alt="Colón" class="h-12 w-auto">
         <img src="<?= asset('img/colon.png') ?>" alt="Colón" class="h-12 w-auto">
-        <img src="<?= asset('img/cristobot.png') ?>" alt="CristobalBot" class="h-10 w-auto hidden sm:inline-block">
+        <img src="<?= asset('img/ColonBotimg.png') ?>" alt="CristobalBot" class="h-10 w-auto hidden sm:inline-block">
         <span class="text-base font-medium whitespace-nowrap hidden sm:inline" style="color: #8B5CF6">CristobalBot: Mapa interactivo del turismo en Colón</span>
       </a>
 
@@ -38,8 +38,20 @@ $flash = flash();
 
 <!-- Left Sidebar -->
 <div id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-white shadow-2xl z-50 overflow-y-auto
-  <?= isset($_COOKIE['sidebar_pinned']) && $_COOKIE['sidebar_pinned'] === 'true' ? '' : '-translate-x-full' ?>
+  <?php
+    $currentUrl = $_SERVER['REQUEST_URI'] ?? '';
+    $isPublicMap = strpos($currentUrl, '/mapa') !== false || $currentUrl === '/' || $currentUrl === BASE_URL;
+    $isSuperAdmin = strpos($currentUrl, '/superadmin') !== false;
+    if ($isPublicMap) {
+      echo '-translate-x-full hidden'; // Hide on public map
+    } elseif ($isSuperAdmin) {
+      echo ''; // Always visible on superadmin
+    } else {
+      echo isset($_COOKIE['sidebar_pinned']) && $_COOKIE['sidebar_pinned'] === 'true' ? '' : '-translate-x-full';
+    }
+  ?>
   transition-transform duration-300 ease-in-out">
+REPLACE
   <div class="p-4">
     <!-- Sidebar header -->
     <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
@@ -188,44 +200,58 @@ document.addEventListener('DOMContentLoaded', function() {
   const overlay = document.getElementById('sidebar-overlay');
   const toggleBtn = document.getElementById('sidebar-toggle');
   const closeBtn = document.getElementById('sidebar-close');
+  const currentUrl = window.location.pathname || '';
 
-  // Check if sidebar is pinned
-  const isPinned = document.cookie.split('; ').find(row => row.startsWith('sidebar_pinned='));
-  const pinned = isPinned ? isPinned.split('=')[1] === 'true' : false;
+  // Check if we're on superadmin pages (always pinned)
+  const isSuperAdmin = currentUrl.indexOf('/superadmin') !== -1 || currentUrl.indexOf('/admin/') !== -1;
+  const isPublicMap = currentUrl.indexOf('/mapa') !== -1 || currentUrl === '/' || currentUrl.endsWith('/');
 
-  if (pinned) {
+  if (isSuperAdmin) {
+    // Superadmin: sidebar always visible, no overlay
     sidebar.classList.remove('-translate-x-full');
     overlay.classList.add('hidden');
-    document.body.style.overflow = '';
+    document.cookie = 'sidebar_pinned=true; path=/; max-age=' + (60*60*24*365);
+    document.body.style.marginLeft = '18rem'; // 72 * 4 = 288px = 18rem
+    if (toggleBtn) toggleBtn.style.display = 'none';
+  } else if (!isPublicMap) {
+    // Normal behavior for other pages
+    const isPinned = document.cookie.split('; ').find(row => row.startsWith('sidebar_pinned='));
+    const pinned = isPinned ? isPinned.split('=')[1] === 'true' : false;
+
+    if (pinned) {
+      sidebar.classList.remove('-translate-x-full');
+      overlay.classList.add('hidden');
+      document.body.style.marginLeft = '18rem';
+    }
   }
 
   function toggleSidebar() {
+    if (isSuperAdmin) return; // No toggle on superadmin
+
     const currentlyPinned = document.cookie.split('; ').find(row => row.startsWith('sidebar_pinned='));
     const isCurrentlyPinned = currentlyPinned ? currentlyPinned.split('=')[1] === 'true' : false;
 
     if (isCurrentlyPinned) {
-      // Unpin: close sidebar
       sidebar.classList.add('-translate-x-full');
       document.cookie = 'sidebar_pinned=false; path=/; max-age=' + (60*60*24*365);
       overlay.classList.add('hidden');
-      document.body.style.overflow = '';
+      document.body.style.marginLeft = '';
     } else {
-      // Pin: open and keep open
       sidebar.classList.remove('-translate-x-full');
       document.cookie = 'sidebar_pinned=true; path=/; max-age=' + (60*60*24*365);
       overlay.classList.add('hidden');
-      document.body.style.overflow = '';
+      document.body.style.marginLeft = '18rem';
     }
   }
 
   function closeSidebar() {
-    // Close only if not pinned
+    if (isSuperAdmin) return;
     const currentlyPinned = document.cookie.split('; ').find(row => row.startsWith('sidebar_pinned='));
     const isCurrentlyPinned = currentlyPinned ? currentlyPinned.split('=')[1] === 'true' : false;
     if (!isCurrentlyPinned) {
       sidebar.classList.add('-translate-x-full');
       overlay.classList.add('hidden');
-      document.body.style.overflow = '';
+      document.body.style.marginLeft = '';
     }
   }
 

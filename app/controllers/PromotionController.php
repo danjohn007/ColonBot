@@ -228,6 +228,82 @@ class PromotionController extends Controller
         $this->json($result);
     }
 
+    /**
+     * Vista pública de una promoción
+     */
+    public function publicView(string $id): void
+    {
+        $promo = $this->promotions->find((int)$id);
+        if (!$promo || $promo['status'] !== 'active') {
+            http_response_code(404);
+            require APP_PATH . '/views/errors/404.php';
+            return;
+        }
+
+        // Track view
+        $db = Database::getInstance();
+        $db->execute(
+            'INSERT INTO promotion_views (promotion_id, ip, user_agent) VALUES (?,?,?)',
+            [(int)$id, $_SERVER['REMOTE_ADDR'] ?? null, substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255)]
+        );
+
+        // Count views
+        $viewCount = (int)$db->query('SELECT COUNT(*) FROM promotion_views WHERE promotion_id = ?', [(int)$id])->fetchColumn();
+        $inquiryCount = (int)$db->query('SELECT COUNT(*) FROM promotion_inquiries WHERE promotion_id = ?', [(int)$id])->fetchColumn();
+
+        $this->view('promotions.public_view', compact('promo', 'viewCount', 'inquiryCount'));
+    }
+
+    /**
+     * Solicitar información de una promoción
+     */
+    public function publicInquiry(string $id): void
+    {
+        $promo = $this->promotions->find((int)$id);
+        if (!$promo) { $this->json(['error' => 'not found'], 404); }
+
+        $name = trim($_POST['name'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $message = trim($_POST['message'] ?? '');
+
+        $db = Database::getInstance();
+        $db->execute(
+            'INSERT INTO promotion_inquiries (promotion_id, name, phone, email, message) VALUES (?,?,?,?,?)',
+            [(int)$id, $name, $phone, $email, $message]
+        );
+
+        $this->json(['ok' => true, 'message' => 'Solicitud enviada exitosamente']);
+    }
+
+    /**
+     * Lista pública de eventos
+     */
+    public function publicEvents(): void
+    {
+        $events = $this->promotions->query(
+            "SELECT * FROM promotions WHERE type = 'evento' AND status = 'active'
+             AND (start_date IS NULL OR start_date >= NOW())
+             ORDER BY start_date ASC"
+        );
+        $this->view('promotions.public_events', compact('events'));
+    }
+
+    /**
+     * Vista pública de un evento
+     */
+    public function publicEventView(string $id): void
+    {
+        $promo = $this->promotions->find((int)$id);
+        if (!$promo || $promo['status'] !== 'active') {
+            http_response_code(404);
+            require APP_PATH . '/views/errors/404.php';
+            return;
+        }
+
+        $this->view('promotions.public_view', compact('promo'));
+    }
+
     private function saveUpload(array $file): ?string
     {
         $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
