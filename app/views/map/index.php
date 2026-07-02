@@ -1,7 +1,31 @@
 <?php
-$pageTitle = 'Mapa Turístico Colón';
+$pageTitle = 'Mapa Turístico de Colón';
 require APP_PATH . '/views/layout/head.php';
 ?>
+<style>
+  .map-title {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: linear-gradient(135deg, #6B21A8, #2563EB, #059669);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    text-shadow: none;
+    display: inline-block;
+  }
+  .map-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .map-title-wrapper::before {
+    content: '🗺️';
+    font-size: 1.5rem;
+    -webkit-text-fill-color: initial;
+  }
+</style>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
 
 <main class="flex-1 flex flex-col">
@@ -31,7 +55,8 @@ require APP_PATH . '/views/layout/head.php';
           class="cat-btn text-xs px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition font-medium active-cat">
           Todos
         </button>
-        <?php foreach ($categories as $cat): ?>
+<?php foreach ($categories as $cat): ?>
+        <?php if ($cat['slug'] === 'punto-de-referencia') continue; ?>
         <button onclick="filterCat('<?= e($cat['slug']) ?>')" data-cat="<?= e($cat['slug']) ?>"
           class="cat-btn text-xs px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition font-medium"
           style="--cat-color: <?= e($cat['color']) ?>">
@@ -316,10 +341,11 @@ function loadPOIs() {
       markers.forEach(m => map.removeLayer(m));
       markers = [];
 
-      // Always add reference points with a distinct style
+      // Always add reference points with their own category icon
       allRefPoints.forEach(poi => {
         if (!poi.lat || !poi.lng) return;
-        const m = L.marker([poi.lat, poi.lng], { icon: createIcon('#8B5CF6', '\u{1F4CD}') });
+        const refEmoji = iconToEmoji(poi.category_icon);
+        const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#8B5CF6', refEmoji) });
         m.addTo(map);
         m.on('click', () => showPOI(poi));
         markers.push(m);
@@ -544,10 +570,11 @@ function filterTripType(tripType) {
   markers.forEach(m => map.removeLayer(m));
   markers = [];
 
-  // Always add reference points
+  // Always add reference points with their own category icon
   allRefPoints.forEach(poi => {
     if (!poi.lat || !poi.lng) return;
-    const m = L.marker([poi.lat, poi.lng], { icon: createIcon('#8B5CF6', '\u{1F4CD}') });
+    const refEmoji = iconToEmoji(poi.category_icon);
+    const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#8B5CF6', refEmoji) });
     m.addTo(map);
     m.on('click', () => showPOI(poi));
     markers.push(m);

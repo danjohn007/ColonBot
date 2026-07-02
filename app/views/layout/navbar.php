@@ -15,9 +15,9 @@ $flash = flash();
 
       <!-- Logo -->
       <a href="<?= url() ?>" class="flex items-center gap-3 font-bold text-white text-lg">
-        <img src="<?= asset('img/logo-header-nuevo.jpeg') ?>" alt="Colón" class="h-12 w-auto">
-        <img src="<?= asset('img/colon.png') ?>" alt="Colón" class="h-12 w-auto">
-        <img src="<?= asset('img/ColonBotimg.png') ?>" alt="CristobalBot" class="h-10 w-auto hidden sm:inline-block">
+        <img src="<?= asset('img/colon.png') ?>" alt="Colón te conquistará" class="h-12 w-auto">
+        <img src="<?= asset('img/ColonBotimg.png') ?>" alt="Colón Administración" class="h-10 w-auto">
+        <img src="<?= asset('img/logo-header-nuevo.jpeg') ?>" alt="Ayuntamiento de Colón" class="h-12 w-auto hidden sm:inline-block">
         <span class="text-base font-medium whitespace-nowrap hidden sm:inline" style="color: #8B5CF6">CristobalBot: Mapa interactivo del turismo en Colón</span>
       </a>
 
