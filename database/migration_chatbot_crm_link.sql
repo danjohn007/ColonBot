@@ -10,10 +10,9 @@ ALTER TABLE `chatbot_sessions`
   ADD COLUMN `purchase_count` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `has_purchased`,
   ADD COLUMN `category` VARCHAR(50) DEFAULT NULL COMMENT 'Prospecto sin historial, Prospecto recurrente, Cliente, Lovemark' AFTER `purchase_count`;
 
--- 2. Agregar columna 'source' a contacts para diferenciar chatbot vs web
+-- 2. Agregar columna 'chatbot_session_id' a contacts para enlazar con chatbot_sessions
 ALTER TABLE `contacts`
-  ADD COLUMN `chatbot_session_id` BIGINT UNSIGNED DEFAULT NULL AFTER `source`,
-  ADD COLUMN `wa_id` VARCHAR(30) DEFAULT NULL AFTER `chatbot_session_id`,
+  ADD COLUMN `chatbot_session_id` BIGINT UNSIGNED DEFAULT NULL AFTER `notes`,
   ADD INDEX `idx_chatbot_session` (`chatbot_session_id`);
 
 -- 3. Modificar ENUM de category para incluir los nuevos niveles
