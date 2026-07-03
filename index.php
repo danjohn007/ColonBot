@@ -98,7 +98,9 @@ $router->post('admin/eventos/crear',         'EventController', 'create');
 $router->post('admin/eventos/{id}/editar',   'EventController', 'update');
 $router->post('admin/eventos/{id}/toggle',   'EventController', 'toggleStatus');
 $router->post('admin/eventos/{id}/aprobar',  'EventController', 'approve');
+$router->post('admin/eventos/{id}/autorizar-bot', 'EventController', 'authorizeBot');
 $router->get('evento/{id}',                  'EventController', 'publicView');
+$router->get('evento/{id}/{slug}',           'EventController', 'publicView');
 
 // ─── Colaborador de Secretaría de Turismo ─────────────────────────
 $router->get('colaborador',                    'ColaboradorController', 'dashboard');
@@ -123,8 +125,10 @@ $router->get('turista/reservar/{id}',      'TouristController', 'makeReservation
 // ─── Registro Público (Visitantes y Prestadores) ──────────────────
 $router->get('registro/visitante',              'PublicRegisterController', 'visitorForm');
 $router->post('registro/visitante/guardar',     'PublicRegisterController', 'visitorRegister');
+$router->post('registro/visitante/iniciar-sesion', 'PublicRegisterController', 'visitorLogin');
 $router->get('registro/prestador',              'PublicRegisterController', 'prestadorForm');
 $router->post('registro/prestador/guardar',     'PublicRegisterController', 'prestadorRegister');
+$router->post('registro/prestador/iniciar-sesion', 'PublicRegisterController', 'prestadorLogin');
 $router->get('registro/verificar',              'PublicRegisterController', 'verifyForm');
 $router->post('registro/verificar/codigo',      'PublicRegisterController', 'verifyCode');
 $router->post('registro/reenviar-codigo',       'PublicRegisterController', 'resendCode');

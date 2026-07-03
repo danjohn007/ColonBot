@@ -1,6 +1,6 @@
 -- ============================================================
 -- Plataforma Turística Interactiva – Municipio de Colón
--- Schema SQL – MySQL 5.7
+-- Schema SQL – MySQL 5.7 (Updated 2026)
 -- ============================================================
 
 SET NAMES utf8mb4;
@@ -8,11 +8,7 @@ SET time_zone = '-06:00';
 SET foreign_key_checks = 0;
 SET sql_mode = 'STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
 
--- ─── Base de datos ────────────────────────────────────────────────────────
-CREATE DATABASE IF NOT EXISTS `colonbot`
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
-USE `colonbot`;
+USE `colon_colonbotdb`;
 
 -- ─── Usuarios ─────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `users` (
@@ -20,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `name`       VARCHAR(120)                         NOT NULL,
   `email`      VARCHAR(191)                         NOT NULL UNIQUE,
   `password`   VARCHAR(255)                         NOT NULL,
-  `role`       ENUM('visitor','admin','superadmin')  NOT NULL DEFAULT 'visitor',
+  `role`       ENUM('visitor','superadmin','prestador','colaborador_admin') NOT NULL DEFAULT 'visitor',
   `phone`      VARCHAR(20)                          DEFAULT NULL,
   `avatar`     VARCHAR(255)                         DEFAULT NULL,
   `active`     TINYINT(1)                           NOT NULL DEFAULT 1,
@@ -68,6 +64,14 @@ CREATE TABLE IF NOT EXISTS `businesses` (
   `cover_image`  VARCHAR(255)     DEFAULT NULL,
   `status`       ENUM('draft','pending','published','rejected') NOT NULL DEFAULT 'draft',
   `featured`     TINYINT(1)       NOT NULL DEFAULT 0,
+  `is_open`      TINYINT(1)       NOT NULL DEFAULT 1,
+  `open_for_messaging` ENUM('24hrs','schedule') NOT NULL DEFAULT 'schedule',
+  `google_maps_link` VARCHAR(500) DEFAULT NULL,
+  `waze_link`    VARCHAR(500)     DEFAULT NULL,
+  `languages`    VARCHAR(255)     DEFAULT NULL COMMENT 'Idiomas separados por coma',
+  `max_images`   INT UNSIGNED     NOT NULL DEFAULT 6,
+  `capacity`     INT UNSIGNED     DEFAULT NULL COMMENT 'Aforo/Aforo de sede',
+  `self_classification` TEXT      DEFAULT NULL COMMENT 'Autoclasificación del prestador',
   `visits`       INT UNSIGNED     NOT NULL DEFAULT 0,
   `rating`       DECIMAL(3,2)     NOT NULL DEFAULT 0.00,
   `created_at`   DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -185,57 +189,41 @@ CREATE TABLE IF NOT EXISTS `error_log` (
   INDEX `idx_level` (`level`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ─── Dispositivos IoT – HikVision ─────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS `iot_hikvision` (
-  `id`          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `name`        VARCHAR(120) NOT NULL,
-  `ip`          VARCHAR(45)  NOT NULL,
-  `port`        SMALLINT UNSIGNED NOT NULL DEFAULT 80,
-  `username`    VARCHAR(80)  NOT NULL DEFAULT 'admin',
-  `password`    VARCHAR(255) NOT NULL,
-  `stream_url`  VARCHAR(255) DEFAULT NULL,
-  `type`        ENUM('camera','nvr','dvr') NOT NULL DEFAULT 'camera',
-  `location`    VARCHAR(150) DEFAULT NULL,
-  `active`      TINYINT(1)   NOT NULL DEFAULT 1,
-  `created_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ─── Dispositivos IoT – Shelly Cloud ─────────────────────────────────────
-CREATE TABLE IF NOT EXISTS `iot_shelly` (
-  `id`         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `name`       VARCHAR(120) NOT NULL,
-  `device_id`  VARCHAR(80)  NOT NULL UNIQUE,
-  `auth_key`   VARCHAR(255) NOT NULL,
-  `server_uri` VARCHAR(255) NOT NULL DEFAULT 'https://shelly-41-eu.shelly.cloud',
-  `type`       VARCHAR(60)  NOT NULL DEFAULT 'relay',
-  `location`   VARCHAR(150) DEFAULT NULL,
-  `active`     TINYINT(1)   NOT NULL DEFAULT 1,
-  `created_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ─── GPS Trackers ────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS `gps_trackers` (
-  `id`         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `name`       VARCHAR(120) NOT NULL,
-  `imei`       VARCHAR(20)  NOT NULL UNIQUE,
-  `api_key`    VARCHAR(255) DEFAULT NULL,
-  `provider`   VARCHAR(80)  DEFAULT NULL,
-  `last_lat`   DECIMAL(10,7) DEFAULT NULL,
-  `last_lng`   DECIMAL(10,7) DEFAULT NULL,
-  `last_seen`  DATETIME     DEFAULT NULL,
-  `active`     TINYINT(1)   NOT NULL DEFAULT 1,
-  `created_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ─── Eventos del negocio ─────────────────────────────────────────────────
+-- ─── Eventos ──────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `events` (
-  `id`          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `business_id` INT UNSIGNED NOT NULL,
-  `name`        VARCHAR(150) NOT NULL,
-  `description` TEXT         DEFAULT NULL,
-  `price`       DECIMAL(10,2) DEFAULT NULL,
-  `date`        DATETIME     DEFAULT NULL,
-  FOREIGN KEY (`business_id`) REFERENCES `businesses`(`id`) ON DELETE CASCADE
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT UNSIGNED NOT NULL,
+  `business_id` INT UNSIGNED DEFAULT NULL COMMENT 'NULL si es evento global/público',
+  `title` VARCHAR(200) NOT NULL,
+  `description` TEXT DEFAULT NULL,
+  `image` VARCHAR(255) DEFAULT NULL,
+  `price` DECIMAL(12,2) DEFAULT NULL COMMENT 'Precio de lista',
+  `presale_price` DECIMAL(12,2) DEFAULT NULL COMMENT 'Precio de preventa',
+  `capacity` INT UNSIGNED DEFAULT NULL COMMENT 'Aforo de la sede',
+  `location` VARCHAR(500) DEFAULT NULL COMMENT 'Ubicación del evento',
+  `validity` VARCHAR(100) DEFAULT NULL COMMENT 'Vigencia del evento',
+  `conditions` TEXT DEFAULT NULL COMMENT 'Condiciones generales',
+  `public_url` VARCHAR(500) DEFAULT NULL COMMENT 'URL pública generada automáticamente',
+  `event_type` ENUM('publico','privado') NOT NULL DEFAULT 'publico',
+  `bot_authorized` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Autorizado para publicar en chatbot',
+  `bot_authorized_by` INT UNSIGNED DEFAULT NULL COMMENT 'Quién autorizó la publicación en chatbot',
+  `bot_authorized_at` DATETIME DEFAULT NULL,
+  `target_segment` SET('prospectos_sin_historial','prospectos_recurrentes','clientes','clientes_frecuentes','todos') NOT NULL DEFAULT 'todos',
+  `status` ENUM('pending','approved','active','inactive','expired') NOT NULL DEFAULT 'pending',
+  `approved_by` INT UNSIGNED DEFAULT NULL,
+  `start_date` DATETIME DEFAULT NULL,
+  `end_date` DATETIME DEFAULT NULL,
+  `presale_start` DATETIME DEFAULT NULL,
+  `presale_end` DATETIME DEFAULT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_status` (`status`),
+  INDEX `idx_business` (`business_id`),
+  INDEX `idx_user` (`user_id`),
+  INDEX `idx_bot_authorized` (`bot_authorized`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`business_id`) REFERENCES `businesses`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`approved_by`) REFERENCES `users`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ─── Conversaciones chatbot ──────────────────────────────────────────────
@@ -253,6 +241,7 @@ CREATE TABLE IF NOT EXISTS `notifications` (
   `id`          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `user_id`     INT UNSIGNED NOT NULL,
   `business_id` INT UNSIGNED DEFAULT NULL,
+  `event_id`    INT UNSIGNED DEFAULT NULL,
   `type`        ENUM('contact','review','status','system') NOT NULL DEFAULT 'system',
   `title`       VARCHAR(150) NOT NULL,
   `message`     TEXT         DEFAULT NULL,
@@ -260,8 +249,114 @@ CREATE TABLE IF NOT EXISTS `notifications` (
   `created_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX `idx_user_id` (`user_id`),
   INDEX `idx_read_at` (`read_at`),
+  INDEX `idx_event` (`event_id`),
   FOREIGN KEY (`user_id`)     REFERENCES `users`(`id`)      ON DELETE CASCADE,
-  FOREIGN KEY (`business_id`) REFERENCES `businesses`(`id`) ON DELETE CASCADE
+  FOREIGN KEY (`business_id`) REFERENCES `businesses`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`event_id`)    REFERENCES `events`(`id`)     ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── Contactos (CRM) ─────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `contacts` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `business_id` INT UNSIGNED NOT NULL,
+  `wa_id` VARCHAR(30) DEFAULT NULL COMMENT 'ID de WhatsApp del contacto',
+  `name` VARCHAR(120) NOT NULL,
+  `email` VARCHAR(191) DEFAULT NULL,
+  `phone` VARCHAR(20) DEFAULT NULL,
+  `category` ENUM('prospecto','cliente','lovemark') NOT NULL DEFAULT 'prospecto',
+  `source` ENUM('whatsapp','mapa','manual') NOT NULL DEFAULT 'manual',
+  `notes` TEXT DEFAULT NULL,
+  `total_visits` INT UNSIGNED NOT NULL DEFAULT 0,
+  `total_purchases` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  `last_contact_at` DATETIME DEFAULT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`business_id`) REFERENCES `businesses`(`id`) ON DELETE CASCADE,
+  INDEX `idx_wa_id` (`wa_id`),
+  INDEX `idx_category` (`category`),
+  INDEX `idx_business_category` (`business_id`, `category`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── Compras/visitas de contactos ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `contact_purchases` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `contact_id` INT UNSIGNED NOT NULL,
+  `business_id` INT UNSIGNED NOT NULL,
+  `amount` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  `products` TEXT DEFAULT NULL COMMENT 'JSON con productos/servicios comprados',
+  `notes` TEXT DEFAULT NULL,
+  `purchase_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`contact_id`) REFERENCES `contacts`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`business_id`) REFERENCES `businesses`(`id`) ON DELETE CASCADE,
+  INDEX `idx_contact` (`contact_id`),
+  INDEX `idx_business` (`business_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── Promociones ─────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `promotions` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `business_id` INT UNSIGNED DEFAULT NULL COMMENT 'NULL si es promoción global',
+  `user_id` INT UNSIGNED NOT NULL COMMENT 'Creador de la promoción',
+  `title` VARCHAR(200) NOT NULL,
+  `description` TEXT DEFAULT NULL,
+  `image` VARCHAR(255) DEFAULT NULL,
+  `price` DECIMAL(12,2) DEFAULT NULL COMMENT 'Precio de lista',
+  `presale_price` DECIMAL(12,2) DEFAULT NULL COMMENT 'Precio de preventa',
+  `conditions` TEXT DEFAULT NULL COMMENT 'Condiciones generales',
+  `public_url` VARCHAR(500) DEFAULT NULL COMMENT 'URL pública generada automáticamente',
+  `type` ENUM('promocion','evento') NOT NULL DEFAULT 'promocion',
+  `target_segment` SET('prospectos_sin_historial','prospectos_recurrentes','clientes','clientes_frecuentes','todos') NOT NULL DEFAULT 'todos',
+  `status` ENUM('pending','approved','active','inactive','expired') NOT NULL DEFAULT 'pending',
+  `approved_by` INT UNSIGNED DEFAULT NULL COMMENT 'ID del colaborador/superadmin que aprobó',
+  `start_date` DATETIME DEFAULT NULL,
+  `end_date` DATETIME DEFAULT NULL,
+  `presale_start` DATETIME DEFAULT NULL COMMENT 'Inicio de preventa',
+  `presale_end` DATETIME DEFAULT NULL COMMENT 'Fin de preventa',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`business_id`) REFERENCES `businesses`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`approved_by`) REFERENCES `users`(`id`) ON DELETE SET NULL,
+  INDEX `idx_status` (`status`),
+  INDEX `idx_business` (`business_id`),
+  INDEX `idx_type` (`type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── Envíos de promociones ───────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `promotion_sends` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `promotion_id` INT UNSIGNED NOT NULL,
+  `contact_id` INT UNSIGNED DEFAULT NULL,
+  `sent_via` ENUM('whatsapp','chatbot','email') NOT NULL DEFAULT 'whatsapp',
+  `sent_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`promotion_id`) REFERENCES `promotions`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`contact_id`) REFERENCES `contacts`(`id`) ON DELETE SET NULL,
+  INDEX `idx_promotion` (`promotion_id`),
+  INDEX `idx_contact` (`contact_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── Vistas de promociones ───────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `promotion_views` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `promotion_id` INT UNSIGNED NOT NULL,
+  `ip` VARCHAR(45) DEFAULT NULL,
+  `user_agent` VARCHAR(255) DEFAULT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`promotion_id`) REFERENCES `promotions`(`id`) ON DELETE CASCADE,
+  INDEX `idx_promotion` (`promotion_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── Consultas de promociones ────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `promotion_inquiries` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `promotion_id` INT UNSIGNED NOT NULL,
+  `name` VARCHAR(120) NOT NULL,
+  `phone` VARCHAR(20) DEFAULT NULL,
+  `email` VARCHAR(191) DEFAULT NULL,
+  `message` TEXT DEFAULT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`promotion_id`) REFERENCES `promotions`(`id`) ON DELETE CASCADE,
+  INDEX `idx_promotion` (`promotion_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET foreign_key_checks = 1;

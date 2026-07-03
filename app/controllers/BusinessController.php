@@ -27,10 +27,10 @@ class BusinessController extends Controller
     public function microsite(): void
     {
         $this->requireAuth('prestador');
-        // Colaborador can also view microsite dashboards
+        // Colaborador_admin can also view microsite dashboards
         $userRole = currentUser()['role'] ?? '';
-        if ($userRole === 'colaborador') {
-            $this->requireAuth('colaborador');
+        if ($userRole === 'colaborador' || $userRole === 'colaborador_admin') {
+            $this->requireAuth('colaborador_admin');
         }
         $user = currentUser();
         $businesses = $user['role'] === 'superadmin'
@@ -39,7 +39,7 @@ class BusinessController extends Controller
 
         if (empty($businesses)) {
             // Allow admin/superadmin to proceed even without businesses
-            if ($user['role'] === 'admin' || $user['role'] === 'superadmin') {
+            if (in_array($user['role'], ['colaborador_admin', 'superadmin'])) {
                 $this->view('business.microsite', compact('businesses', 'user'));
                 return;
             }

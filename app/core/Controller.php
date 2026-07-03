@@ -36,12 +36,13 @@ abstract class Controller
         }
         $userRole = $_SESSION['user']['role'] ?? '';
         $allowed  = match ($role) {
-            'superadmin'  => ['superadmin'],
-            'admin'       => ['admin', 'superadmin'],
-            'prestador'   => ['prestador', 'admin', 'superadmin'],
-            'colaborador' => ['colaborador', 'admin', 'superadmin'],
-            'turista'     => ['turista', 'admin', 'superadmin'],
-            default       => ['visitor', 'admin', 'superadmin', 'prestador', 'colaborador', 'turista'],
+            'superadmin'        => ['superadmin'],
+            'admin'             => ['colaborador_admin', 'superadmin'],
+            'colaborador_admin' => ['colaborador_admin', 'superadmin'],
+            'prestador'         => ['prestador', 'colaborador_admin', 'superadmin'],
+            'colaborador'       => ['colaborador_admin', 'superadmin'],
+            'visitor'           => ['visitor', 'colaborador_admin', 'superadmin'],
+            default             => ['visitor', 'colaborador_admin', 'superadmin', 'prestador'],
         };
         if (!in_array($userRole, $allowed, true)) {
             http_response_code(403);

@@ -10,7 +10,7 @@ class UserModel extends Model
 
     public function admins(): array
     {
-        return $this->query("SELECT * FROM users WHERE role IN ('admin','superadmin') ORDER BY name");
+        return $this->query("SELECT * FROM users WHERE role IN ('colaborador_admin','superadmin') ORDER BY name");
     }
 
     public function verifyPassword(string $plain, string $hash): bool

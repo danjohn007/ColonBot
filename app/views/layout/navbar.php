@@ -106,8 +106,8 @@ REPLACE
         </a>
         <?php endif; ?>
 
-        <!-- ADMIN (strict) -->
-        <?php if ($role === 'admin'): ?>
+        <!-- COLABORADOR_ADMIN (strict) - merged admin + colaborador -->
+        <?php if ($role === 'colaborador_admin'): ?>
         <div class="pt-3 pb-1 text-xs uppercase tracking-wide text-gray-400 font-semibold px-3">Gestión</div>
         <a href="<?= url('admin') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">🏢</span> Mis Negocios
@@ -152,7 +152,7 @@ REPLACE
         </a>
         <?php endif; ?>
 
-        <!-- COLABORADOR (strict) -->
+        <!-- COLABORADOR (strict) - kept for backward compatibility but same as colaborador_admin -->
         <?php if ($role === 'colaborador'): ?>
         <div class="pt-3 pb-1 text-xs uppercase tracking-wide text-gray-400 font-semibold px-3">Turismo</div>
         <a href="<?= url('colaborador') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
@@ -169,10 +169,10 @@ REPLACE
         </a>
         <?php endif; ?>
 
-        <!-- TURISTA (strict) - only for actual turista role -->
-        <?php if ($role === 'turista'): ?>
+        <!-- VISITOR (strict) - merged from turista -->
+        <?php if ($role === 'visitor'): ?>
         <a href="<?= url('turista') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
-          <span class="text-lg">👤</span> Mi Perfil Turista
+          <span class="text-lg">👤</span> Mi Perfil Visitante
         </a>
         <?php endif; ?>
 
@@ -180,7 +180,7 @@ REPLACE
         <div class="border-t border-gray-200 my-3"></div>
 
         <!-- Configuraciones above logout -->
-        <?php if (in_array($role, ['superadmin', 'admin', 'prestador', 'colaborador'])): ?>
+        <?php if (in_array($role, ['superadmin', 'colaborador_admin', 'prestador', 'colaborador'])): ?>
         <a href="<?= url('configuraciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">⚙️</span> Configuraciones
         </a>

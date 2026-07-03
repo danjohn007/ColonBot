@@ -70,9 +70,10 @@ require APP_PATH . '/views/layout/head.php';
       <input type="password" name="password" required placeholder="Contraseña (mín. 8 chars)" minlength="8" class="w-full input">
       <input type="tel" name="phone" placeholder="Teléfono (opcional)" class="w-full input">
       <select name="role" class="w-full input">
-        <option value="admin">Admin de Negocio</option>
+        <option value="colaborador_admin">Colaborador / Admin</option>
         <option value="superadmin">Super Administrador</option>
-        <option value="colaborador">Colaborador de Turismo</option>
+        <option value="prestador">Prestador de Servicio</option>
+        <option value="visitor">Visitante</option>
       </select>
       <div class="flex gap-2 pt-2">
         <button type="submit" class="flex-1 bg-blue-600 text-white py-2.5 rounded-xl font-semibold hover:bg-blue-700 transition">Crear</button>
@@ -92,9 +93,10 @@ require APP_PATH . '/views/layout/head.php';
       <input type="text" name="name" id="edit-name" required placeholder="Nombre" class="w-full input">
       <input type="password" name="password" placeholder="Nueva contraseña (dejar vacío para no cambiar)" class="w-full input">
       <select name="role" id="edit-role" class="w-full input">
-        <option value="admin">Admin de Negocio</option>
+        <option value="colaborador_admin">Colaborador / Admin</option>
         <option value="superadmin">Super Administrador</option>
-        <option value="colaborador">Colaborador de Turismo</option>
+        <option value="prestador">Prestador de Servicio</option>
+        <option value="visitor">Visitante</option>
       </select>
       <label class="flex items-center gap-2 text-sm">
         <input type="checkbox" name="active" id="edit-active" value="1" class="rounded">

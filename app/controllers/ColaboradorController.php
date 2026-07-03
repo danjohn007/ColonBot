@@ -16,7 +16,7 @@ class ColaboradorController extends Controller
 
     public function dashboard(): void
     {
-        $this->requireAuth('colaborador');
+        $this->requireAuth('colaborador_admin');
 
         // Metrics
         $totalBiz = $this->businesses->count();
@@ -69,7 +69,7 @@ class ColaboradorController extends Controller
 
     public function events(): void
     {
-        $this->requireAuth('colaborador');
+        $this->requireAuth('colaborador_admin');
 
         $pendingPromos = $this->promotions->pendingForApproval();
         $activePromos = $this->promotions->active();
@@ -79,7 +79,7 @@ class ColaboradorController extends Controller
 
     public function approvePromotion(string $id): void
     {
-        $this->requireAuth('colaborador');
+        $this->requireAuth('colaborador_admin');
         $this->verifyCsrf();
 
         $this->promotions->approve((int)$id, (int)currentUser()['id']);
@@ -89,7 +89,7 @@ class ColaboradorController extends Controller
 
     public function createGlobalEvent(): void
     {
-        $this->requireAuth('colaborador');
+        $this->requireAuth('colaborador_admin');
         $this->verifyCsrf();
 
         $title = trim($_POST['title'] ?? '');
@@ -129,7 +129,7 @@ class ColaboradorController extends Controller
 
     public function resetRatings(string $businessId): void
     {
-        $this->requireAuth('colaborador');
+        $this->requireAuth('colaborador_admin');
         $this->verifyCsrf();
 
         $db = Database::getInstance();
@@ -142,7 +142,7 @@ class ColaboradorController extends Controller
 
     public function contactProvider(string $businessId): void
     {
-        $this->requireAuth('colaborador');
+        $this->requireAuth('colaborador_admin');
 
         $business = $this->businesses->find((int)$businessId);
         if (!$business) { $this->json(['error' => 'not found'], 404); }
@@ -160,7 +160,7 @@ class ColaboradorController extends Controller
 
     public function metrics(): void
     {
-        $this->requireAuth('colaborador');
+        $this->requireAuth('colaborador_admin');
 
         $db = Database::getInstance();
 

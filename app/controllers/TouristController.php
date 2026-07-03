@@ -2,26 +2,20 @@
 class TouristController extends Controller
 {
     private BusinessModel $businesses;
-    private EmergencyModel $emergency;
-    private TouristProfileModel $profiles;
     private PromotionModel $promotions;
+    private UserModel $users;
 
     public function __construct()
     {
         $this->businesses = new BusinessModel();
-        $this->emergency = new EmergencyModel();
-        $this->profiles = new TouristProfileModel();
         $this->promotions = new PromotionModel();
+        $this->users = new UserModel();
     }
 
     public function dashboard(): void
     {
         // Allow access without login for public tourist page
         $user = currentUser();
-        $profile = null;
-        if ($user) {
-            $profile = $this->profiles->findByUserId((int)$user['id']);
-        }
 
         // Top visited & recommended
         $topVisited = $this->businesses->query(
@@ -33,15 +27,14 @@ class TouristController extends Controller
              LIMIT 10'
         );
 
-        $emergencyNumbers = $this->emergency->active();
         $activePromotions = $this->promotions->active();
 
-        $this->view('tourist.dashboard', compact('user', 'profile', 'topVisited', 'emergencyNumbers', 'activePromotions') + ['csrf' => $this->csrf()]);
+        $this->view('tourist.dashboard', compact('user', 'topVisited', 'activePromotions') + ['csrf' => $this->csrf()]);
     }
 
     public function register(): void
     {
-        $this->requireAuth('turista');
+        $this->requireAuth('visitor');
         $this->verifyCsrf();
 
         $user = currentUser();
@@ -49,11 +42,8 @@ class TouristController extends Controller
         $whatsapp = trim($_POST['whatsapp'] ?? '');
         $email = trim($_POST['email'] ?? $user['email']);
 
-        $profile = $this->profiles->createOrUpdate((int)$user['id'], $name, $whatsapp, $email);
-
-        // Update user record too
-        $userModel = new UserModel();
-        $userModel->update((int)$user['id'], [
+        // Update user record
+        $this->users->update((int)$user['id'], [
             'name' => $name,
             'email' => $email ?: $user['email'],
             'phone' => $whatsapp ?: $user['phone'],
@@ -67,16 +57,9 @@ class TouristController extends Controller
         $this->redirect('turista');
     }
 
-    public function emergency(): void
-    {
-        $this->requireAuth('turista');
-        $numbers = $this->emergency->active();
-        $this->json($numbers);
-    }
-
     public function submitReview(): void
     {
-        $this->requireAuth('turista');
+        $this->requireAuth('visitor');
         $this->verifyCsrf();
 
         $businessId = (int)($_POST['business_id'] ?? 0);
@@ -104,7 +87,7 @@ class TouristController extends Controller
 
     public function makeReservation(string $businessId): void
     {
-        $this->requireAuth('turista');
+        $this->requireAuth('visitor');
 
         $business = $this->businesses->find((int)$businessId);
         if (!$business) { $this->json(['error' => 'not found'], 404); }

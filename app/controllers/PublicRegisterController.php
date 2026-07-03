@@ -17,7 +17,56 @@ class PublicRegisterController extends Controller
      */
     public function visitorForm(): void
     {
+        if (isLoggedIn()) {
+            $this->redirect('mapa');
+        }
         $this->view('public.register_visitor', ['csrf' => $this->csrf()]);
+    }
+
+    /**
+     * Inicio de sesión para Visitante
+     */
+    public function visitorLogin(): void
+    {
+        $this->verifyCsrf();
+
+        $email    = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+
+        if (!$email || !$password) {
+            $this->flash('error', 'Ingresa correo y contraseña.');
+            $this->redirect('registro/visitante');
+            return;
+        }
+
+        $user = $this->users->findByEmail($email);
+        if (!$user || !$this->users->verifyPassword($password, $user['password'])) {
+            $this->flash('error', 'Credenciales incorrectas.');
+            $this->redirect('registro/visitante');
+            return;
+        }
+
+        if (!$user['active']) {
+            $this->flash('error', 'Tu cuenta está desactivada.');
+            $this->redirect('registro/visitante');
+            return;
+        }
+
+        if ($user['role'] !== 'visitor') {
+            $this->flash('error', 'Esta cuenta no es de tipo visitante.');
+            $this->redirect('registro/visitante');
+            return;
+        }
+
+        $_SESSION['user'] = [
+            'id'    => $user['id'],
+            'name'  => $user['name'],
+            'email' => $user['email'],
+            'role'  => $user['role'],
+        ];
+
+        $this->logAction('visitor_login', 'users', $user['id']);
+        $this->redirect('mapa');
     }
 
     /**
@@ -69,7 +118,61 @@ class PublicRegisterController extends Controller
      */
     public function prestadorForm(): void
     {
+        if (isLoggedIn()) {
+            $this->redirect('admin');
+        }
         $this->view('public.register_prestador', ['csrf' => $this->csrf()]);
+    }
+
+    /**
+     * Inicio de sesión para Prestador
+     */
+    public function prestadorLogin(): void
+    {
+        $this->verifyCsrf();
+
+        $email    = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+
+        if (!$email || !$password) {
+            $this->flash('error', 'Ingresa correo y contraseña.');
+            $this->redirect('registro/prestador');
+            return;
+        }
+
+        $user = $this->users->findByEmail($email);
+        if (!$user || !$this->users->verifyPassword($password, $user['password'])) {
+            $this->flash('error', 'Credenciales incorrectas.');
+            $this->redirect('registro/prestador');
+            return;
+        }
+
+        if (!$user['active']) {
+            $this->flash('error', 'Tu cuenta está desactivada.');
+            $this->redirect('registro/prestador');
+            return;
+        }
+
+        if (!in_array($user['role'], ['prestador', 'colaborador_admin', 'superadmin'])) {
+            $this->flash('error', 'Esta cuenta no es de tipo prestador.');
+            $this->redirect('registro/prestador');
+            return;
+        }
+
+        $_SESSION['user'] = [
+            'id'    => $user['id'],
+            'name'  => $user['name'],
+            'email' => $user['email'],
+            'role'  => $user['role'],
+        ];
+
+        $this->logAction('prestador_login', 'users', $user['id']);
+        $redirect = match ($user['role']) {
+            'superadmin' => 'superadmin',
+            'colaborador_admin' => 'colaborador',
+            default => 'admin/micrositio',
+        };
+        $this->redirect($redirect);
     }
 
     /**

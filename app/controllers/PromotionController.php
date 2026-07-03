@@ -84,7 +84,7 @@ class PromotionController extends Controller
             'price' => $_POST['price'] !== '' ? (float)$_POST['price'] : null,
             'presale_price' => $_POST['presale_price'] !== '' ? (float)$_POST['presale_price'] : null,
             'conditions' => trim($_POST['conditions'] ?? ''),
-            'public_url' => trim($_POST['public_url'] ?? ''),
+            'public_url' => BASE_URL . '/promocion/' . $id,
             'type' => in_array($_POST['type'] ?? '', ['promocion', 'evento']) ? $_POST['type'] : 'promocion',
             'target_segment' => implode(',', $_POST['target_segment'] ?? ['todos']),
             'status' => 'pending',
@@ -93,6 +93,9 @@ class PromotionController extends Controller
             'presale_start' => $_POST['presale_start'] ?? null,
             'presale_end' => $_POST['presale_end'] ?? null,
         ]);
+
+        // Update public_url with the actual ID
+        $this->promotions->update($id, ['public_url' => BASE_URL . '/promocion/' . $id]);
 
         $this->logAction('create_promotion', 'promotions', $id, $title);
         $this->json(['ok' => true, 'id' => $id]);

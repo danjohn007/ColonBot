@@ -28,18 +28,29 @@ require APP_PATH . '/views/layout/head.php';
         <div class="flex-1">
           <div class="flex items-center gap-2 mb-2">
             <h3 class="font-bold text-gray-900"><?= e($p['title']) ?></h3>
-            <span class="text-xs px-2 py-0.5 rounded-full font-medium <?= $p['status'] === 'active' ? 'bg-green-50 text-green-700' : ($p['status'] === 'pending' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-50 text-gray-500') ?>">
+            <span class="text-xs px-2 py-0.5 rounded-full font-medium <?= $p['status'] === 'active' ? 'bg-green-50 text-green-700' : ($p['status'] === 'pending' ? 'bg-yellow-50 text-yellow-700' : ($p['status'] === 'approved' ? 'bg-blue-50 text-blue-700' : 'bg-gray-50 text-gray-500')) ?>">
               <?= $p['status'] ?>
             </span>
+            <?php if ($p['event_type'] === 'publico'): ?>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-purple-50 text-purple-700">Público</span>
+            <?php else: ?>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-orange-50 text-orange-700">Privado</span>
+            <?php endif; ?>
+            <?php if ($p['bot_authorized']): ?>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-700">🤖 Bot OK</span>
+            <?php endif; ?>
           </div>
           <p class="text-sm text-gray-500 mb-2"><?= nl2br(e(mb_substr($p['description'] ?? '', 0, 200))) ?></p>
           <div class="flex flex-wrap gap-3 text-xs text-gray-400">
             <?php if ($p['price']): ?><span>💰 Precio: $<?= number_format((float)$p['price'], 2) ?></span><?php endif; ?>
             <?php if ($p['presale_price']): ?><span>🏷️ Preventa: $<?= number_format((float)$p['presale_price'], 2) ?></span><?php endif; ?>
+            <?php if ($p['capacity']): ?><span>👥 Aforo: <?= (int)$p['capacity'] ?></span><?php endif; ?>
+            <?php if ($p['location']): ?><span>📍 <?= e($p['location']) ?></span><?php endif; ?>
+            <?php if ($p['validity']): ?><span>⏳ Vigencia: <?= e($p['validity']) ?></span><?php endif; ?>
             <?php if ($p['start_date']): ?><span>📅 Inicio: <?= date('d/m/Y', strtotime($p['start_date'])) ?></span><?php endif; ?>
             <?php if ($p['end_date']): ?><span>⏰ Fin: <?= date('d/m/Y', strtotime($p['end_date'])) ?></span><?php endif; ?>
-            <?php if ($p['status'] === 'active'): ?>
-            <span>🔗 <a href="<?= url('evento/' . $p['id']) ?>" target="_blank" class="text-blue-600 hover:underline">URL pública</a></span>
+            <?php if ($p['public_url']): ?>
+            <span>🔗 <a href="<?= e($p['public_url']) ?>" target="_blank" class="text-blue-600 hover:underline">URL pública</a></span>
             <?php endif; ?>
           </div>
         </div>
@@ -48,8 +59,11 @@ require APP_PATH . '/views/layout/head.php';
           <button onclick="toggleStatus(<?= $p['id'] ?>, '<?= $p['status'] === 'active' ? 'inactive' : 'active' ?>')" class="text-xs px-3 py-1.5 <?= $p['status'] === 'active' ? 'bg-red-50 text-red-700 hover:bg-red-100' : 'bg-green-50 text-green-700 hover:bg-green-100' ?> rounded-lg transition">
             <?= $p['status'] === 'active' ? 'Desactivar' : 'Activar' ?>
           </button>
-          <?php if (in_array($user['role'], ['superadmin', 'colaborador'])): ?>
-          <button onclick="approveEvent(<?= $p['id'] ?>)" class="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition">Autorizar</button>
+          <?php if (in_array($user['role'], ['superadmin', 'colaborador_admin'])): ?>
+          <button onclick="approveEvent(<?= $p['id'] ?>)" class="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition">Aprobar</button>
+          <?php if (!$p['bot_authorized'] && $p['status'] === 'approved'): ?>
+          <button onclick="authorizeBot(<?= $p['id'] ?>)" class="text-xs px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition">🤖 Autorizar Bot</button>
+          <?php endif; ?>
           <?php endif; ?>
         </div>
       </div>
@@ -80,6 +94,7 @@ require APP_PATH . '/views/layout/head.php';
         <div class="col-span-2">
           <label class="label block text-sm font-medium text-gray-700 mb-1">Negocio</label>
           <select id="event-business-select" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
+            <option value="">-- Evento público (sin negocio) --</option>
             <?php foreach ($businesses as $b): ?>
             <option value="<?= $b['id'] ?>"><?= e($b['name']) ?></option>
             <?php endforeach; ?>
@@ -99,6 +114,22 @@ require APP_PATH . '/views/layout/head.php';
           <input type="number" id="event-price" step="0.01" min="0" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
         </div>
         <div>
+          <label class="label block text-sm font-medium text-gray-700 mb-1">Precio Preventa</label>
+          <input type="number" id="event-presale-price" step="0.01" min="0" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
+        </div>
+        <div>
+          <label class="label block text-sm font-medium text-gray-700 mb-1">Aforo</label>
+          <input type="number" id="event-capacity" min="0" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
+        </div>
+        <div class="col-span-2">
+          <label class="label block text-sm font-medium text-gray-700 mb-1">Ubicación del evento</label>
+          <input type="text" id="event-location" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
+        </div>
+        <div>
+          <label class="label block text-sm font-medium text-gray-700 mb-1">Vigencia</label>
+          <input type="text" id="event-validity" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="Ej: 30 días">
+        </div>
+        <div>
           <label class="label block text-sm font-medium text-gray-700 mb-1">Fecha inicio</label>
           <input type="datetime-local" id="event-start" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
         </div>
@@ -106,8 +137,16 @@ require APP_PATH . '/views/layout/head.php';
           <label class="label block text-sm font-medium text-gray-700 mb-1">Fecha fin</label>
           <input type="datetime-local" id="event-end" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
         </div>
+        <div>
+          <label class="label block text-sm font-medium text-gray-700 mb-1">Inicio preventa</label>
+          <input type="datetime-local" id="event-presale-start" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
+        </div>
+        <div>
+          <label class="label block text-sm font-medium text-gray-700 mb-1">Fin preventa</label>
+          <input type="datetime-local" id="event-presale-end" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
+        </div>
         <div class="col-span-2">
-          <label class="label block text-sm font-medium text-gray-700 mb-1">Restricciones del Evento</label>
+          <label class="label block text-sm font-medium text-gray-700 mb-1">Condiciones / Restricciones</label>
           <textarea id="event-conditions" rows="2" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm"></textarea>
         </div>
       </div>
@@ -123,26 +162,38 @@ const CSRF = '<?= e($csrf) ?>';
 const BASE_URL = '<?= BASE_URL ?>';
 
 function openCreateModal() {
-    document.getElementById('modal-title').textContent = 'Eventos';
+  document.getElementById('modal-title').textContent = 'Eventos';
   document.getElementById('event-id').value = '';
   document.getElementById('event-title').value = '';
   document.getElementById('event-description').value = '';
   document.getElementById('event-price').value = '';
+  document.getElementById('event-presale-price').value = '';
+  document.getElementById('event-capacity').value = '';
+  document.getElementById('event-location').value = '';
+  document.getElementById('event-validity').value = '';
   document.getElementById('event-start').value = '';
   document.getElementById('event-end').value = '';
+  document.getElementById('event-presale-start').value = '';
+  document.getElementById('event-presale-end').value = '';
   document.getElementById('event-conditions').value = '';
   document.getElementById('event-image').value = '';
   document.getElementById('event-modal').classList.remove('hidden');
 }
 
 function editEvent(p) {
-    document.getElementById('modal-title').textContent = 'Editar Evento';
+  document.getElementById('modal-title').textContent = 'Editar Evento';
   document.getElementById('event-id').value = p.id;
   document.getElementById('event-title').value = p.title;
   document.getElementById('event-description').value = p.description || '';
   document.getElementById('event-price').value = p.price || '';
+  document.getElementById('event-presale-price').value = p.presale_price || '';
+  document.getElementById('event-capacity').value = p.capacity || '';
+  document.getElementById('event-location').value = p.location || '';
+  document.getElementById('event-validity').value = p.validity || '';
   document.getElementById('event-start').value = p.start_date ? p.start_date.replace(' ', 'T').substring(0, 16) : '';
   document.getElementById('event-end').value = p.end_date ? p.end_date.replace(' ', 'T').substring(0, 16) : '';
+  document.getElementById('event-presale-start').value = p.presale_start ? p.presale_start.replace(' ', 'T').substring(0, 16) : '';
+  document.getElementById('event-presale-end').value = p.presale_end ? p.presale_end.replace(' ', 'T').substring(0, 16) : '';
   document.getElementById('event-conditions').value = p.conditions || '';
   document.getElementById('event-modal').classList.remove('hidden');
 }
@@ -162,8 +213,14 @@ function saveEvent(e) {
   fd.append('title', document.getElementById('event-title').value.trim());
   fd.append('description', document.getElementById('event-description').value.trim());
   fd.append('price', document.getElementById('event-price').value);
+  fd.append('presale_price', document.getElementById('event-presale-price').value);
+  fd.append('capacity', document.getElementById('event-capacity').value);
+  fd.append('location', document.getElementById('event-location').value.trim());
+  fd.append('validity', document.getElementById('event-validity').value.trim());
   fd.append('start_date', document.getElementById('event-start').value);
   fd.append('end_date', document.getElementById('event-end').value);
+  fd.append('presale_start', document.getElementById('event-presale-start').value);
+  fd.append('presale_end', document.getElementById('event-presale-end').value);
   fd.append('conditions', document.getElementById('event-conditions').value.trim());
 
   const img = document.getElementById('event-image');
@@ -195,9 +252,21 @@ function toggleStatus(id, status) {
 }
 
 function approveEvent(id) {
-  if (!confirm('¿Autorizar la publicación de este evento en el chatbot?')) return;
+  if (!confirm('¿Aprobar este evento?')) return;
   const body = new URLSearchParams({ _csrf: CSRF });
   fetch(`${BASE_URL}/admin/eventos/${id}/aprobar`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  })
+  .then(r => r.json())
+  .then(d => { if (d.ok) location.reload(); });
+}
+
+function authorizeBot(id) {
+  if (!confirm('¿Autorizar la publicación de este evento en el chatbot? Esta acción enviará el evento al chatbot.')) return;
+  const body = new URLSearchParams({ _csrf: CSRF });
+  fetch(`${BASE_URL}/admin/eventos/${id}/autorizar-bot`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),

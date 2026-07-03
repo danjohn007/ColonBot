@@ -3,24 +3,42 @@ class EventController extends Controller
 {
     private EventModel $events;
     private BusinessModel $businesses;
+    private NotificationModel $notifications;
+    private UserModel $users;
 
     public function __construct()
     {
         $this->events = new EventModel();
         $this->businesses = new BusinessModel();
+        $this->notifications = new NotificationModel();
+        $this->users = new UserModel();
     }
 
     public function index(): void
     {
         $this->requireAuth('prestador');
         $user = currentUser();
-        $businesses = $user['role'] === 'superadmin'
+        $businesses = in_array($user['role'], ['colaborador_admin', 'superadmin'])
             ? $this->businesses->allWithCategory()
             : $this->businesses->byUser((int)$user['id']);
 
         $events = [];
         foreach ($businesses as $b) {
             $events = array_merge($events, $this->events->byBusiness((int)$b['id']));
+        }
+
+        // Also get events created by this user directly
+        $userEvents = $this->events->byUser((int)$user['id']);
+        $events = array_merge($events, $userEvents);
+
+        // Remove duplicates
+        $seen = [];
+        $uniqueEvents = [];
+        foreach ($events as $e) {
+            if (!in_array($e['id'], $seen)) {
+                $seen[] = $e['id'];
+                $uniqueEvents[] = $e;
+            }
         }
 
         $this->view('events.index', compact('events', 'businesses', 'user') + ['csrf' => $this->csrf()]);
@@ -44,7 +62,7 @@ class EventController extends Controller
         $businessId = (int)($_POST['business_id'] ?? 0);
         
         $user = currentUser();
-        if ($businessId <= 0 && $user['role'] === 'admin') {
+        if ($businessId <= 0 && !in_array($user['role'], ['colaborador_admin', 'superadmin'])) {
             $this->json(['error' => 'No tienes permiso para crear eventos públicos'], 403);
         }
         
@@ -62,6 +80,12 @@ class EventController extends Controller
             $image = $this->saveUpload($_FILES['image']);
         }
 
+        // Determine event type: public (colaborador_admin) or private (prestador)
+        $eventType = $businessId > 0 ? 'privado' : 'publico';
+        if (in_array($user['role'], ['colaborador_admin', 'superadmin'])) {
+            $eventType = 'publico';
+        }
+
         $id = $this->events->insert([
             'business_id' => $businessId > 0 ? $businessId : null,
             'user_id' => currentUser()['id'],
@@ -70,8 +94,11 @@ class EventController extends Controller
             'image' => $image ?: null,
             'price' => $_POST['price'] !== '' ? (float)$_POST['price'] : null,
             'presale_price' => $_POST['presale_price'] !== '' ? (float)$_POST['presale_price'] : null,
+            'capacity' => $_POST['capacity'] !== '' ? (int)$_POST['capacity'] : null,
+            'location' => trim($_POST['location'] ?? ''),
+            'validity' => trim($_POST['validity'] ?? ''),
             'conditions' => trim($_POST['conditions'] ?? ''),
-            'public_url' => trim($_POST['public_url'] ?? ''),
+            'event_type' => $eventType,
             'target_segment' => implode(',', $_POST['target_segment'] ?? ['todos']),
             'status' => 'pending',
             'start_date' => $_POST['start_date'] ?? null,
@@ -80,8 +107,17 @@ class EventController extends Controller
             'presale_end' => $_POST['presale_end'] ?? null,
         ]);
 
+        // Generate public URL
+        $publicUrl = $this->events->generatePublicUrl($id);
+        $this->events->update($id, ['public_url' => $publicUrl]);
+
+        // Notify colaborador_admin and superadmin about pending event authorization
+        if ($eventType === 'publico') {
+            $this->notifyAdminsForApproval($id, $title);
+        }
+
         $this->logAction('create_event', 'events', $id, $title);
-        $this->json(['ok' => true, 'id' => $id]);
+        $this->json(['ok' => true, 'id' => $id, 'public_url' => $publicUrl]);
     }
 
     public function update(string $id): void
@@ -102,8 +138,10 @@ class EventController extends Controller
             'description' => trim($_POST['description'] ?? ''),
             'price' => $_POST['price'] !== '' ? (float)$_POST['price'] : null,
             'presale_price' => $_POST['presale_price'] !== '' ? (float)$_POST['presale_price'] : null,
+            'capacity' => $_POST['capacity'] !== '' ? (int)$_POST['capacity'] : null,
+            'location' => trim($_POST['location'] ?? ''),
+            'validity' => trim($_POST['validity'] ?? ''),
             'conditions' => trim($_POST['conditions'] ?? ''),
-            'public_url' => trim($_POST['public_url'] ?? ''),
             'target_segment' => implode(',', $_POST['target_segment'] ?? explode(',', $event['target_segment'])),
             'start_date' => $_POST['start_date'] ?? $event['start_date'],
             'end_date' => $_POST['end_date'] ?? $event['end_date'],
@@ -117,8 +155,11 @@ class EventController extends Controller
         }
 
         if (isset($_POST['status'])) {
-            $data['status'] = in_array($_POST['status'], ['pending', 'active', 'inactive', 'expired']) ? $_POST['status'] : $event['status'];
+            $data['status'] = in_array($_POST['status'], ['pending', 'approved', 'active', 'inactive', 'expired']) ? $_POST['status'] : $event['status'];
         }
+
+        // Regenerate public URL if title changed
+        $data['public_url'] = $this->events->generatePublicUrl((int)$id);
 
         $this->events->update((int)$id, $data);
         $this->logAction('update_event', 'events', (int)$id, $data['title']);
@@ -139,7 +180,7 @@ class EventController extends Controller
         }
 
         $newStatus = $_POST['status'] ?? '';
-        if (!in_array($newStatus, ['pending', 'active', 'inactive', 'expired'])) {
+        if (!in_array($newStatus, ['pending', 'approved', 'active', 'inactive', 'expired'])) {
             $this->json(['error' => 'Invalid status'], 422);
         }
 
@@ -149,7 +190,7 @@ class EventController extends Controller
 
     public function approve(string $id): void
     {
-        $this->requireAuth('colaborador');
+        $this->requireAuth('colaborador_admin');
         $this->verifyCsrf();
 
         $this->events->approve((int)$id, (int)currentUser()['id']);
@@ -158,12 +199,28 @@ class EventController extends Controller
     }
 
     /**
+     * Authorize event for chatbot publication (1-click)
+     */
+    public function authorizeBot(string $id): void
+    {
+        $this->requireAuth('colaborador_admin');
+        $this->verifyCsrf();
+
+        $event = $this->events->find((int)$id);
+        if (!$event) { $this->json(['error' => 'not found'], 404); }
+
+        $this->events->authorizeBot((int)$id, (int)currentUser()['id']);
+        $this->logAction('authorize_event_bot', 'events', (int)$id, $event['title']);
+        $this->json(['ok' => true, 'message' => 'Evento autorizado para publicación en chatbot']);
+    }
+
+    /**
      * Vista pública de un evento
      */
     public function publicView(string $id): void
     {
         $event = $this->events->find((int)$id);
-        if (!$event || $event['status'] !== 'active') {
+        if (!$event || $event['status'] === 'expired') {
             http_response_code(404);
             require APP_PATH . '/views/errors/404.php';
             return;
@@ -176,6 +233,20 @@ class EventController extends Controller
         }
 
         $this->view('events.public_view', compact('event', 'business'));
+    }
+
+    private function notifyAdminsForApproval(int $eventId, string $title): void
+    {
+        $admins = $this->users->admins();
+        foreach ($admins as $admin) {
+            $this->notifications->create([
+                'user_id' => (int)$admin['id'],
+                'event_id' => $eventId,
+                'type' => 'system',
+                'title' => 'Nuevo evento pendiente de aprobación',
+                'message' => "El evento \"{$title}\" requiere aprobación para su publicación.",
+            ]);
+        }
     }
 
     private function saveUpload(array $file): ?string
@@ -200,7 +271,7 @@ class EventController extends Controller
     private function ownerOrAdmin(array $business): void
     {
         $user = currentUser();
-        if ($user['role'] !== 'superadmin' && (int)$business['user_id'] !== (int)$user['id']) {
+        if (!in_array($user['role'], ['superadmin', 'colaborador_admin']) && (int)$business['user_id'] !== (int)$user['id']) {
             http_response_code(403);
             $this->json(['error' => 'No tienes permiso'], 403);
         }
