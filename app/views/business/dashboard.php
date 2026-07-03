@@ -55,7 +55,7 @@ require APP_PATH . '/views/layout/head.php';
             class="flex-1 text-center text-xs bg-purple-50 text-purple-700 py-1.5 rounded-lg hover:bg-purple-100 transition font-medium">
             📊 Dashboard
           </a>
-          <a href="<?= url('admin/promociones') ?>"
+          <a href="<?= url('admin/promociones?business_id=' . $b['id']) ?>"
             class="flex-1 text-center text-xs bg-green-50 text-green-700 py-1.5 rounded-lg hover:bg-green-100 transition font-medium">
             🎉 Promos
           </a>

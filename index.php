@@ -89,6 +89,16 @@ $router->post('admin/promociones/{id}/editar','PromotionController', 'update');
 $router->post('admin/promociones/{id}/toggle','PromotionController', 'toggleStatus');
 $router->post('admin/promociones/{id}/enviar','PromotionController', 'send');
 $router->get('admin/promociones/{id}/historial','PromotionController', 'sendHistory');
+$router->post('admin/promociones/{id}/aprobar','PromotionController', 'approve');
+
+// ─── Eventos ──────────────────────────────────────────────────────
+$router->get('admin/eventos',                'EventController', 'index');
+$router->get('admin/eventos/{id}/list',      'EventController', 'list');
+$router->post('admin/eventos/crear',         'EventController', 'create');
+$router->post('admin/eventos/{id}/editar',   'EventController', 'update');
+$router->post('admin/eventos/{id}/toggle',   'EventController', 'toggleStatus');
+$router->post('admin/eventos/{id}/aprobar',  'EventController', 'approve');
+$router->get('evento/{id}',                  'EventController', 'publicView');
 
 // ─── Colaborador de Secretaría de Turismo ─────────────────────────
 $router->get('colaborador',                    'ColaboradorController', 'dashboard');

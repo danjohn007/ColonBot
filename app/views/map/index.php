@@ -341,17 +341,17 @@ function loadPOIs() {
       markers.forEach(m => map.removeLayer(m));
       markers = [];
 
-      // Always add reference points with their own category icon
+      // Always add reference points with their own TIPO DE LUGAR (isotipo) icon
       allRefPoints.forEach(poi => {
         if (!poi.lat || !poi.lng) return;
-        const refEmoji = iconToEmoji(poi.category_icon);
+        const refEmoji = isotipoToEmoji(poi.isotipo) || iconToEmoji(poi.category_icon);
         const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#8B5CF6', refEmoji) });
         m.addTo(map);
         m.on('click', () => showPOI(poi));
         markers.push(m);
       });
 
-      // Add filtered POIs
+      // Add filtered POIs - also use TIPO DE LUGAR (isotipo) icon
       allPois.forEach(poi => {
         if (!poi.lat || !poi.lng) return;
         const poiEmoji = isotipoToEmoji(poi.isotipo);
@@ -570,10 +570,10 @@ function filterTripType(tripType) {
   markers.forEach(m => map.removeLayer(m));
   markers = [];
 
-  // Always add reference points with their own category icon
+  // Always add reference points with their own TIPO DE LUGAR (isotipo) icon
   allRefPoints.forEach(poi => {
     if (!poi.lat || !poi.lng) return;
-    const refEmoji = iconToEmoji(poi.category_icon);
+    const refEmoji = isotipoToEmoji(poi.isotipo) || iconToEmoji(poi.category_icon);
     const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#8B5CF6', refEmoji) });
     m.addTo(map);
     m.on('click', () => showPOI(poi));

@@ -6,9 +6,9 @@ require APP_PATH . '/views/layout/head.php';
 
 <main class="max-w-6xl mx-auto px-4 py-8 mb-24">
   <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">🎉 Promociones y Eventos</h1>
+    <h1 class="text-2xl font-bold text-gray-900">🏷️ Promociones</h1>
     <button onclick="openCreateModal()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition">
-      + Nueva Promoción/Evento
+      + Nueva Promoción
     </button>
   </div>
 
@@ -18,7 +18,7 @@ require APP_PATH . '/views/layout/head.php';
     <div class="text-center py-16 bg-white rounded-2xl shadow-sm">
       <p class="text-gray-400 text-lg">No hay promociones creadas.</p>
       <button onclick="openCreateModal()" class="mt-4 bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition">
-        Crear primera Promoción/Evento
+        Crear primera Promoción
       </button>
     </div>
     <?php else: ?>
@@ -31,12 +31,11 @@ require APP_PATH . '/views/layout/head.php';
             <span class="text-xs px-2 py-0.5 rounded-full font-medium <?= $p['status'] === 'active' ? 'bg-green-50 text-green-700' : ($p['status'] === 'pending' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-50 text-gray-500') ?>">
               <?= $p['status'] ?>
             </span>
-            <span class="text-xs px-2 py-0.5 rounded-full font-medium bg-blue-50 text-blue-700"><?= $p['type'] ?></span>
           </div>
           <p class="text-sm text-gray-500 mb-2"><?= nl2br(e(mb_substr($p['description'] ?? '', 0, 200))) ?></p>
           <div class="flex flex-wrap gap-3 text-xs text-gray-400">
             <?php if ($p['price']): ?><span>💰 Precio: $<?= number_format((float)$p['price'], 2) ?></span><?php endif; ?>
-            <?php if ($p['presale_price']): ?><span>🏷️ Preventa: $<?= number_format((float)$p['presale_price'], 2) ?></span><?php endif; ?>
+            <?php if ($p['presale_price']): ?><span>🏷️ Precio promocional: $<?= number_format((float)$p['presale_price'], 2) ?></span><?php endif; ?>
             <?php if ($p['start_date']): ?><span>📅 Inicio: <?= date('d/m/Y', strtotime($p['start_date'])) ?></span><?php endif; ?>
             <?php if ($p['end_date']): ?><span>⏰ Fin: <?= date('d/m/Y', strtotime($p['end_date'])) ?></span><?php endif; ?>
             <span>🎯 Segmento: <?= e($p['target_segment']) ?></span>
@@ -55,6 +54,9 @@ require APP_PATH . '/views/layout/head.php';
             <?= $p['status'] === 'active' ? 'Desactivar' : 'Activar' ?>
           </button>
           <button onclick="sendPromotion(<?= $p['id'] ?>)" class="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition">Enviar</button>
+          <?php if (in_array($user['role'], ['superadmin', 'colaborador'])): ?>
+          <button onclick="approvePromotion(<?= $p['id'] ?>)" class="text-xs px-3 py-1.5 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition">Autorizar</button>
+          <?php endif; ?>
         </div>
       </div>
       <?php if ($p['image']): ?>
@@ -70,10 +72,10 @@ require APP_PATH . '/views/layout/head.php';
 <div id="promo-modal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-40 flex items-center justify-center px-4">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 relative">
     <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">✕</button>
-    <h2 class="text-lg font-bold text-gray-900 mb-4" id="modal-title">Nueva promoción</h2>
+    <h2 class="text-lg font-bold text-gray-900 mb-4" id="modal-title">Nueva Promoción</h2>
     <form onsubmit="savePromotion(event)" enctype="multipart/form-data" class="space-y-4">
       <input type="hidden" id="promo-id" value="">
-      <input type="hidden" id="promo-business-id" name="business_id" value="<?= $businesses[0]['id'] ?? '' ?>">
+      <input type="hidden" id="promo-business-id" name="business_id" value="<?= $_GET['business_id'] ?? ($businesses[0]['id'] ?? '') ?>">
 
       <div class="grid grid-cols-2 gap-4">
         <div class="col-span-2">
@@ -85,7 +87,7 @@ require APP_PATH . '/views/layout/head.php';
           <label class="label block text-sm font-medium text-gray-700 mb-1">Negocio</label>
           <select id="promo-business-select" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
             <?php foreach ($businesses as $b): ?>
-            <option value="<?= $b['id'] ?>"><?= e($b['name']) ?></option>
+            <option value="<?= $b['id'] ?>" <?= (isset($_GET['business_id']) && (int)$_GET['business_id'] === (int)$b['id']) ? 'selected' : '' ?>><?= e($b['name']) ?></option>
             <?php endforeach; ?>
           </select>
         </div>
@@ -93,13 +95,6 @@ require APP_PATH . '/views/layout/head.php';
         <div class="col-span-2">
           <label class="label block text-sm font-medium text-gray-700 mb-1">Descripción</label>
           <textarea id="promo-description" rows="3" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm"></textarea>
-        </div>
-        <div>
-          <label class="label block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-          <select id="promo-type" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
-            <option value="promocion">Promoción</option>
-            <option value="evento">Evento</option>
-          </select>
         </div>
         <div>
           <label class="label block text-sm font-medium text-gray-700 mb-1">Imagen</label>
@@ -110,7 +105,7 @@ require APP_PATH . '/views/layout/head.php';
           <input type="number" id="promo-price" step="0.01" min="0" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
         </div>
         <div>
-          <label class="label block text-sm font-medium text-gray-700 mb-1">Precio preventa</label>
+          <label class="label block text-sm font-medium text-gray-700 mb-1">Precio promocional</label>
           <input type="number" id="promo-presale" step="0.01" min="0" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
         </div>
         <div>
@@ -132,7 +127,7 @@ require APP_PATH . '/views/layout/head.php';
           </div>
         </div>
         <div class="col-span-2">
-          <label class="label block text-sm font-medium text-gray-700 mb-1">Condiciones</label>
+          <label class="label block text-sm font-medium text-gray-700 mb-1">Restricciones de la Promoción</label>
           <textarea id="promo-conditions" rows="2" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm"></textarea>
         </div>
         <div class="col-span-2">
@@ -152,7 +147,7 @@ const CSRF = '<?= e($csrf) ?>';
 const BASE_URL = '<?= BASE_URL ?>';
 
 function openCreateModal() {
-    document.getElementById('modal-title').textContent = 'Nueva Promoción/Evento';
+    document.getElementById('modal-title').textContent = 'Nueva Promoción';
   document.getElementById('promo-id').value = '';
   document.getElementById('promo-title').value = '';
   document.getElementById('promo-description').value = '';
@@ -163,13 +158,12 @@ function openCreateModal() {
   document.getElementById('promo-conditions').value = '';
   document.getElementById('promo-url').value = '';
   document.getElementById('promo-image').value = '';
-  document.getElementById('promo-type').value = 'promocion';
   document.querySelectorAll('.target-checkbox').forEach(cb => cb.checked = false);
   document.getElementById('promo-modal').classList.remove('hidden');
 }
 
 function editPromotion(p) {
-    document.getElementById('modal-title').textContent = 'Editar Promoción/Evento';
+    document.getElementById('modal-title').textContent = 'Editar Promoción';
   document.getElementById('promo-id').value = p.id;
   document.getElementById('promo-title').value = p.title;
   document.getElementById('promo-description').value = p.description || '';
@@ -179,7 +173,6 @@ function editPromotion(p) {
   document.getElementById('promo-end').value = p.end_date ? p.end_date.replace(' ', 'T').substring(0, 16) : '';
   document.getElementById('promo-conditions').value = p.conditions || '';
   document.getElementById('promo-url').value = p.public_url || '';
-  document.getElementById('promo-type').value = p.type;
   document.querySelectorAll('.target-checkbox').forEach(cb => {
     cb.checked = p.target_segment && p.target_segment.split(',').includes(cb.value);
   });
@@ -206,7 +199,6 @@ function savePromotion(e) {
   fd.append('end_date', document.getElementById('promo-end').value);
   fd.append('conditions', document.getElementById('promo-conditions').value.trim());
   fd.append('public_url', document.getElementById('promo-url').value.trim());
-  fd.append('type', document.getElementById('promo-type').value);
 
   const targets = Array.from(document.querySelectorAll('.target-checkbox:checked')).map(cb => cb.value);
   targets.forEach(t => fd.append('target_segment[]', t));
@@ -258,6 +250,18 @@ function sendPromotion(id) {
       alert('Error al enviar');
     }
   });
+}
+
+function approvePromotion(id) {
+  if (!confirm('¿Autorizar la publicación de esta promoción en el chatbot?')) return;
+  const body = new URLSearchParams({ _csrf: CSRF });
+  fetch(`${BASE_URL}/admin/promociones/${id}/aprobar`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  })
+  .then(r => r.json())
+  .then(d => { if (d.ok) location.reload(); });
 }
 
 document.getElementById('target-all')?.addEventListener('change', function() {

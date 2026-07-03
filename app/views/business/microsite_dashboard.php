@@ -69,6 +69,12 @@ require APP_PATH . '/views/layout/head.php';
       <canvas id="activityChart" height="200"></canvas>
     </div>
 
+    <!-- Contacts Chart -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+      <h2 class="font-semibold text-gray-900 mb-4">📊 Contactos CRM</h2>
+      <canvas id="contactsChart" height="200"></canvas>
+    </div>
+
     <!-- Top Negocios (same style as analytics page) -->
     <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
       <h2 class="font-semibold text-gray-900 mb-4">🏆 Visitas acumuladas</h2>

@@ -18,7 +18,7 @@ $flash = flash();
         <img src="<?= asset('img/colon.png') ?>" alt="Colón te conquistará" class="h-12 w-auto">
         <img src="<?= asset('img/ColonBotimg.png') ?>" alt="Colón Administración" class="h-10 w-auto">
         <img src="<?= asset('img/logo-header-nuevo.jpeg') ?>" alt="Ayuntamiento de Colón" class="h-12 w-auto hidden sm:inline-block">
-        <span class="text-base font-medium whitespace-nowrap hidden sm:inline" style="color: #8B5CF6">CristobalBot: Mapa interactivo del turismo en Colón</span>
+        <span class="text-base font-medium whitespace-nowrap hidden sm:inline" style="color: #8B5CF6"><?= e(setting('site_name', 'CristobalBot: Mapa interactivo del turismo en Colón')) ?></span>
       </a>
 
       <!-- User / Login on the right -->
@@ -93,7 +93,10 @@ REPLACE
           <span class="text-lg">🏢</span> Mis Negocios
         </a>
         <a href="<?= url('admin/promociones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
-          <span class="text-lg">🎉</span> PROMOCIONES y EVENTOS
+          <span class="text-lg">🏷️</span> Promociones
+        </a>
+        <a href="<?= url('admin/eventos') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">🎉</span> Eventos
         </a>
         <a href="<?= url('admin/crm') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">📇</span> CRM
@@ -110,7 +113,10 @@ REPLACE
           <span class="text-lg">🏢</span> Mis Negocios
         </a>
         <a href="<?= url('admin/promociones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
-          <span class="text-lg">🎉</span> PROMOCIONES y EVENTOS
+          <span class="text-lg">🏷️</span> Promociones
+        </a>
+        <a href="<?= url('admin/eventos') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">🎉</span> Eventos
         </a>
         <a href="<?= url('admin/crm') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">📇</span> CRM
@@ -133,7 +139,10 @@ REPLACE
           <span class="text-lg">🏢</span> Mis Negocios
         </a>
         <a href="<?= url('admin/promociones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
-          <span class="text-lg">🎉</span> PROMOCIONES y EVENTOS
+          <span class="text-lg">🏷️</span> Promociones
+        </a>
+        <a href="<?= url('admin/eventos') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">🎉</span> Eventos
         </a>
         <a href="<?= url('admin/crm') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">📇</span> CRM

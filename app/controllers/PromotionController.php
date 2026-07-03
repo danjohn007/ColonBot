@@ -20,9 +20,19 @@ class PromotionController extends Controller
             ? $this->businesses->allWithCategory()
             : $this->businesses->byUser((int)$user['id']);
 
+        // Filtrar por negocio específico si se pasa business_id en la URL
+        $filterBusinessId = (int)($_GET['business_id'] ?? 0);
+        
         $promotions = [];
-        foreach ($businesses as $b) {
-            $promotions = array_merge($promotions, $this->promotions->byBusiness((int)$b['id']));
+        if ($filterBusinessId > 0) {
+            // Only show promotions for that specific business
+            $promotions = $this->promotions->byBusiness($filterBusinessId);
+            // Filter businesses to only show the selected one
+            $businesses = array_filter($businesses, fn($b) => (int)$b['id'] === $filterBusinessId);
+        } else {
+            foreach ($businesses as $b) {
+                $promotions = array_merge($promotions, $this->promotions->byBusiness((int)$b['id']));
+            }
         }
 
         $this->view('promotions.index', compact('promotions', 'businesses', 'user') + ['csrf' => $this->csrf()]);
@@ -190,6 +200,16 @@ class PromotionController extends Controller
         }
 
         $this->json(['ok' => true, 'links' => $links]);
+    }
+
+    public function approve(string $id): void
+    {
+        $this->requireAuth('colaborador');
+        $this->verifyCsrf();
+
+        $this->promotions->approve((int)$id, (int)currentUser()['id']);
+        $this->logAction('approve_promotion', 'promotions', (int)$id);
+        $this->json(['ok' => true]);
     }
 
     public function sendHistory(string $id): void
