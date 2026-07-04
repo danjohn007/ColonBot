@@ -49,7 +49,7 @@ require APP_PATH . '/views/layout/head.php';
         </div>
         <p class="text-xs text-gray-500 mb-1"><?= e($b['category_name']) ?></p>
         <p class="text-sm text-gray-600 line-clamp-2 flex-1"><?= e($b['description']) ?></p>
-        <!-- Microsite actions: Dashboard, Promos, CRM -->
+        <!-- Microsite actions: Dashboard, Promos, Events -->
         <div class="flex flex-wrap gap-1.5 mt-4">
           <a href="<?= url('admin/micrositio/' . $b['id'] . '/dashboard') ?>"
             class="flex-1 text-center text-xs bg-purple-50 text-purple-700 py-1.5 rounded-lg hover:bg-purple-100 transition font-medium">
@@ -59,9 +59,9 @@ require APP_PATH . '/views/layout/head.php';
             class="flex-1 text-center text-xs bg-green-50 text-green-700 py-1.5 rounded-lg hover:bg-green-100 transition font-medium">
             🎉 Promos
           </a>
-          <a href="<?= url('admin/crm') ?>"
+          <a href="<?= url('admin/eventos') ?>"
             class="flex-1 text-center text-xs bg-blue-50 text-blue-700 py-1.5 rounded-lg hover:bg-blue-100 transition font-medium">
-            📇 CRM
+            🎊 Eventos
           </a>
           <a href="<?= url('admin/negocio/' . $b['id']) ?>"
             class="flex-1 text-center text-xs bg-gray-50 text-gray-700 py-1.5 rounded-lg hover:bg-gray-100 transition font-medium">

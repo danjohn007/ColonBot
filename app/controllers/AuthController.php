@@ -65,7 +65,7 @@ class AuthController extends Controller
             'superadmin'        => 'superadmin',
             'colaborador_admin' => 'colaborador',
             'visitor'           => 'mapa',
-            'prestador'         => 'admin/micrositio',
+            'prestador'         => 'admin/crm',
             default             => 'admin',
         };
         $this->redirect($redirect);
