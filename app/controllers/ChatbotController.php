@@ -103,6 +103,9 @@ class ChatbotController extends Controller
         if (str_contains($text, 'experiencia') || $text === 'cat_experiencias') {
             return $this->listByCategory('experiencias', '⭐ Experiencias Turísticas');
         }
+        if (str_contains($text, 'emergencia') || str_contains($text, 'urgencia') || str_contains($text, 'policia') || str_contains($text, 'bombero') || str_contains($text, 'ambulancia') || $text === 'emergencias') {
+            return $this->emergencyNumbers();
+        }
 
         // Default
         return $this->menuPrincipal();
@@ -154,6 +157,24 @@ class ChatbotController extends Controller
         $lines[] = "\nEscribe *menú* para regresar al inicio.";
 
         return ['type' => 'text', 'text' => ['body' => implode("\n\n", $lines)]];
+    }
+
+    private function emergencyNumbers(): array
+    {
+        $lines = [
+            "*🆘 Números de Emergencia - Colón*\n",
+            "🚨 *Emergencias* (Policía, bomberos, ambulancia, protección civil)",
+            "   📞 911\n",
+            "🤫 *Denuncia Anónima*",
+            "   📞 089\n",
+            "🛡️ *Protección Civil Colón*",
+            "   📞 419 292 0296\n",
+            "🏛️ *Presidencia Municipal de Colón*",
+            "   📞 419 292 0061\n",
+            "Escribe *menú* para regresar al inicio."
+        ];
+
+        return ['type' => 'text', 'text' => ['body' => implode("\n", $lines)]];
     }
 
     // ── Envío de mensajes via API de Meta ─────────────────────────────────

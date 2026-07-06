@@ -98,6 +98,20 @@ require APP_PATH . '/views/layout/head.php';
     <!-- Map -->
     <div id="map" class="flex-1 z-0"></div>
 
+    <!-- Route Legend Boxes (right side of map) -->
+    <div id="route-legend" class="hidden md:block absolute top-4 right-4 z-20 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-3 max-w-[200px]">
+      <h4 class="text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Rutas Turísticas</h4>
+      <div class="space-y-1.5">
+        <?php foreach ($categories as $cat): ?>
+        <?php if ($cat['slug'] === 'punto-de-referencia') continue; ?>
+        <div class="flex items-center gap-2 text-xs">
+          <span class="inline-block w-3 h-3 rounded-sm shrink-0" style="background-color: <?= e($cat['color']) ?>"></span>
+          <span class="text-gray-600 truncate"><?= e($cat['name']) ?></span>
+        </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+
     <!-- Sidebar panel -->
     <div id="poi-panel" class="hidden md:block w-80 bg-white border-l shadow-lg overflow-y-auto z-10 absolute right-0 top-0 bottom-0 transform translate-x-full transition-transform duration-300">
       <div class="p-4 border-b flex items-center justify-between">
@@ -188,6 +202,44 @@ require APP_PATH . '/views/layout/head.php';
         📱 Contáctalo aquí
       </a>
       <?php endif; ?>
+    </div>
+  </div>
+</div>
+
+<!-- Emergency Numbers Section -->
+<div class="border-t border-gray-200 bg-gradient-to-r from-red-50 to-orange-50">
+  <div class="max-w-7xl mx-auto px-4 py-6">
+    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">🆘 Números de emergencia</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <a href="tel:911" class="flex items-center gap-3 p-3 bg-white rounded-xl border border-red-200 hover:shadow-md hover:border-red-400 transition group">
+        <span class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-lg shrink-0 group-hover:scale-110 transition">📞</span>
+        <div class="min-w-0">
+          <p class="font-semibold text-gray-900 text-sm leading-tight">Emergencias</p>
+          <p class="text-red-600 text-sm font-bold">911</p>
+          <p class="text-gray-400 text-xs">Policía, bomberos, ambulancia y protección civil</p>
+        </div>
+      </a>
+      <a href="tel:089" class="flex items-center gap-3 p-3 bg-white rounded-xl border border-red-200 hover:shadow-md hover:border-red-400 transition group">
+        <span class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-lg shrink-0 group-hover:scale-110 transition">📞</span>
+        <div class="min-w-0">
+          <p class="font-semibold text-gray-900 text-sm leading-tight">Denuncia Anónima</p>
+          <p class="text-red-600 text-sm font-bold">089</p>
+        </div>
+      </a>
+      <a href="tel:4192920296" class="flex items-center gap-3 p-3 bg-white rounded-xl border border-red-200 hover:shadow-md hover:border-red-400 transition group">
+        <span class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-lg shrink-0 group-hover:scale-110 transition">📞</span>
+        <div class="min-w-0">
+          <p class="font-semibold text-gray-900 text-sm leading-tight">Protección Civil Colón</p>
+          <p class="text-red-600 text-sm font-bold">419 292 0296</p>
+        </div>
+      </a>
+      <a href="tel:4192920061" class="flex items-center gap-3 p-3 bg-white rounded-xl border border-red-200 hover:shadow-md hover:border-red-400 transition group">
+        <span class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-lg shrink-0 group-hover:scale-110 transition">📞</span>
+        <div class="min-w-0">
+          <p class="font-semibold text-gray-900 text-sm leading-tight">Presidencia Municipal de Colón</p>
+          <p class="text-red-600 text-sm font-bold">419 292 0061</p>
+        </div>
+      </a>
     </div>
   </div>
 </div>

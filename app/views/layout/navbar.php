@@ -14,11 +14,11 @@ $flash = flash();
       </button>
 
       <!-- Logo -->
-      <a href="<?= url() ?>" class="flex items-center gap-3 font-bold text-white text-lg">
+      <a href="https://colon.click/sistema/mapa" class="flex items-center gap-3 font-bold text-lg">
         <img src="<?= asset('img/colon.png') ?>" alt="Colón te conquistará" class="h-12 w-auto">
         <img src="<?= asset('img/ColonBotimg.png') ?>" alt="Colón Administración" class="h-10 w-auto">
         <img src="<?= asset('img/logo-header-nuevo.jpeg') ?>" alt="Ayuntamiento de Colón" class="h-12 w-auto hidden sm:inline-block">
-        <span class="text-base font-medium whitespace-nowrap hidden sm:inline" style="color: #8B5CF6"><?= e(setting('site_name', 'CristobalBot: Mapa interactivo del turismo en Colón')) ?></span>
+        <span class="text-base font-semibold whitespace-nowrap hidden sm:inline site-title-brand"><?= e(setting('site_name', 'CristobalBot: Mapa interactivo del turismo en Colón')) ?></span>
       </a>
 
       <!-- User / Login on the right -->

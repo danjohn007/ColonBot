@@ -27,6 +27,14 @@
       --color-accent:    <?= e(setting('color_accent','#F59E0B')) ?>;
     }
     main h1 { color: var(--color-secondary); }
+    .site-title-brand {
+      background: linear-gradient(135deg, #6B21A8, #2563EB, #059669);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
   </style>
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
