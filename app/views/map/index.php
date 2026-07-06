@@ -189,7 +189,7 @@ require APP_PATH . '/views/layout/head.php';
     </div>
     <p class="text-sm text-gray-600 mb-3">Combina el estilo de visita que quieras realizar, con el tipo de ruta a explorar y encuentra la mejor hospitalidad de los Colonenses.</p>
     <div class="bg-purple-50 rounded-xl p-4 border border-purple-100 mb-3">
-      <h3 class="font-semibold text-sm text-gray-900 mb-2">🤖 Conoce a CristobalBot, nuestro anfitrión a través de WhatsApp</h3>
+      <h3 class="font-semibold text-sm text-gray-900 mb-2">🤖 Conoce a Cristo Bot Colón, nuestro anfitrión a través de WhatsApp</h3>
       <p class="text-xs text-gray-600 mb-2">Te proporciona la ubicación exacta de todos nuestros atractivos turísticos, información detallada de los productos y servicios creados para nuestros visitantes, mándale un WhatsApp y:</p>
       <ul class="text-xs text-gray-600 list-disc list-inside space-y-1 mb-3">
         <li>Haz una reservación</li>
