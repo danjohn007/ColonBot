@@ -199,8 +199,23 @@ function loadContacts() {
         return;
       }
       tbody.innerHTML = contacts.map(c => {
-        const categoryLabel = c.category === 'lovemark' ? '⭐ Lovemark' : c.category === 'cliente' ? '✅ Cliente' : '📋 Prospecto';
-        const categoryClass = c.category === 'lovemark' ? 'text-pink-600 bg-pink-50' : c.category === 'cliente' ? 'text-green-600 bg-green-50' : 'text-purple-600 bg-purple-50';
+        let categoryLabel, categoryClass;
+        if (c.category === 'lovemark') {
+          categoryLabel = '⭐ Lovemark';
+          categoryClass = 'text-pink-600 bg-pink-50';
+        } else if (c.category === 'cliente') {
+          categoryLabel = '✅ Cliente';
+          categoryClass = 'text-green-600 bg-green-50';
+        } else if (c.category === 'prospecto_recurrente') {
+          categoryLabel = '🔄 Prospecto recurrente';
+          categoryClass = 'text-orange-600 bg-orange-50';
+        } else if (c.category === 'prospecto_sin_historial' || c.category === 'prospecto') {
+          categoryLabel = c.is_chatbot ? '🆕 WhatsApp' : '📋 Prospecto';
+          categoryClass = 'text-purple-600 bg-purple-50';
+        } else {
+          categoryLabel = '📋 Prospecto';
+          categoryClass = 'text-purple-600 bg-purple-50';
+        }
         const sourceIcon = c.source === 'whatsapp' ? '📱' : c.source === 'mapa' ? '🗺️' : '✍️';
         const lastContact = c.last_contact_at ? new Date(c.last_contact_at).toLocaleDateString('es-MX') : '—';
         const phone = c.phone || c.wa_id || '—';

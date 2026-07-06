@@ -31,35 +31,22 @@ class CrmController extends Controller
         $category = $_GET['category'] ?? '';
         $contacts = $this->contacts->byBusiness((int)$businessId, $category);
 
-        // Add chatbot sessions as prospects with proper classification
-        $db = Database::getInstance();
-        $chatbotContacts = $db->query(
-            "SELECT cs.id AS id, cs.wa_id AS phone, cs.last_message AS notes,
-                    COALESCE(cs.category, 'Prospecto sin historial') AS name, '' AS email,
-                    CASE 
-                        WHEN cs.category = 'Lovemark' THEN 'lovemark'
-                        WHEN cs.category = 'Cliente' THEN 'cliente'
-                        WHEN cs.category = 'Prospecto recurrente' THEN 'prospecto_recurrente'
-                        ELSE 'prospecto_sin_historial'
-                    END AS category,
-                    cs.session_count AS total_visits, 0 AS total_spent,
-                    'chatbot' AS source, cs.updated_at AS last_contact_at,
-                    cs.purchase_count AS purchase_count, cs.id AS chatbot_session_id
-             FROM chatbot_sessions cs
-             WHERE cs.wa_id NOT IN (
-                SELECT COALESCE(c.wa_id, '') FROM contacts c WHERE c.business_id = ?
-             )
-             AND cs.wa_id NOT IN (
-                SELECT COALESCE(c.phone, '') FROM contacts c WHERE c.business_id = ?
-             )
-             ORDER BY cs.updated_at DESC
-             LIMIT 50",
-            [(int)$businessId, (int)$businessId]
-        )->fetchAll();
+        // Add chatbot contacts with automatic classification based on chatbot sessions
+        $chatbotContacts = $this->contacts->classifyByChatbotSessions((int)$businessId);
 
-        // Merge chatbot contacts as prospects
-        if (empty($category) || in_array($category, ['prospecto', 'prospecto_sin_historial', 'prospecto_recurrente'])) {
+        // Merge chatbot contacts
+        if (empty($category)) {
+            // Show all: merge chatbot contacts with regular contacts
             $contacts = array_merge($chatbotContacts, $contacts);
+        } elseif (in_array($category, ['prospecto', 'prospecto_sin_historial', 'prospecto_recurrente', 'cliente', 'lovemark', 'cliente_frecuente'])) {
+            // Filter chatbot contacts by the requested category
+            $filteredChatbot = array_filter($chatbotContacts, function($c) use ($category) {
+                if ($category === 'cliente_frecuente') {
+                    return $c['category'] === 'lovemark' || ($c['purchase_count'] ?? 0) >= 3;
+                }
+                return $c['category'] === $category;
+            });
+            $contacts = array_merge($filteredChatbot, $contacts);
         }
 
         $this->json($contacts);

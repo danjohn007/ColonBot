@@ -183,6 +183,146 @@ class ContactModel extends Model
         ];
     }
 
+    /**
+     * Clasificar contactos basado en sesiones de chatbot WhatsApp.
+     * Utiliza los datos de chatbot_sessions (session_count, purchase_count, has_purchased, category)
+     * para determinar automáticamente la categoría de cada contacto en el CRM.
+     *
+     * Clasificación:
+     * - purchase_count >= 3  → lovemark
+     * - has_purchased = 1 o purchase_count >= 1  → cliente
+     * - session_count > 1 y sin compras  → prospecto_recurrente
+     * - session_count = 1 y sin compras  → prospecto_sin_historial
+     *
+     * @param int $businessId ID del negocio
+     * @return array Lista de contactos clasificados con datos de chatbot
+     */
+    public function classifyByChatbotSessions(int $businessId): array
+    {
+        $db = Database::getInstance();
+
+        // Obtener todos los contactos existentes para este negocio con wa_id
+        $existingContacts = $this->query(
+            "SELECT c.id, c.wa_id, c.phone, c.category, c.name, c.email, c.source
+             FROM contacts c
+             WHERE c.business_id = ? AND (c.wa_id IS NOT NULL AND c.wa_id != '')",
+            [$businessId]
+        );
+
+        $results = [];
+
+        // 1) Procesar contactos existentes que tienen wa_id - clasificar según sus sesiones
+        foreach ($existingContacts as $contact) {
+            $waId = $contact['wa_id'];
+            $session = $db->query(
+                "SELECT session_count, purchase_count, has_purchased, category
+                 FROM chatbot_sessions WHERE wa_id = ? LIMIT 1",
+                [$waId]
+            )->fetch();
+
+            if ($session) {
+                $newCategory = $this->determineCategoryFromSession($session);
+                $results[] = [
+                    'id'               => $contact['id'],
+                    'wa_id'            => $waId,
+                    'name'             => $contact['name'],
+                    'email'            => $contact['email'] ?? '',
+                    'phone'            => $contact['phone'] ?? $waId,
+                    'category'         => $newCategory,
+                    'total_visits'     => (int)$session['session_count'],
+                    'total_spent'      => 0,
+                    'source'           => 'whatsapp',
+                    'last_contact_at'  => null,
+                    'purchase_count'   => (int)$session['purchase_count'],
+                    'chatbot_session_id' => 0,
+                    'is_chatbot'       => true,
+                ];
+
+                // Actualizar la categoría en la tabla contacts si cambió
+                if ($newCategory !== $contact['category']) {
+                    $this->update((int)$contact['id'], ['category' => $newCategory]);
+                }
+            } else {
+                // Contacto con wa_id pero sin sesión de chatbot - mantener su categoría actual
+                $results[] = [
+                    'id'               => $contact['id'],
+                    'wa_id'            => $waId,
+                    'name'             => $contact['name'],
+                    'email'            => $contact['email'] ?? '',
+                    'phone'            => $contact['phone'] ?? $waId,
+                    'category'         => $contact['category'] ?: 'prospecto_sin_historial',
+                    'total_visits'     => 0,
+                    'total_spent'      => 0,
+                    'source'           => $contact['source'] ?: 'manual',
+                    'last_contact_at'  => null,
+                    'purchase_count'   => 0,
+                    'chatbot_session_id' => 0,
+                    'is_chatbot'       => false,
+                ];
+            }
+        }
+
+        // 2) Obtener sesiones de chatbot sin contacto asociado (nuevos prospectos)
+        $chatbotOnlySessions = $db->query(
+            "SELECT cs.id, cs.wa_id, cs.last_message AS notes,
+                    cs.category AS session_category,
+                    cs.session_count, cs.purchase_count, cs.has_purchased,
+                    cs.updated_at
+             FROM chatbot_sessions cs
+             WHERE cs.wa_id NOT IN (
+                SELECT COALESCE(c.wa_id, '') FROM contacts c WHERE c.business_id = ?
+             )
+             AND cs.wa_id NOT IN (
+                SELECT COALESCE(c.phone, '') FROM contacts c WHERE c.business_id = ?
+             )
+             ORDER BY cs.updated_at DESC
+             LIMIT 50",
+            [(int)$businessId, (int)$businessId]
+        )->fetchAll();
+
+        foreach ($chatbotOnlySessions as $session) {
+            $newCategory = $this->determineCategoryFromSession($session);
+            $results[] = [
+                'id'               => $session['id'],
+                'wa_id'            => $session['wa_id'],
+                'name'             => $session['session_category'] ?: 'Prospecto WhatsApp',
+                'email'            => '',
+                'phone'            => $session['wa_id'],
+                'category'         => $newCategory,
+                'total_visits'     => (int)$session['session_count'],
+                'total_spent'      => 0,
+                'source'           => 'whatsapp',
+                'last_contact_at'  => $session['updated_at'],
+                'purchase_count'   => (int)$session['purchase_count'],
+                'chatbot_session_id' => (int)$session['id'],
+                'is_chatbot'       => true,
+            ];
+        }
+
+        return $results;
+    }
+
+    /**
+     * Determinar la categoría del cliente basado en datos de sesión del chatbot.
+     */
+    private function determineCategoryFromSession(array $session): string
+    {
+        $purchaseCount = (int)($session['purchase_count'] ?? 0);
+        $hasPurchased  = (bool)($session['has_purchased'] ?? false);
+        $sessionCount  = (int)($session['session_count'] ?? 1);
+
+        if ($purchaseCount >= 3) {
+            return 'lovemark';
+        }
+        if ($hasPurchased || $purchaseCount >= 1) {
+            return 'cliente';
+        }
+        if ($sessionCount > 1) {
+            return 'prospecto_recurrente';
+        }
+        return 'prospecto_sin_historial';
+    }
+
     public function getMetrics(int $businessId, string $period = 'all'): array
     {
         $dateFilter = '';
