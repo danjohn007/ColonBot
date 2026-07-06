@@ -1,5 +1,9 @@
 <?php
-$pageTitle = 'Mapa Turístico de Colón';
+$pageTitle = 'Colón te conquistará | Mapa Interactivo';
+$extraHead = '<link rel="preconnect" href="https://fonts.googleapis.com">' . PHP_EOL
+  . '  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . PHP_EOL
+  . '  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">' . PHP_EOL
+  . '  <link rel="stylesheet" href="' . asset('css/landing-map.css') . '">';
 require APP_PATH . '/views/layout/head.php';
 ?>
 <style>
@@ -28,9 +32,39 @@ require APP_PATH . '/views/layout/head.php';
 </style>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
 
-<main class="flex-1 flex flex-col">
+<section class="colon-hero" id="inicio" aria-label="Colón te conquistará">
+  <div class="colon-hero-bg" aria-hidden="true">
+    <img class="colon-hero-slide is-active" src="<?= asset('img/landing/noche-restaurante.jpeg') ?>" alt="">
+    <img class="colon-hero-slide" src="<?= asset('img/landing/dulces-tradicionales.jpeg') ?>" alt="">
+    <img class="colon-hero-slide" src="<?= asset('img/landing/queso-vino.jpeg') ?>" alt="">
+    <img class="colon-hero-slide" src="<?= asset('img/landing/el-chino.jpeg') ?>" alt="">
+  </div>
+  <div class="colon-hero-shade" aria-hidden="true"></div>
+  <div class="colon-hero-content">
+    <p class="colon-eyebrow reveal-up">Mapa Interactivo</p>
+    <h1 class="colon-hero-title reveal-up">Colón te conquistará</h1>
+    <p class="colon-hero-copy reveal-up">Combina el estilo de visita que quieras realizar con la ruta ideal y encuentra la mejor hospitalidad de los Colonenses.</p>
+    <div class="colon-hero-actions reveal-up">
+      <a href="#explorar-mapa" class="colon-btn colon-btn-primary">Explorar rutas</a>
+      <a href="#cristo-bot" class="colon-btn colon-btn-ghost">Conocer a Cristo Bot</a>
+    </div>
+  </div>
+  <div class="colon-slide-dots" aria-label="Controles del carrusel">
+    <button class="colon-dot is-active" type="button" data-colon-dot="0" aria-label="Imagen 1"></button>
+    <button class="colon-dot" type="button" data-colon-dot="1" aria-label="Imagen 2"></button>
+    <button class="colon-dot" type="button" data-colon-dot="2" aria-label="Imagen 3"></button>
+    <button class="colon-dot" type="button" data-colon-dot="3" aria-label="Imagen 4"></button>
+  </div>
+</section>
+
+<main class="flex-1 flex flex-col" id="explorar-mapa">
+  <section class="colon-map-shell">
+    <div class="colon-map-intro reveal-up">
+      <p class="colon-eyebrow">Diseña tu ruta</p>
+      <h2>Explora atractivos, sabores y experiencias desde el mapa turístico de Colón.</h2>
+    </div>
   <!-- Filter Bar -->
-  <div class="bg-white border-b shadow-sm px-4 py-3">
+  <div class="bg-white border-b shadow-sm px-4 py-3 colon-filter-bar">
     <div class="max-w-7xl mx-auto flex flex-wrap gap-3 items-center">
       <!-- Search -->
       <div class="flex-1 min-w-48 relative">
@@ -94,7 +128,7 @@ require APP_PATH . '/views/layout/head.php';
   </div>
 
   <!-- Map + Sidebar layout -->
-  <div class="flex-1 flex relative overflow-hidden" style="height: calc(100vh - 130px);">
+  <div class="flex-1 flex relative overflow-hidden colon-map-frame" style="height: calc(100vh - 130px);">
     <!-- Map -->
     <div id="map" class="flex-1 z-0"></div>
 
@@ -125,6 +159,7 @@ require APP_PATH . '/views/layout/head.php';
       <div id="panel-content" class="p-4 space-y-4"></div>
     </div>
   </div>
+  </section>
 </main>
 
 <!-- Mis Favoritos modal -->
@@ -159,52 +194,92 @@ require APP_PATH . '/views/layout/head.php';
 
 <?php require APP_PATH . '/views/layout/bottom_nav.php'; ?>
 
-<!-- Contenido informativo -->
-<div class="max-w-7xl mx-auto px-4 py-6">
-  <div class="prose prose-sm max-w-none">
-    <h2 class="text-xl font-bold text-gray-900 mb-3">Colón te conquistará</h2>
-    <p class="text-sm text-gray-600 mb-3">Descubre nuestros maravillosos atractivos turísticos que tenemos en nuestro mapa interactivo el cual permite encontrar el mejor destino de acuerdo al estilo de visita que quieras realizar a nuestro municipio: <strong>Familiar, en pareja, con tus mejores amigos, pet friendly</strong>.</p>
-    <p class="text-sm text-gray-600 mb-3">Disfruta de los mejores atractivos turísticos públicos o privados y arma tu ruta de visita, contamos con 5 opciones:</p>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-      <div class="bg-white rounded-xl p-3 border border-gray-100">
-        <p class="font-semibold text-sm text-gray-900">🏛️ Turismo Cultural</p>
-        <p class="text-xs text-gray-500">Corredores artesanales, museos, mercados, haciendas, recorridos turísticos</p>
-      </div>
-      <div class="bg-white rounded-xl p-3 border border-gray-100">
-        <p class="font-semibold text-sm text-gray-900">⭐ Turismo de Experiencias</p>
-        <p class="text-xs text-gray-500">Viñedos, productos locales y nativos, restaurantes gourmet, queserías, miradores, balnearios, paseos a caballo</p>
-      </div>
-      <div class="bg-white rounded-xl p-3 border border-gray-100">
-        <p class="font-semibold text-sm text-gray-900">🌲 Ecoturismo y Aventura</p>
-        <p class="text-xs text-gray-500">Senderismo, pesca, Mountain Bike (MTB), crosstrail, camping</p>
-      </div>
-      <div class="bg-white rounded-xl p-3 border border-gray-100">
-        <p class="font-semibold text-sm text-gray-900">⛪ Turismo religioso</p>
-        <p class="text-xs text-gray-500">Catedral de Soriano, peregrinaciones, fiestas patronales, iglesias, conventos</p>
-      </div>
-      <div class="bg-white rounded-xl p-3 border border-gray-100 md:col-span-2">
-        <p class="font-semibold text-sm text-gray-900">🍽️ Turismo gastronómico</p>
-        <p class="text-xs text-gray-500">Desde una fonda hasta lo mejor de la gastronomía en los mejores restaurantes del municipio</p>
-      </div>
+<section class="colon-routes-section">
+  <div class="colon-section-head">
+    <div>
+      <p class="colon-eyebrow reveal-up">Rutas sugeridas</p>
+      <h2 class="colon-display reveal-up">Elige tu forma de vivir Colón.</h2>
     </div>
-    <p class="text-sm text-gray-600 mb-3">Combina el estilo de visita que quieras realizar, con el tipo de ruta a explorar y encuentra la mejor hospitalidad de los Colonenses.</p>
-    <div class="bg-purple-50 rounded-xl p-4 border border-purple-100 mb-3">
-      <h3 class="font-semibold text-sm text-gray-900 mb-2">🤖 Conoce a Cristo Bot Colón, nuestro anfitrión a través de WhatsApp</h3>
-      <p class="text-xs text-gray-600 mb-2">Te proporciona la ubicación exacta de todos nuestros atractivos turísticos, información detallada de los productos y servicios creados para nuestros visitantes, mándale un WhatsApp y:</p>
-      <ul class="text-xs text-gray-600 list-disc list-inside space-y-1 mb-3">
-        <li>Haz una reservación</li>
-        <li>Contacta directamente al prestador de servicios turísticos</li>
-        <li>Imágenes de los lugares de tu interés</li>
-        <li>Las mejores rutas para llegar a tu destino a través de Waze o Google Maps</li>
-      </ul>
-      <?php if (setting('chatbot_wa_number', '')): ?>
-      <a href="https://wa.me/<?= e(preg_replace('/\D/', '', setting('chatbot_wa_number', ''))) ?>" target="_blank" class="inline-flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-green-600 transition">
-        📱 Contáctalo aquí
-      </a>
-      <?php endif; ?>
+    <p class="colon-section-copy reveal-up">Descubre atractivos públicos y privados de acuerdo al estilo de visita que quieras realizar: familiar, en pareja, con amigos o pet friendly.</p>
+  </div>
+
+  <div class="colon-route-grid">
+    <article class="colon-route-card reveal-up" style="--route-img: url('<?= asset('img/landing/dulces-tradicionales.jpeg') ?>')">
+      <span>Turismo Cultural</span>
+      <h3>Mercados, artesanías e historia</h3>
+      <p>Corredores artesanales, museos, mercados, haciendas y recorridos turísticos.</p>
+    </article>
+    <article class="colon-route-card reveal-up" style="--route-img: url('<?= asset('img/landing/queso-vino.jpeg') ?>')">
+      <span>Experiencias</span>
+      <h3>Queserías, viñedos y miradores</h3>
+      <p>Productos locales y nativos, restaurantes gourmet, balnearios y paseos a caballo.</p>
+    </article>
+    <article class="colon-route-card reveal-up" style="--route-img: url('<?= asset('img/landing/noche-restaurante.jpeg') ?>')">
+      <span>Ecoturismo</span>
+      <h3>Aventura al aire libre</h3>
+      <p>Senderismo, pesca, Mountain Bike, crosstrail y camping.</p>
+    </article>
+    <article class="colon-route-card reveal-up" style="--route-img: url('<?= asset('img/landing/el-chino.jpeg') ?>')">
+      <span>Religioso</span>
+      <h3>Soriano y fiestas patronales</h3>
+      <p>Catedral, peregrinaciones, iglesias, conventos y celebraciones tradicionales.</p>
+    </article>
+    <article class="colon-route-card colon-route-wide reveal-up" style="--route-img: url('<?= asset('img/landing/gordita.jpeg') ?>')">
+      <span>Gastronomía</span>
+      <h3>De la fonda al restaurante</h3>
+      <p>Sabores locales, antojitos y lo mejor de la gastronomía del municipio.</p>
+    </article>
+  </div>
+</section>
+
+<section id="cristo-bot" class="colon-bot-section">
+  <div class="colon-bot-visual reveal-scale" aria-hidden="true">
+    <span>🤖</span>
+  </div>
+  <div class="colon-bot-content reveal-up">
+    <p class="colon-eyebrow">WhatsApp</p>
+    <h2>Conoce a Cristo Bot Colón, nuestro anfitrión.</h2>
+    <p>Te proporciona la ubicación exacta de los atractivos turísticos, información detallada de productos y servicios, imágenes de lugares y rutas por Waze o Google Maps.</p>
+    <div class="colon-bot-actions">
+      <span>Haz una reservación</span>
+      <span>Contacta prestadores turísticos</span>
+      <span>Consulta imágenes de interés</span>
+      <span>Llega por la mejor ruta</span>
+    </div>
+    <?php if (setting('chatbot_wa_number', '')): ?>
+    <a href="https://wa.me/<?= e(preg_replace('/\D/', '', setting('chatbot_wa_number', ''))) ?>" target="_blank" class="colon-btn colon-btn-whatsapp">
+      Contáctalo aquí
+    </a>
+    <?php endif; ?>
+  </div>
+</section>
+
+<section class="colon-gallery-section">
+  <div class="colon-section-head">
+    <div>
+      <p class="colon-eyebrow reveal-up">Galería</p>
+      <h2 class="colon-display reveal-up">Atractivos, sabores y momentos.</h2>
     </div>
   </div>
-</div>
+  <div class="colon-gallery">
+    <figure class="reveal-scale">
+      <img src="<?= asset('img/landing/el-chino.jpeg') ?>" alt="Fachada de restaurante en Colón">
+      <figcaption>Gastronomía</figcaption>
+    </figure>
+    <figure class="reveal-scale">
+      <img src="<?= asset('img/landing/noche-restaurante.jpeg') ?>" alt="Restaurante iluminado de noche">
+      <figcaption>Experiencias</figcaption>
+    </figure>
+    <figure class="colon-gallery-wide reveal-scale">
+      <img src="<?= asset('img/landing/dulces-tradicionales.jpeg') ?>" alt="Dulces tradicionales">
+      <figcaption>Cultural</figcaption>
+    </figure>
+    <figure class="reveal-scale">
+      <img src="<?= asset('img/landing/queso-vino.jpeg') ?>" alt="Quesos y vino">
+      <figcaption>Productos locales</figcaption>
+    </figure>
+  </div>
+</section>
 
 <!-- Emergency Numbers Section -->
 <div class="border-t border-gray-200 bg-gradient-to-r from-red-50 to-orange-50">
@@ -786,5 +861,51 @@ if (PRELOAD_CAT) {
 }
 updateFavCount();
 loadPOIs();
+
+(() => {
+  const slides = Array.from(document.querySelectorAll('.colon-hero-slide'));
+  const dots = Array.from(document.querySelectorAll('.colon-dot'));
+  let currentSlide = 0;
+  let sliderTimer;
+
+  function setColonSlide(index) {
+    if (!slides.length) return;
+    currentSlide = (index + slides.length) % slides.length;
+    slides.forEach((slide, i) => slide.classList.toggle('is-active', i === currentSlide));
+    dots.forEach((dot, i) => dot.classList.toggle('is-active', i === currentSlide));
+  }
+
+  function startColonSlider() {
+    clearInterval(sliderTimer);
+    sliderTimer = setInterval(() => setColonSlide(currentSlide + 1), 5200);
+  }
+
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      setColonSlide(Number(dot.dataset.colonDot || 0));
+      startColonSlider();
+    });
+  });
+
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.16, rootMargin: '0px 0px -8% 0px' });
+
+    document.querySelectorAll('.reveal-up, .reveal-scale').forEach((el, index) => {
+      el.style.transitionDelay = `${Math.min(index % 4, 3) * 80}ms`;
+      observer.observe(el);
+    });
+  } else {
+    document.querySelectorAll('.reveal-up, .reveal-scale').forEach(el => el.classList.add('is-visible'));
+  }
+
+  startColonSlider();
+})();
 </script>
 <?php require APP_PATH . '/views/layout/footer.php'; ?>

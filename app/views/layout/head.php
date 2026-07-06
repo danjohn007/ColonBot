@@ -42,6 +42,9 @@
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
   <!-- Custom CSS -->
   <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
+  <?php if (!empty($extraHead)): ?>
+    <?= $extraHead ?>
+  <?php endif; ?>
   <!-- PWA manifest -->
   <link rel="manifest" href="<?= url('public/manifest.json') ?>">
 </head>
