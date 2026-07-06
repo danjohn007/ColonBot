@@ -341,6 +341,19 @@ require APP_PATH . '/views/layout/head.php';
       <div class="bg-white rounded-2xl shadow-sm p-5 space-y-3">
         <h3 class="font-semibold text-gray-900">Contactar</h3>
 
+        <!-- Estado en línea (mostrar en chatbot) -->
+        <div class="p-3 rounded-lg border-2 <?= ($business['is_open'] ?? 0) ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-gray-50' ?>">
+          <button onclick="toggleOnline(<?= (int)$business['id'] ?>, <?= ($business['is_open'] ?? 0) ? 'false' : 'true' ?>)"
+            class="w-full flex items-center justify-between py-2">
+            <span class="font-semibold text-sm <?= ($business['is_open'] ?? 0) ? 'text-green-700' : 'text-gray-700' ?>">
+              🟢 <?= ($business['is_open'] ?? 0) ? 'En línea' : 'Fuera de línea' ?>
+            </span>
+            <span class="text-xs <?= ($business['is_open'] ?? 0) ? 'text-green-600' : 'text-gray-500' ?>">
+              <?= ($business['is_open'] ?? 0) ? '(Visible en CristobalBot)' : '(No visible)' ?>
+            </span>
+          </button>
+        </div>
+
         <?php if ($business['whatsapp'] && ($business['category_slug'] ?? '') !== 'punto-de-referencia'): ?>
         <a href="<?= e(waLink($business['whatsapp'], 'Hola, vi tu perfil en Colón Turismo 🗺️')) ?>"
           target="_blank"
@@ -419,6 +432,23 @@ function trackContact(event, businessId) {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: `event=${event}&business_id=${businessId}`,
   });
+}
+
+function toggleOnline(businessId, shouldBeOpen) {
+  fetch('<?= BASE_URL ?>/api/business/' + businessId + '/toggle-online', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'online=' + (shouldBeOpen ? '1' : '0'),
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) {
+      location.reload();
+    } else {
+      alert(d.error || 'Error al actualizar estado.');
+    }
+  })
+  .catch(() => alert('Error de conexión.'));
 }
 </script>
 <?php require APP_PATH . '/views/layout/footer.php'; ?>

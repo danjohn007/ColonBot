@@ -22,8 +22,21 @@ require APP_PATH . '/views/layout/head.php';
       <?php if ($promo['description']): ?>
       <p class="text-gray-600 mb-4" style="white-space: pre-wrap;"><?= e($promo['description']) ?></p>
       <?php endif; ?>
-      <?php if ($promo['price']): ?>
-      <p class="text-2xl font-bold text-blue-600 mb-4">$<?= number_format((float)$promo['price'], 2) ?></p>
+      <?php if ($promo['price'] || $promo['presale_price']): ?>
+      <div class=\"grid grid-cols-2 gap-4 mb-4\">
+        <?php if ($promo['price']): ?>
+        <div class=\"bg-gray-50 rounded-lg p-3\">
+          <p class=\"text-xs text-gray-500 font-semibold mb-1\">PRECIO DE LISTA</p>
+          <p class=\"text-xl font-bold line-through text-gray-400\">$<?= number_format((float)$promo['price'], 2) ?></p>
+        </div>
+        <?php endif; ?>
+        <?php if ($promo['presale_price']): ?>
+        <div class=\"bg-green-50 rounded-lg p-3\">
+          <p class=\"text-xs text-green-600 font-semibold mb-1\">PRECIO PROMOCIONAL</p>
+          <p class=\"text-xl font-bold text-green-600\">$<?= number_format((float)$promo['presale_price'], 2) ?></p>
+        </div>
+        <?php endif; ?>
+      </div>
       <?php endif; ?>
       <?php if ($promo['conditions']): ?>
       <div class="bg-gray-50 rounded-xl p-4 mb-4">
@@ -31,7 +44,20 @@ require APP_PATH . '/views/layout/head.php';
         <p class="text-sm text-gray-600" style="white-space: pre-wrap;"><?= e($promo['conditions']) ?></p>
       </div>
       <?php endif; ?>
-      
+      <!-- Vigencia -->
+      <?php if ($promo['start_date'] || $promo['end_date']): ?>
+      <div class=\"bg-blue-50 rounded-xl p-4 mb-4\">
+        <h3 class=\"font-semibold text-gray-900 text-sm mb-2\">⏳ Vigencia</h3>
+        <div class=\"text-sm text-gray-600\">
+          <?php if ($promo['start_date']): ?>
+          <p>Inicia: <strong><?= date('d/m/Y', strtotime($promo['start_date'])) ?></strong></p>
+          <?php endif; ?>
+          <?php if ($promo['end_date']): ?>
+          <p>Finaliza: <strong><?= date('d/m/Y', strtotime($promo['end_date'])) ?></strong></p>
+          <?php endif; ?>
+        </div>
+      </div>
+      <?php endif; ?>      
       <!-- Métricas -->
       <div class="flex gap-4 text-sm text-gray-500 border-t pt-4 mt-4">
         <span>👁️ Vistas: <?= $viewCount ?? 0 ?></span>

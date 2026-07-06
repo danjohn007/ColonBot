@@ -10,7 +10,7 @@ class NotificationController extends Controller
 
     public function index(): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth(); // Permite cualquier usuario loggeado (visitante, prestador, colaborador_admin, superadmin)
         $user          = currentUser();
         $notifications = $this->notifications->forUser((int)$user['id']);
         $unread        = $this->notifications->unreadCount((int)$user['id']);

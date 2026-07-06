@@ -2,7 +2,6 @@
 $pageTitle = 'Registro Prestador – CristobalBot';
 require APP_PATH . '/views/layout/head.php';
 ?>
-<?php require APP_PATH . '/views/layout/navbar.php'; ?>
 
 <main class="max-w-lg mx-auto px-4 py-8 mb-24">
   <!-- Login Tab -->

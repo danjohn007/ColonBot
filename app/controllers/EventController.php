@@ -16,7 +16,7 @@ class EventController extends Controller
 
     public function index(): void
     {
-        $this->requireAuth('prestador');
+        $this->requireAuth('prestador', 'colaborador_admin', 'superadmin');
         $user = currentUser();
         $businesses = in_array($user['role'], ['colaborador_admin', 'superadmin'])
             ? $this->businesses->allWithCategory()

@@ -66,7 +66,7 @@ class PublicRegisterController extends Controller
         ];
 
         $this->logAction('visitor_login', 'users', $user['id']);
-        $this->redirect('mapa');
+        $this->redirect('turista'); // Redirigir al dashboard del visitante
     }
 
     /**
@@ -170,7 +170,8 @@ class PublicRegisterController extends Controller
         $redirect = match ($user['role']) {
             'superadmin' => 'superadmin',
             'colaborador_admin' => 'colaborador',
-            default => 'admin/micrositio',
+            'prestador' => 'admin/crm',
+            default => 'admin/crm',
         };
         $this->redirect($redirect);
     }

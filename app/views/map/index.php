@@ -454,11 +454,11 @@ function showPOI(poi) {
       ${!isPuntoReferencia ? (CHATBOT_ACTIVE && CHATBOT_WA_NUMBER
         ? `<a href="https://wa.me/${CHATBOT_WA_NUMBER}?text=${encodeURIComponent('Hola, quiero ver las opciones para ' + poi.name)}" target="_blank"
             class="col-span-2 flex items-center justify-center gap-2 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-purple-700 transition">
-            \u{1F6D2} Reservar/Comprar
+            \u{1F4AC} Reservar por Whatsapp
           </a>`
         : `<button type="button" onclick="toggleReservarMenu(this)"
             class="col-span-2 flex items-center justify-center gap-2 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-purple-700 transition">
-            \u{1F6D2} Reservar/Comprar
+            \u{1F4AC} Reservar por Whatsapp
           </button>
           <div class="col-span-2 hidden reservar-menu">
             <div class="grid grid-cols-2 gap-2 mt-1">
@@ -476,13 +476,7 @@ function showPOI(poi) {
               </a>
             </div>
           </div>`) : ''}
-      ${!isPuntoReferencia ? `
-      <a href="https://wa.me/?text=Estoy%20en%20${encodeURIComponent(poi.name)}%20Col\u00F3n%20Qro" target="_blank"
-        onclick="trackWA(${poi.id})"
-        class="flex items-center justify-center gap-1.5 bg-green-500 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-green-600 transition">
-        \u{1F4AC} WhatsApp
-      </a>
-      ` : ''}
+
       <a href="https://www.google.com/maps/dir/?api=1&destination=${poi.lat},${poi.lng}" target="_blank"
         class="flex items-center justify-center gap-1.5 bg-orange-500 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-orange-600 transition">
         \u{1F5FA}\u{FE0F} C\u00F3mo llegar
