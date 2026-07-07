@@ -173,13 +173,13 @@ require APP_PATH . '/views/layout/head.php';
       <h2>Explora atractivos, sabores y experiencias desde el mapa interactivo del turismo en Colón.</h2>
     </div>
   <!-- Filter Bar -->
-  <div class="bg-white border-b shadow-sm px-4 py-3 colon-filter-bar">
-    <div class="max-w-7xl mx-auto flex flex-wrap gap-3 items-center">
+  <div class="colon-filter-bar">
+    <div class="colon-filter-row">
       <!-- Search -->
-      <div class="flex-1 min-w-48 relative">
+      <div class="colon-search-box">
         <input type="text" id="search-input" placeholder="🔍 Buscar lugares..."
-          class="colon-filter-input w-full pl-4 pr-10 py-2 text-sm border border-gray-300 rounded-full focus:outline-none transition">
-        <button onclick="doSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+          class="colon-filter-input">
+        <button onclick="doSearch()" class="colon-search-btn" aria-label="Buscar">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
           </svg>
@@ -187,13 +187,13 @@ require APP_PATH . '/views/layout/head.php';
       </div>
       <!-- Mis Favoritos -->
       <button id="btn-mis-favoritos" onclick="openFavoritos()"
-        class="flex items-center gap-1.5 text-sm px-3 py-2 rounded-full bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 transition font-medium whitespace-nowrap">
+        class="colon-favorites-btn">
         <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
         Mis Favoritos
         <span id="fav-count" class="hidden bg-orange-600 text-white text-xs rounded-full px-1.5 py-0.5 font-bold leading-none"></span>
       </button>
       <!-- Category filters -->
-      <div class="flex gap-2 flex-wrap">
+      <div class="colon-chip-row">
         <button onclick="filterCat('')" data-cat=""
           class="cat-btn colon-chip text-xs px-3 py-1.5 rounded-full bg-orange-600 text-white transition font-medium active-cat">
           Todos
@@ -211,8 +211,8 @@ require APP_PATH . '/views/layout/head.php';
     </div>
 
     <!-- Tipo de viaje Filter -->
-    <div class="max-w-7xl mx-auto flex flex-wrap gap-2 items-center mt-2">
-      <span class="text-xs font-semibold text-gray-500 mr-1">Tipo de viaje:</span>
+    <div class="colon-trip-row">
+      <span class="colon-trip-label">Tipo de viaje:</span>
       <button onclick="filterTripType('')" data-trip-type=""
         class="trip-type-btn text-xs px-3 py-1.5 rounded-full bg-orange-600 text-white transition font-medium">
         Todos
@@ -376,69 +376,72 @@ require APP_PATH . '/views/layout/head.php';
   </div>
 </section>
 
-<!-- Emergency Numbers Section -->
-<div class="border-t border-gray-200 bg-gradient-to-r from-red-50 to-orange-50">
-  <div class="max-w-7xl mx-auto px-4 py-6">
-    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">🆘 Números de emergencia</h3>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-      <a href="tel:911" class="flex items-center gap-3 p-3 bg-white rounded-xl border border-red-200 hover:shadow-md hover:border-red-400 transition group">
-        <span class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-lg shrink-0 group-hover:scale-110 transition">📞</span>
-        <div class="min-w-0">
-          <p class="font-semibold text-gray-900 text-sm leading-tight">Emergencias</p>
-          <p class="text-red-600 text-sm font-bold">911</p>
-          <p class="text-gray-400 text-xs">Policía, bomberos, ambulancia y protección civil</p>
+<section class="colon-emergency-section" aria-label="Números de emergencia">
+  <div class="colon-emergency-inner">
+    <div class="colon-emergency-head">
+      <p class="colon-eyebrow">Asistencia</p>
+      <h2>Números de emergencia</h2>
+    </div>
+    <div class="colon-emergency-grid">
+      <a href="tel:911" class="colon-emergency-card colon-emergency-primary">
+        <span class="colon-emergency-icon" aria-hidden="true">911</span>
+        <div>
+          <strong>Emergencias</strong>
+          <b>911</b>
+          <small>Policía, bomberos, ambulancia y protección civil</small>
         </div>
       </a>
-      <a href="tel:089" class="flex items-center gap-3 p-3 bg-white rounded-xl border border-red-200 hover:shadow-md hover:border-red-400 transition group">
-        <span class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-lg shrink-0 group-hover:scale-110 transition">📞</span>
-        <div class="min-w-0">
-          <p class="font-semibold text-gray-900 text-sm leading-tight">Denuncia Anónima</p>
-          <p class="text-red-600 text-sm font-bold">089</p>
+      <a href="tel:089" class="colon-emergency-card">
+        <span class="colon-emergency-icon" aria-hidden="true">089</span>
+        <div>
+          <strong>Denuncia Anónima</strong>
+          <b>089</b>
+          <small>Reporte seguro y confidencial</small>
         </div>
       </a>
-      <a href="tel:4192920296" class="flex items-center gap-3 p-3 bg-white rounded-xl border border-red-200 hover:shadow-md hover:border-red-400 transition group">
-        <span class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-lg shrink-0 group-hover:scale-110 transition">📞</span>
-        <div class="min-w-0">
-          <p class="font-semibold text-gray-900 text-sm leading-tight">Protección Civil Colón</p>
-          <p class="text-red-600 text-sm font-bold">419 292 0296</p>
+      <a href="tel:4192920296" class="colon-emergency-card">
+        <span class="colon-emergency-icon" aria-hidden="true">PC</span>
+        <div>
+          <strong>Protección Civil Colón</strong>
+          <b>419 292 0296</b>
+          <small>Apoyo municipal inmediato</small>
         </div>
       </a>
-      <a href="tel:4192920061" class="flex items-center gap-3 p-3 bg-white rounded-xl border border-red-200 hover:shadow-md hover:border-red-400 transition group">
-        <span class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-lg shrink-0 group-hover:scale-110 transition">📞</span>
-        <div class="min-w-0">
-          <p class="font-semibold text-gray-900 text-sm leading-tight">Presidencia Municipal de Colón</p>
-          <p class="text-red-600 text-sm font-bold">419 292 0061</p>
+      <a href="tel:4192920061" class="colon-emergency-card">
+        <span class="colon-emergency-icon" aria-hidden="true">COL</span>
+        <div>
+          <strong>Presidencia Municipal</strong>
+          <b>419 292 0061</b>
+          <small>Atención ciudadana Colón</small>
         </div>
       </a>
     </div>
   </div>
-</div>
+</section>
 
 <!-- Banners de registro público entre mapa y footer -->
-<div class="colon-public-band">
-  <div class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-    <!-- Banner 1: Visitante -->
-    <a href="<?= url('registro/visitante') ?>" class="block colon-public-card rounded-2xl p-6 transition group">
-      <div class="flex items-start gap-4">
-        <div class="w-12 h-12 rounded-full colon-public-icon flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition">👤</div>
-        <div>
-          <h3 class="font-bold text-gray-900 text-sm mb-1">Regístrate como visitante y obtén descuentos exclusivos</h3>
-          <p class="text-xs text-gray-500">Califica y deja comentarios de nuestros atractivos turísticos, aquí</p>
-        </div>
+<section class="colon-public-band" aria-label="Registro público">
+  <div class="colon-public-grid">
+    <a href="<?= url('registro/visitante') ?>" class="colon-public-banner">
+      <img src="<?= asset('img/cristo-bot-nino.png') ?>" alt="Visitante de Colón">
+      <span class="colon-public-overlay" aria-hidden="true"></span>
+      <div class="colon-public-banner-content">
+        <span>Visitantes</span>
+        <h3>Regístrate como visitante y obtén descuentos exclusivos</h3>
+        <p>Califica y deja comentarios de nuestros atractivos turísticos.</p>
       </div>
     </a>
-    <!-- Banner 2: Prestador -->
-    <a href="<?= url('registro/prestador') ?>" class="block colon-public-card rounded-2xl p-6 transition group">
-      <div class="flex items-start gap-4">
-        <div class="w-12 h-12 rounded-full colon-public-icon flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition">🏪</div>
-        <div>
-          <h3 class="font-bold text-gray-900 text-sm mb-1">¿Eres prestador de servicio?</h3>
-          <p class="text-xs text-gray-500">Da de alta tu negocio aquí</p>
-        </div>
+    <a href="<?= url('registro/prestador') ?>" class="colon-public-banner">
+      <img src="<?= asset('img/landing/noche-restaurante.jpeg') ?>" alt="Negocio turístico en Colón">
+      <span class="colon-public-overlay" aria-hidden="true"></span>
+      <div class="colon-public-banner-content">
+        <span>Prestadores</span>
+        <h3>¿Eres prestador de servicio?</h3>
+        <p>Da de alta tu negocio y conecta con visitantes.</p>
       </div>
     </a>
   </div>
-</div>
+</section>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
