@@ -57,21 +57,18 @@ class CrmController extends Controller
             $waId = $session['wa_id'];
 
             // Count actions in consultas for this wa_id AND this business
-            $infoCount = (int)$db->query(
-                "SELECT COUNT(*) FROM consultas WHERE wa_id = ? AND business_id = ? AND tipo_accion = 'solicitar_informacion'",
-                [$waId, (int)$businessId]
-            )->fetchColumn();
+            // NOTE: PDO query() does NOT support parameter binding, use prepare+execute
+            $stmt = $db->prepare(
+                "SELECT COUNT(*) FROM consultas WHERE wa_id = ? AND business_id = ? AND tipo_accion = 'solicitar_informacion'"
+            );
+            $stmt->execute([$waId, (int)$businessId]);
+            $infoCount = (int)$stmt->fetchColumn();
 
-            $compraCount = (int)$db->query(
-                "SELECT COUNT(*) FROM consultas WHERE wa_id = ? AND business_id = ? AND tipo_accion = 'compra_reservacion'",
-                [$waId, (int)$businessId]
-            )->fetchColumn();
-
-            // Also check if they have compra_reservacion in ANY business
-            $hasCompraAnyBusiness = (int)$db->query(
-                "SELECT COUNT(*) FROM consultas WHERE wa_id = ? AND tipo_accion = 'compra_reservacion' AND business_id = ?",
-                [$waId, (int)$businessId]
-            )->fetchColumn();
+            $stmt = $db->prepare(
+                "SELECT COUNT(*) FROM consultas WHERE wa_id = ? AND business_id = ? AND tipo_accion = 'compra_reservacion'"
+            );
+            $stmt->execute([$waId, (int)$businessId]);
+            $compraCount = (int)$stmt->fetchColumn();
 
             // Determine category
             if ($compraCount >= 3) {
@@ -96,12 +93,13 @@ class CrmController extends Controller
             // Get business name for the place they consulted about
             $businessName = null;
             if ($infoCount > 0 || $compraCount > 0) {
-                $bizRow = $db->query(
-                    "SELECT b.name FROM consultas c JOIN businesses b ON b.id = c.business_id WHERE c.wa_id = ? AND c.business_id = ? LIMIT 1",
-                    [$waId, (int)$businessId]
+                $stmt = $db->prepare(
+                    "SELECT b.name FROM consultas c JOIN businesses b ON b.id = c.business_id WHERE c.wa_id = ? AND c.business_id = ? LIMIT 1"
                 );
+                $stmt->execute([$waId, (int)$businessId]);
+                $bizRow = $stmt->fetch();
                 if (!empty($bizRow)) {
-                    $businessName = $bizRow[0]['name'];
+                    $businessName = $bizRow['name'];
                 }
             }
 
