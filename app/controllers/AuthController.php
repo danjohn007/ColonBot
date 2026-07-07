@@ -11,7 +11,7 @@ class AuthController extends Controller
     public function loginForm(): void
     {
         if (isLoggedIn()) {
-            $this->redirect(hasRole('superadmin') ? 'superadmin' : 'admin');
+            $this->redirect(hasRole('visitor') ? 'turista' : (hasRole('superadmin') ? 'superadmin' : 'admin'));
         }
         $a = random_int(1, 9);
         $b = random_int(1, 9);
@@ -64,7 +64,7 @@ class AuthController extends Controller
         $redirect = match ($user['role']) {
             'superadmin'        => 'superadmin',
             'colaborador_admin' => 'colaborador',
-            'visitor'           => 'mapa',
+            'visitor'           => 'turista',
             'prestador'         => 'admin/crm',
             default             => 'admin',
         };
@@ -81,7 +81,7 @@ class AuthController extends Controller
     public function forgotPasswordForm(): void
     {
         if (isLoggedIn()) {
-            $this->redirect(hasRole('superadmin') ? 'superadmin' : 'admin');
+            $this->redirect(hasRole('visitor') ? 'turista' : (hasRole('superadmin') ? 'superadmin' : 'admin'));
         }
         $this->view('auth.forgot_password', ['csrf' => $this->csrf()]);
     }

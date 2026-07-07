@@ -185,6 +185,9 @@ class EventController extends Controller
         }
 
         $this->events->update((int)$id, ['status' => $newStatus]);
+        if ($newStatus === 'active') {
+            $this->notifyVisitorsForEvent((int)$id, $event['title'], $event['business_id'] ? (int)$event['business_id'] : null);
+        }
         $this->json(['ok' => true]);
     }
 
@@ -194,6 +197,10 @@ class EventController extends Controller
         $this->verifyCsrf();
 
         $this->events->approve((int)$id, (int)currentUser()['id']);
+        $event = $this->events->find((int)$id);
+        if ($event) {
+            $this->notifyVisitorsForEvent((int)$id, $event['title'], $event['business_id'] ? (int)$event['business_id'] : null);
+        }
         $this->logAction('approve_event', 'events', (int)$id);
         $this->json(['ok' => true]);
     }
@@ -245,6 +252,20 @@ class EventController extends Controller
                 'type' => 'system',
                 'title' => 'Nuevo evento pendiente de aprobación',
                 'message' => "El evento \"{$title}\" requiere aprobación para su publicación.",
+            ]);
+        }
+    }
+
+    private function notifyVisitorsForEvent(int $eventId, string $title, ?int $businessId): void
+    {
+        foreach ($this->users->visitors() as $visitor) {
+            $this->notifications->create([
+                'user_id' => (int)$visitor['id'],
+                'business_id' => $businessId,
+                'event_id' => $eventId,
+                'type' => 'system',
+                'title' => 'Nuevo evento disponible',
+                'message' => "Ya puedes consultar el evento \"{$title}\" en tu panel de visitante.",
             ]);
         }
     }

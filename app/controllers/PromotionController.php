@@ -4,12 +4,16 @@ class PromotionController extends Controller
     private PromotionModel $promotions;
     private BusinessModel $businesses;
     private ContactModel $contacts;
+    private NotificationModel $notifications;
+    private UserModel $users;
 
     public function __construct()
     {
         $this->promotions = new PromotionModel();
         $this->businesses = new BusinessModel();
         $this->contacts = new ContactModel();
+        $this->notifications = new NotificationModel();
+        $this->users = new UserModel();
     }
 
     public function index(): void
@@ -163,6 +167,9 @@ class PromotionController extends Controller
         }
 
         $this->promotions->update((int)$id, ['status' => $newStatus]);
+        if ($newStatus === 'active') {
+            $this->notifyVisitorsForPromotion((int)$id, $promo['title'], $promo['business_id'] ? (int)$promo['business_id'] : null);
+        }
         $this->json(['ok' => true]);
     }
 
@@ -211,6 +218,10 @@ class PromotionController extends Controller
         $this->verifyCsrf();
 
         $this->promotions->approve((int)$id, (int)currentUser()['id']);
+        $promo = $this->promotions->find((int)$id);
+        if ($promo) {
+            $this->notifyVisitorsForPromotion((int)$id, $promo['title'], $promo['business_id'] ? (int)$promo['business_id'] : null);
+        }
         $this->logAction('approve_promotion', 'promotions', (int)$id);
         $this->json(['ok' => true]);
     }
@@ -344,6 +355,19 @@ class PromotionController extends Controller
             return $filename;
         }
         return null;
+    }
+
+    private function notifyVisitorsForPromotion(int $promotionId, string $title, ?int $businessId): void
+    {
+        foreach ($this->users->visitors() as $visitor) {
+            $this->notifications->create([
+                'user_id' => (int)$visitor['id'],
+                'business_id' => $businessId,
+                'type' => 'system',
+                'title' => 'Nueva promoción disponible',
+                'message' => "Ya puedes consultar la promoción \"{$title}\" en tu panel de visitante.",
+            ]);
+        }
     }
 
     private function ownerOrAdmin(array $business): void

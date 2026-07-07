@@ -3,19 +3,22 @@ class TouristController extends Controller
 {
     private BusinessModel $businesses;
     private PromotionModel $promotions;
+    private EventModel $events;
     private UserModel $users;
 
     public function __construct()
     {
         $this->businesses = new BusinessModel();
         $this->promotions = new PromotionModel();
+        $this->events = new EventModel();
         $this->users = new UserModel();
     }
 
     public function dashboard(): void
     {
-        // Allow access without login for public tourist page
+        $this->requireAuth('visitor');
         $user = currentUser();
+        $user = $this->users->find((int)$user['id']) ?: $user;
 
         // Top visited & recommended
         $topVisited = $this->businesses->query(
@@ -28,8 +31,11 @@ class TouristController extends Controller
         );
 
         $activePromotions = $this->promotions->active();
+        $activeEvents = $this->events->active();
+        $visitedPlaces = $this->businesses->visitedByUser((int)$user['id']);
+        $myReviews = $this->businesses->reviewsByUser((int)$user['id']);
 
-        $this->view('tourist.dashboard', compact('user', 'topVisited', 'activePromotions') + ['csrf' => $this->csrf()]);
+        $this->view('tourist.dashboard', compact('user', 'topVisited', 'activePromotions', 'activeEvents', 'visitedPlaces', 'myReviews') + ['csrf' => $this->csrf()]);
     }
 
     public function register(): void
@@ -38,6 +44,7 @@ class TouristController extends Controller
         $this->verifyCsrf();
 
         $user = currentUser();
+        $fullUser = $this->users->find((int)$user['id']) ?: $user;
         $name = trim($_POST['name'] ?? $user['name']);
         $whatsapp = trim($_POST['whatsapp'] ?? '');
         $email = trim($_POST['email'] ?? $user['email']);
@@ -46,7 +53,7 @@ class TouristController extends Controller
         $this->users->update((int)$user['id'], [
             'name' => $name,
             'email' => $email ?: $user['email'],
-            'phone' => $whatsapp ?: $user['phone'],
+            'phone' => $whatsapp ?: ($fullUser['phone'] ?? ''),
         ]);
 
         // Refresh session
@@ -78,7 +85,7 @@ class TouristController extends Controller
             $this->redirect('turista');
         }
 
-        $this->businesses->addReview($businessId, $user['name'], $comment, min(5, max(1, $rating)));
+        $this->businesses->addReview($businessId, $user['name'], $comment, min(5, max(1, $rating)), (int)$user['id']);
         $this->businesses->updateRating($businessId);
 
         $this->flash('success', '¡Gracias por tu valoración!');

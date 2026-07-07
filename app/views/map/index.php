@@ -153,7 +153,7 @@ require APP_PATH . '/views/layout/head.php';
     <p class="colon-hero-copy reveal-up">Combina el estilo de visita que quieras realizar con la ruta ideal y encuentra la mejor hospitalidad de los Colonenses.</p>
     <div class="colon-hero-actions reveal-up">
       <a href="#explorar-mapa" class="colon-btn colon-btn-primary">Explorar rutas</a>
-      <a href="#cristo-bot" class="colon-btn colon-btn-ghost">Conocer a Cristo Bot</a>
+      <a href="#cristo-bot" class="colon-btn colon-btn-ghost">Conocer a CristoBot</a>
     </div>
   </div>
   <div class="colon-slide-dots" aria-label="Controles del carrusel">
@@ -360,7 +360,7 @@ require APP_PATH . '/views/layout/head.php';
   </div>
   <div class="colon-bot-content reveal-up">
     <p class="colon-eyebrow">WhatsApp</p>
-    <h2>Conoce a Cristo Bot Colón, nuestro anfitrión.</h2>
+    <h2>Conoce a CristoBot Colón, nuestro anfitrión.</h2>
     <p>Te proporciona la ubicación exacta de los atractivos turísticos, información detallada de productos y servicios, imágenes de lugares y rutas por Waze o Google Maps.</p>
     <div class="colon-bot-actions">
       <span>Haz una reservación</span>

@@ -41,16 +41,20 @@ class ApiController extends Controller
     public function submitReview(): void
     {
         $businessId = (int)($_POST['business_id'] ?? 0);
-        $userName   = trim($_POST['user_name'] ?? '');
         $comment    = trim($_POST['comment'] ?? '');
         $rating     = (int)($_POST['rating'] ?? 5);
+        $user        = currentUser();
 
-        if ($businessId <= 0 || empty($userName)) {
+        if (!$user || ($user['role'] ?? '') !== 'visitor') {
+            $this->json(['error' => 'Inicia sesión como visitante para dejar tu comentario.'], 401);
+        }
+
+        if ($businessId <= 0) {
             $this->json(['error' => 'Faltan datos requeridos'], 422);
         }
         if ($rating < 1 || $rating > 5) $rating = 5;
 
-        $this->businesses->addReview($businessId, $userName, $comment, $rating);
+        $this->businesses->addReview($businessId, $user['name'], $comment, $rating, (int)$user['id']);
         $this->businesses->updateRating($businessId);
         $this->json(['ok' => true]);
     }

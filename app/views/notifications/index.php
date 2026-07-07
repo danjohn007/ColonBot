@@ -7,7 +7,7 @@ require APP_PATH . '/views/layout/head.php';
 <main class="max-w-4xl mx-auto px-4 py-8 mb-24">
   <div class="flex items-center justify-between mb-6">
     <div class="flex items-center gap-3">
-      <a href="<?= url('admin') ?>" class="text-gray-500 hover:text-blue-600 transition">
+      <a href="<?= url(($user['role'] ?? '') === 'visitor' ? 'turista' : 'admin') ?>" class="text-gray-500 hover:text-blue-600 transition">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>

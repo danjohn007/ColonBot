@@ -18,7 +18,7 @@ class PublicRegisterController extends Controller
     public function visitorForm(): void
     {
         if (isLoggedIn()) {
-            $this->redirect('mapa');
+            $this->redirect(hasRole('visitor') ? 'turista' : 'mapa');
         }
         $this->view('public.register_visitor', ['csrf' => $this->csrf()]);
     }
@@ -315,7 +315,7 @@ class PublicRegisterController extends Controller
 
         $this->logAction('public_register', 'users', $userId, "Registro público como $role");
 
-        $redirect = $role === 'prestador' ? 'admin' : 'mapa';
+        $redirect = $role === 'prestador' ? 'admin' : 'turista';
         $this->flash('success', 'Registro completado exitosamente. Bienvenido a CristobalBot.');
         $this->redirect($redirect);
     }

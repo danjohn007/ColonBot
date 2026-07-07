@@ -83,7 +83,6 @@ class EventModel extends Model
              FROM events e
              LEFT JOIN businesses b ON b.id = e.business_id
              WHERE e.status = 'active' 
-             AND (e.start_date IS NULL OR e.start_date <= NOW())
              AND (e.end_date IS NULL OR e.end_date >= NOW())
              ORDER BY e.start_date ASC"
         );

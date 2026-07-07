@@ -1,5 +1,7 @@
 <?php
 $pageTitle = e($business['name']) . ' – ' . APP_NAME;
+$viewer = currentUser();
+$isVisitor = $viewer && ($viewer['role'] ?? '') === 'visitor';
 require APP_PATH . '/views/layout/head.php';
 ?>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
@@ -247,11 +249,12 @@ require APP_PATH . '/views/layout/head.php';
         <h2 class="font-semibold text-gray-900 mb-4">⭐ Valoraciones y Comentarios</h2>
 
         <!-- Formulario para dejar valoración -->
+        <?php if ($isVisitor): ?>
         <form id="review-form" class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200" onsubmit="return submitReview(event, <?= (int)$business['id'] ?>)">
-          <h3 class="text-sm font-semibold text-gray-700 mb-3">Deja tu valoración</h3>
+          <h3 class="text-sm font-semibold text-gray-700 mb-1">Deja tu valoración</h3>
+          <p class="text-xs text-gray-500 mb-3">Publicarás como <?= e($viewer['name']) ?>.</p>
           <div class="mb-3">
-            <label class="text-xs font-medium text-gray-500 block mb-1">Tu nombre</label>
-            <input type="text" id="review-name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nombre">
+            <input type="hidden" id="review-name" value="<?= e($viewer['name']) ?>">
           </div>
           <div class="mb-3">
             <label class="text-xs font-medium text-gray-500 block mb-1">Calificación</label>
@@ -270,6 +273,15 @@ require APP_PATH . '/views/layout/head.php';
             Enviar valoración
           </button>
         </form>
+        <?php else: ?>
+        <div class="mb-6 p-4 bg-orange-50 rounded-xl border border-orange-100">
+          <h3 class="text-sm font-semibold text-orange-900 mb-1">Inicia sesión para comentar</h3>
+          <p class="text-sm text-orange-800 mb-3">Puedes leer las reseñas libremente, pero las nuevas valoraciones se guardan con una cuenta de visitante.</p>
+          <a href="<?= url('registro/visitante') ?>" class="inline-flex items-center justify-center bg-orange-600 text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-orange-700 transition">
+            Entrar como visitante
+          </a>
+        </div>
+        <?php endif; ?>
 
         <!-- Lista de valoraciones -->
         <div id="reviews-list" class="space-y-4">
@@ -279,7 +291,7 @@ require APP_PATH . '/views/layout/head.php';
           <?php foreach ($reviews as $rv): ?>
           <div class="border-b border-gray-100 pb-4 last:border-0">
             <div class="flex items-center justify-between mb-1">
-              <span class="font-medium text-gray-800 text-sm"><?= e($rv['user_name']) ?></span>
+              <span class="font-medium text-gray-800 text-sm"><?= e($rv['display_name'] ?? $rv['user_name']) ?></span>
               <span class="text-yellow-400 text-sm"><?= str_repeat('★', (int)$rv['rating']) . str_repeat('☆', 5 - (int)$rv['rating']) ?></span>
             </div>
             <?php if ($rv['comment']): ?>

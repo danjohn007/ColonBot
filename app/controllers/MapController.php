@@ -66,6 +66,10 @@ class MapController extends Controller
             return;
         }
         $this->businesses->incrementVisit($business['id']);
+        $user = currentUser();
+        if ($user && ($user['role'] ?? '') === 'visitor') {
+            $this->businesses->recordVisitorVisit((int)$user['id'], (int)$business['id']);
+        }
         $this->analytics->track('map_view', $business['id']);
 
         $images    = $this->businesses->images($business['id']);

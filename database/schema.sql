@@ -136,10 +136,26 @@ CREATE TABLE IF NOT EXISTS `products` (
 CREATE TABLE IF NOT EXISTS `reviews` (
   `id`          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `business_id` INT UNSIGNED NOT NULL,
+  `user_id`     INT UNSIGNED DEFAULT NULL,
   `user_name`   VARCHAR(80)  NOT NULL,
   `rating`      TINYINT(1)   NOT NULL DEFAULT 5,
   `comment`     TEXT         DEFAULT NULL,
   `created_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_reviews_user_id` (`user_id`),
+  FOREIGN KEY (`business_id`) REFERENCES `businesses`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`user_id`)     REFERENCES `users`(`id`)      ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `visitor_place_visits` (
+  `id`          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `user_id`     INT UNSIGNED NOT NULL,
+  `business_id` INT UNSIGNED NOT NULL,
+  `visited_at`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_visitor_visits_user` (`user_id`),
+  INDEX `idx_visitor_visits_business` (`business_id`),
+  INDEX `idx_visitor_visits_visited_at` (`visited_at`),
+  INDEX `idx_visitor_visits_user_business` (`user_id`, `business_id`),
+  FOREIGN KEY (`user_id`)     REFERENCES `users`(`id`)      ON DELETE CASCADE,
   FOREIGN KEY (`business_id`) REFERENCES `businesses`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

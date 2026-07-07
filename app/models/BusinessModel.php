@@ -144,6 +144,14 @@ class BusinessModel extends Model
         $this->execute('UPDATE businesses SET visits = visits + 1 WHERE id = ?', [$id]);
     }
 
+    public function recordVisitorVisit(int $userId, int $businessId): void
+    {
+        $this->execute(
+            'INSERT INTO visitor_place_visits (user_id, business_id, visited_at) VALUES (?,?,NOW())',
+            [$userId, $businessId]
+        );
+    }
+
     public function addImage(int $businessId, string $path, string $caption = ''): void
     {
         $this->execute(
@@ -221,16 +229,49 @@ class BusinessModel extends Model
     public function reviews(int $businessId): array
     {
         return $this->query(
-            'SELECT * FROM reviews WHERE business_id = ? ORDER BY created_at DESC',
+            'SELECT r.*, COALESCE(u.name, r.user_name) AS display_name
+             FROM reviews r
+             LEFT JOIN users u ON u.id = r.user_id
+             WHERE r.business_id = ?
+             ORDER BY r.created_at DESC',
             [$businessId]
         );
     }
 
-    public function addReview(int $businessId, string $userName, string $comment, int $rating): bool
+    public function addReview(int $businessId, string $userName, string $comment, int $rating, ?int $userId = null): bool
     {
         return $this->execute(
-            'INSERT INTO reviews (business_id, user_name, comment, rating) VALUES (?,?,?,?)',
-            [$businessId, $userName, $comment, $rating]
+            'INSERT INTO reviews (business_id, user_id, user_name, comment, rating) VALUES (?,?,?,?,?)',
+            [$businessId, $userId, $userName, $comment, $rating]
+        );
+    }
+
+    public function reviewsByUser(int $userId): array
+    {
+        return $this->query(
+            'SELECT r.*, b.name AS business_name, b.slug AS business_slug, b.cover_image,
+                    c.name AS category_name, c.color AS category_color
+             FROM reviews r
+             JOIN businesses b ON b.id = r.business_id
+             JOIN categories c ON c.id = b.category_id
+             WHERE r.user_id = ?
+             ORDER BY r.created_at DESC',
+            [$userId]
+        );
+    }
+
+    public function visitedByUser(int $userId): array
+    {
+        return $this->query(
+            'SELECT b.*, c.name AS category_name, c.color AS category_color, c.icon AS category_icon,
+                    MAX(v.visited_at) AS last_visited_at, COUNT(v.id) AS visit_count
+             FROM visitor_place_visits v
+             JOIN businesses b ON b.id = v.business_id
+             JOIN categories c ON c.id = b.category_id
+             WHERE v.user_id = ?
+             GROUP BY b.id
+             ORDER BY last_visited_at DESC',
+            [$userId]
         );
     }
 

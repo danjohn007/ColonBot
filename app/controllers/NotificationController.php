@@ -20,7 +20,7 @@ class NotificationController extends Controller
 
     public function markRead(string $id): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth();
         $this->verifyCsrf();
         $user = currentUser();
         $this->notifications->markRead((int)$id, (int)$user['id']);
@@ -29,7 +29,7 @@ class NotificationController extends Controller
 
     public function markAllRead(): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth();
         $this->verifyCsrf();
         $user = currentUser();
         $this->notifications->markAllRead((int)$user['id']);

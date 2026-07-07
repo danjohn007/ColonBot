@@ -8,12 +8,27 @@
       Mapa
     </a>
     <?php if (isLoggedIn()): ?>
+    <?php if (hasRole('visitor')): ?>
+    <a href="<?= url('turista') ?>" class="flex flex-col items-center gap-1 text-xs text-gray-500 hover:text-orange-700 transition px-3">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+      </svg>
+      Visitante
+    </a>
+    <a href="<?= url('admin/notificaciones') ?>" class="flex flex-col items-center gap-1 text-xs text-gray-500 hover:text-orange-700 transition px-3">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 11-6 0m6 0H9"/>
+      </svg>
+      Avisos
+    </a>
+    <?php else: ?>
     <a href="<?= url('admin') ?>" class="flex flex-col items-center gap-1 text-xs text-gray-500 hover:text-orange-700 transition px-3">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
       </svg>
       Negocio
     </a>
+    <?php endif; ?>
     <?php if (hasRole('superadmin')): ?>
     <a href="<?= url('superadmin') ?>" class="flex flex-col items-center gap-1 text-xs text-gray-500 hover:text-orange-700 transition px-3">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

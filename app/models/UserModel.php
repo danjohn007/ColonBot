@@ -13,6 +13,11 @@ class UserModel extends Model
         return $this->query("SELECT * FROM users WHERE role IN ('colaborador_admin','superadmin') ORDER BY name");
     }
 
+    public function visitors(): array
+    {
+        return $this->query("SELECT * FROM users WHERE role = 'visitor' AND active = 1 ORDER BY name");
+    }
+
     public function verifyPassword(string $plain, string $hash): bool
     {
         return password_verify($plain, $hash);
