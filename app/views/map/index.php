@@ -7,19 +7,19 @@ $extraHead = '<link rel="preconnect" href="https://fonts.googleapis.com">' . PHP
 $landingProfiles = [
   'turismo-de-experiencias' => [
     'eyebrow' => 'Turismo de experiencias',
-    'title' => 'Vive Colon con todos los sentidos',
-    'copy' => 'Queserias, vinedos, miradores y prestadores locales para armar una ruta memorable.',
+    'title' => 'Vive Colón con todos los sentidos',
+    'copy' => 'Queserías, viñedos, miradores y prestadores locales para armar una ruta memorable.',
     'intro' => 'Explora experiencias, productos locales y anfitriones listos para recibirte.',
     'routes_title' => 'Momentos para saborear, caminar y compartir.',
-    'routes_copy' => 'Combina recorridos guiados, productos regionales y pausas escenicas en una ruta hecha a tu ritmo.',
+    'routes_copy' => 'Combina recorridos guiados, productos regionales y pausas escénicas en una ruta hecha a tu ritmo.',
     'slides' => ['queso-vino.jpeg', 'noche-restaurante.jpeg', 'el-chino.jpeg', 'gordita.jpeg'],
   ],
   'turismo-cultural' => [
     'eyebrow' => 'Turismo cultural',
     'title' => 'Historia viva, oficios y tradiciones',
-    'copy' => 'Recorre mercados, artesanias, museos, haciendas y espacios que cuentan la identidad de Colon.',
+    'copy' => 'Recorre mercados, artesanías, museos, haciendas y espacios que cuentan la identidad de Colón.',
     'intro' => 'Encuentra puntos culturales, corredores artesanales y lugares con memoria.',
-    'routes_title' => 'Una ruta para mirar Colon con calma.',
+    'routes_title' => 'Una ruta para mirar Colón con calma.',
     'routes_copy' => 'Conecta arquitectura, oficios locales, historia y encuentros con la comunidad.',
     'slides' => ['dulces-tradicionales.jpeg', 'el-chino.jpeg', 'noche-restaurante.jpeg', 'queso-vino.jpeg'],
   ],
@@ -28,36 +28,36 @@ $landingProfiles = [
     'title' => 'Aire libre, paisaje y adrenalina suave',
     'copy' => 'Senderismo, cerros, presas, pesca, camping y rutas para conectar con la naturaleza.',
     'intro' => 'Filtra lugares para aventura, descanso al aire libre y paisajes abiertos.',
-    'routes_title' => 'Aventura con horizonte Colonense.',
+    'routes_title' => 'Aventura con horizonte colonense.',
     'routes_copy' => 'Planea salidas familiares, con amigos o en pareja entre senderos, agua y vistas amplias.',
     'slides' => ['noche-restaurante.jpeg', 'queso-vino.jpeg', 'dulces-tradicionales.jpeg', 'gordita.jpeg'],
   ],
   'turismo-religioso' => [
     'eyebrow' => 'Turismo religioso',
-    'title' => 'Fe, peregrinacion y patrimonio',
-    'copy' => 'Iglesias, celebraciones, conventos y recorridos con valor espiritual e historico.',
+    'title' => 'Fe, peregrinación y patrimonio',
+    'copy' => 'Iglesias, celebraciones, conventos y recorridos con valor espiritual e histórico.',
     'intro' => 'Ubica espacios religiosos, fiestas patronales y puntos cercanos para completar tu visita.',
-    'routes_title' => 'Tradicion espiritual en cada parada.',
+    'routes_title' => 'Tradición espiritual en cada parada.',
     'routes_copy' => 'Crea una ruta serena entre templos, plazas, servicios y experiencias locales.',
     'slides' => ['el-chino.jpeg', 'dulces-tradicionales.jpeg', 'noche-restaurante.jpeg', 'queso-vino.jpeg'],
   ],
   'turismo-gastronomico' => [
-    'eyebrow' => 'Turismo gastronomico',
+    'eyebrow' => 'Turismo gastronómico',
     'title' => 'Sabores locales, de la fonda al restaurante',
-    'copy' => 'Antojitos, dulces tradicionales, vino, queso y propuestas de cocina para descubrir Colon por el paladar.',
+    'copy' => 'Antojitos, dulces tradicionales, vino, queso y propuestas de cocina para descubrir Colón por el paladar.',
     'intro' => 'Encuentra restaurantes, productos locales y paradas ideales para comer bien.',
-    'routes_title' => 'Una ruta para probar Colon.',
-    'routes_copy' => 'Arma el dia entre desayunos, antojitos, sobremesa, dulces y cenas con identidad local.',
+    'routes_title' => 'Una ruta para probar Colón.',
+    'routes_copy' => 'Arma el día entre desayunos, antojitos, sobremesa, dulces y cenas con identidad local.',
     'slides' => ['gordita.jpeg', 'el-chino.jpeg', 'queso-vino.jpeg', 'dulces-tradicionales.jpeg'],
   ],
 ];
 $landingDefault = [
   'eyebrow' => 'Mapa Interactivo',
-  'title' => 'Colon te conquistara',
-  'copy' => 'Combina el estilo de visita que quieras realizar con la ruta ideal y encuentra la mejor hospitalidad de los Colonenses.',
-  'intro' => 'Explora atractivos, sabores y experiencias desde el mapa interactivo del turismo en Colon.',
-  'routes_title' => 'Elige tu forma de vivir Colon.',
-  'routes_copy' => 'Descubre atractivos publicos y privados de acuerdo al estilo de visita que quieras realizar: familiar, en pareja, con amigos o pet friendly.',
+  'title' => 'Colón te conquistará',
+  'copy' => 'Combina el estilo de visita que quieras realizar con la ruta ideal y encuentra la mejor hospitalidad de los colonenses.',
+  'intro' => 'Explora atractivos, sabores y experiencias desde el mapa interactivo del turismo en Colón.',
+  'routes_title' => 'Elige tu forma de vivir Colón.',
+  'routes_copy' => 'Descubre atractivos públicos y privados de acuerdo al estilo de visita que quieras realizar: familiar, en pareja, con amigos o pet friendly.',
   'slides' => ['noche-restaurante.jpeg', 'dulces-tradicionales.jpeg', 'queso-vino.jpeg', 'el-chino.jpeg'],
 ];
 $landingRouteUrls = [
@@ -71,11 +71,11 @@ $landingContent = $landingProfiles[$preloadCat ?? ''] ?? $landingDefault;
 $routeCardsBySlug = [
   'turismo-de-experiencias' => [
     ['label' => 'Producto local', 'title' => 'Queso, vino y sabores de origen', 'copy' => 'Paradas para probar, comprar y conversar con anfitriones locales.', 'img' => 'queso-vino.jpeg'],
-    ['label' => 'Plan de tarde', 'title' => 'Miradores, sobremesa y noche', 'copy' => 'Experiencias para bajar el ritmo y disfrutar Colon sin prisa.', 'img' => 'noche-restaurante.jpeg'],
+    ['label' => 'Plan de tarde', 'title' => 'Miradores, sobremesa y noche', 'copy' => 'Experiencias para bajar el ritmo y disfrutar Colón sin prisa.', 'img' => 'noche-restaurante.jpeg'],
     ['label' => 'Ruta memorable', 'title' => 'Momentos hechos para compartir', 'copy' => 'Combina gastronomia, servicios y atractivos cercanos en una sola salida.', 'img' => 'gordita.jpeg', 'wide' => true],
   ],
   'turismo-cultural' => [
-    ['label' => 'Tradicion', 'title' => 'Mercados, dulces y oficios', 'copy' => 'Encuentra lugares donde la identidad local se vive en cada detalle.', 'img' => 'dulces-tradicionales.jpeg'],
+    ['label' => 'Tradición', 'title' => 'Mercados, dulces y oficios', 'copy' => 'Encuentra lugares donde la identidad local se vive en cada detalle.', 'img' => 'dulces-tradicionales.jpeg'],
     ['label' => 'Historia', 'title' => 'Haciendas, plazas y memoria', 'copy' => 'Recorridos para conectar arquitectura, relatos y vida cotidiana.', 'img' => 'el-chino.jpeg'],
     ['label' => 'Comunidad', 'title' => 'Cultura con anfitriones locales', 'copy' => 'Haz una ruta con paradas utiles para comer, comprar y aprender.', 'img' => 'noche-restaurante.jpeg', 'wide' => true],
   ],
@@ -85,22 +85,22 @@ $routeCardsBySlug = [
     ['label' => 'Aventura suave', 'title' => 'Rutas para moverte a tu ritmo', 'copy' => 'Planea una salida con servicios cercanos y puntos de interes.', 'img' => 'dulces-tradicionales.jpeg', 'wide' => true],
   ],
   'turismo-religioso' => [
-    ['label' => 'Fe', 'title' => 'Templos y celebraciones', 'copy' => 'Ubica espacios religiosos y fiestas patronales de Colon.', 'img' => 'el-chino.jpeg'],
-    ['label' => 'Patrimonio', 'title' => 'Arquitectura y tradicion', 'copy' => 'Recorridos serenos con valor historico y espiritual.', 'img' => 'dulces-tradicionales.jpeg'],
+    ['label' => 'Fe', 'title' => 'Templos y celebraciones', 'copy' => 'Ubica espacios religiosos y fiestas patronales de Colón.', 'img' => 'el-chino.jpeg'],
+    ['label' => 'Patrimonio', 'title' => 'Arquitectura y tradición', 'copy' => 'Recorridos serenos con valor histórico y espiritual.', 'img' => 'dulces-tradicionales.jpeg'],
     ['label' => 'Peregrinacion', 'title' => 'Una visita cuidada de principio a fin', 'copy' => 'Complementa la ruta con servicios, comida y puntos cercanos.', 'img' => 'noche-restaurante.jpeg', 'wide' => true],
   ],
   'turismo-gastronomico' => [
-    ['label' => 'Antojitos', 'title' => 'Sabores de fonda y mercado', 'copy' => 'Paradas casuales para probar recetas locales y antojos de la region.', 'img' => 'gordita.jpeg'],
+    ['label' => 'Antojitos', 'title' => 'Sabores de fonda y mercado', 'copy' => 'Paradas casuales para probar recetas locales y antojos de la región.', 'img' => 'gordita.jpeg'],
     ['label' => 'Sobremesa', 'title' => 'Restaurantes y cocina local', 'copy' => 'Opciones para comer bien y convertir la visita en experiencia.', 'img' => 'el-chino.jpeg'],
-    ['label' => 'Producto regional', 'title' => 'Queso, vino y dulces tradicionales', 'copy' => 'Arma una ruta para llevarte Colon tambien a casa.', 'img' => 'queso-vino.jpeg', 'wide' => true],
+    ['label' => 'Producto regional', 'title' => 'Queso, vino y dulces tradicionales', 'copy' => 'Arma una ruta para llevarte Colón también a casa.', 'img' => 'queso-vino.jpeg', 'wide' => true],
   ],
 ];
 $defaultRouteCards = [
-  ['label' => 'Experiencias', 'title' => 'Queserias, vinedos y miradores', 'copy' => 'Productos locales y nativos, restaurantes gourmet, balnearios y paseos a caballo.', 'img' => 'queso-vino.jpeg', 'href' => $landingRouteUrls['turismo-de-experiencias']],
-  ['label' => 'Turismo Cultural', 'title' => 'Mercados, artesanias e historia', 'copy' => 'Corredores artesanales, museos, mercados, haciendas y recorridos turisticos.', 'img' => 'dulces-tradicionales.jpeg', 'href' => $landingRouteUrls['turismo-cultural']],
+  ['label' => 'Experiencias', 'title' => 'Queserías, viñedos y miradores', 'copy' => 'Productos locales y nativos, restaurantes gourmet, balnearios y paseos a caballo.', 'img' => 'queso-vino.jpeg', 'href' => $landingRouteUrls['turismo-de-experiencias']],
+  ['label' => 'Turismo Cultural', 'title' => 'Mercados, artesanías e historia', 'copy' => 'Corredores artesanales, museos, mercados, haciendas y recorridos turísticos.', 'img' => 'dulces-tradicionales.jpeg', 'href' => $landingRouteUrls['turismo-cultural']],
   ['label' => 'Ecoturismo y aventura', 'title' => 'Senderos, naturaleza y aire libre', 'copy' => 'Cerros, presas, pesca, camping y rutas para conectar con el paisaje.', 'img' => 'noche-restaurante.jpeg', 'href' => $landingRouteUrls['ecoturismo-y-aventura']],
-  ['label' => 'Turismo religioso', 'title' => 'Fe, peregrinacion y patrimonio', 'copy' => 'Iglesias, celebraciones, conventos y recorridos con valor espiritual e historico.', 'img' => 'el-chino.jpeg', 'href' => $landingRouteUrls['turismo-religioso']],
-  ['label' => 'Gastronomia', 'title' => 'De la fonda al restaurante', 'copy' => 'Sabores locales, antojitos y lo mejor de la gastronomia del municipio.', 'img' => 'gordita.jpeg', 'href' => $landingRouteUrls['turismo-gastronomico'], 'wide' => true],
+  ['label' => 'Turismo religioso', 'title' => 'Fe, peregrinación y patrimonio', 'copy' => 'Iglesias, celebraciones, conventos y recorridos con valor espiritual e histórico.', 'img' => 'el-chino.jpeg', 'href' => $landingRouteUrls['turismo-religioso']],
+  ['label' => 'Gastronomía', 'title' => 'De la fonda al restaurante', 'copy' => 'Sabores locales, antojitos y lo mejor de la gastronomía del municipio.', 'img' => 'gordita.jpeg', 'href' => $landingRouteUrls['turismo-gastronomico'], 'wide' => true],
 ];
 $routeCards = $routeCardsBySlug[$preloadCat ?? ''] ?? $defaultRouteCards;
 if (!empty($preloadCat) && isset($landingRouteUrls[$preloadCat])) {
@@ -167,7 +167,7 @@ require APP_PATH . '/views/layout/head.php';
 <main class="flex-1 flex flex-col" id="explorar-mapa">
   <section class="colon-map-shell">
     <div class="colon-map-intro reveal-up">
-      <p class="colon-eyebrow colon-dynamic-copy">Disena tu ruta</p>
+      <p class="colon-eyebrow colon-dynamic-copy">Diseña tu ruta</p>
       <h2 class="colon-dynamic-copy"><?= e($landingContent['intro']) ?></h2>
       <p class="colon-eyebrow">Diseña tu ruta</p>
       <h2>Explora atractivos, sabores y experiencias desde el mapa interactivo del turismo en Colón.</h2>
@@ -454,6 +454,10 @@ const PRELOAD_CAT = '<?= e($preloadCat ?? '') ?>';
 const BOUNDARY_DATA = <?= $boundaryData ?: '[]' ?>;
 const CHATBOT_ACTIVE    = <?= setting('chatbot_active', '0') === '1' ? 'true' : 'false' ?>;
 const CHATBOT_WA_NUMBER = '<?= e(setting('chatbot_wa_number', '')) ?>';
+const MAP_LIMITS = L.latLngBounds(
+  L.latLng(19.85, -100.65),
+  L.latLng(21.05, -99.05)
+);
 
 // ─── Icon name → emoji mapping for category symbols (panels/modals) ────
 const ICON_MAP = {
@@ -496,12 +500,26 @@ function isotipoToEmoji(isotipo) {
 }
 
 // Initialise map
-const map = L.map('map', { zoomControl: true }).setView([MAP_LAT, MAP_LNG], MAP_ZOOM);
+const map = L.map('map', {
+  zoomControl: true,
+  scrollWheelZoom: false,
+  minZoom: 9,
+  maxZoom: 18,
+  maxBounds: MAP_LIMITS,
+  maxBoundsViscosity: 0.95,
+}).setView([MAP_LAT, MAP_LNG], Math.max(MAP_ZOOM, 10));
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '\u00A9 <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   maxZoom: 18,
+  minZoom: 9,
+  bounds: MAP_LIMITS,
+  noWrap: true,
 }).addTo(map);
+
+const mapEl = map.getContainer();
+mapEl.addEventListener('click', () => map.scrollWheelZoom.enable());
+mapEl.addEventListener('mouseleave', () => map.scrollWheelZoom.disable());
 
 // ─── Divisi\u00F3n territorial (l\u00EDmite municipal de Col\u00F3n) ──────────────────
 if (BOUNDARY_DATA && BOUNDARY_DATA.length > 0) {

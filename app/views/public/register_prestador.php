@@ -10,10 +10,10 @@ require APP_PATH . '/views/layout/head.php';
 <main class="colon-auth-page">
   <div class="colon-auth-shell">
     <section class="colon-auth-copy">
-      <img src="<?= asset('img/cristo-bot-nino.png') ?>" alt="Cristo Bot Colon" class="colon-auth-logo mb-6">
-      <p class="colon-eyebrow">Prestadores turisticos</p>
+      <img src="<?= asset('img/cristo-bot-nino.png') ?>" alt="Cristo Bot Colón" class="colon-auth-logo mb-6">
+      <p class="colon-eyebrow">Prestadores turísticos</p>
       <h1>Haz visible tu negocio</h1>
-      <p>Un espacio profesional para recibir visitantes, administrar tu presencia turistica y conectar con personas que ya estan explorando Colon.</p>
+      <p>Un espacio profesional para recibir visitantes, administrar tu presencia turística y conectar con personas que ya están explorando Colón.</p>
     </section>
 
     <section class="colon-auth-card">
@@ -47,7 +47,7 @@ require APP_PATH . '/views/layout/head.php';
 
       <div class="colon-auth-panel">
         <h2>Registro para prestadores</h2>
-        <p class="text-sm mb-6">Da de alta tu negocio en la plataforma turistica de Colon.</p>
+        <p class="text-sm mb-6">Da de alta tu negocio en la plataforma turística de Colón.</p>
 
         <form method="POST" action="<?= url('registro/prestador/guardar') ?>" class="space-y-4">
           <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">

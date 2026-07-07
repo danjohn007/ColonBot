@@ -10,10 +10,10 @@ require APP_PATH . '/views/layout/head.php';
 <main class="colon-auth-page">
   <div class="colon-auth-shell">
     <section class="colon-auth-copy">
-      <img src="<?= asset('img/cristo-bot-nino.png') ?>" alt="Cristo Bot Colon" class="colon-auth-logo mb-6">
-      <p class="colon-eyebrow">Panel de administracion</p>
-      <h1>Gestion turistica con estilo</h1>
-      <p>Accede al sistema para administrar negocios, promociones, eventos y la experiencia digital de visitantes en Colon.</p>
+      <img src="<?= asset('img/cristo-bot-nino.png') ?>" alt="Cristo Bot Colón" class="colon-auth-logo mb-6">
+      <p class="colon-eyebrow">Panel de administración</p>
+      <h1>Gestión turística con estilo</h1>
+      <p>Accede al sistema para administrar negocios, promociones, eventos y la experiencia digital de visitantes en Colón.</p>
     </section>
 
     <section class="colon-auth-card">
