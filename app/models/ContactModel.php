@@ -264,6 +264,7 @@ class ContactModel extends Model
         }
 
         // 2) Obtener sesiones de chatbot sin contacto asociado (nuevos prospectos)
+        // AUTOMATICALLY create contacts for them in the contacts table
         $chatbotOnlySessions = $db->query(
             "SELECT cs.id, cs.wa_id, cs.last_message AS notes,
                     cs.updated_at
@@ -281,8 +282,20 @@ class ContactModel extends Model
 
         foreach ($chatbotOnlySessions as $session) {
             $newCategory = $this->determineCategoryFromConsultas($session['wa_id'], (int)$businessId);
+
+            // ✅ CREATE the contact record in the database so it persists for CRM
+            $contactId = $this->insert([
+                'business_id' => (int)$businessId,
+                'wa_id' => $session['wa_id'],
+                'name' => 'Prospecto WhatsApp',
+                'phone' => $session['wa_id'],
+                'category' => $newCategory,
+                'source' => 'whatsapp',
+                'last_contact_at' => $session['updated_at'],
+            ]);
+
             $results[] = [
-                'id'               => $session['id'],
+                'id'               => $contactId,
                 'wa_id'            => $session['wa_id'],
                 'name'             => 'Prospecto WhatsApp',
                 'email'            => '',
@@ -297,6 +310,13 @@ class ContactModel extends Model
                 'is_chatbot'       => true,
             ];
         }
+
+        // 3) Also get all regular contacts for this business (including the ones we just created)
+        // and return them so the CRM shows ALL contacts, not just chatbot ones
+        $regularContacts = $this->byBusiness((int)$businessId, '');
+        
+        // Merge: chatbot contacts first, then regular contacts
+        $results = array_merge($results, $regularContacts);
 
         return $results;
     }
