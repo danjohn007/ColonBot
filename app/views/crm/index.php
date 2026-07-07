@@ -7,11 +7,6 @@ require APP_PATH . '/views/layout/head.php';
 <main class="max-w-6xl mx-auto px-4 py-8 mb-24">
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold text-gray-900">📇 CRM - Mis Contactos</h1>
-    <div class="flex gap-2">
-      <button onclick="openAddModal()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition">
-        + Nuevo contacto
-      </button>
-    </div>
   </div>
 
   <!-- Business selector -->
@@ -58,46 +53,6 @@ require APP_PATH . '/views/layout/head.php';
     </div>
   </div>
 </main>
-
-<!-- Add Contact Modal -->
-<div id="add-modal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-40 flex items-center justify-center px-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 relative">
-    <button onclick="closeAddModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">✕</button>
-    <h2 class="text-lg font-bold text-gray-900 mb-4">Nuevo contacto</h2>
-    <form onsubmit="saveContact(event)" class="space-y-4">
-      <input type="hidden" id="add-business-id" value="">
-      <div>
-        <label class="label block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
-        <input type="text" id="add-name" required class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
-      </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="label block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-          <input type="tel" id="add-phone" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
-        </div>
-        <div>
-          <label class="label block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input type="email" id="add-email" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
-        </div>
-      </div>
-      <div>
-        <label class="label block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-        <select id="add-category" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
-          <option value="prospecto">📋 Prospecto</option>
-          <option value="cliente">✅ Cliente</option>
-          <option value="lovemark">⭐ Lovemark</option>
-        </select>
-      </div>
-      <div>
-        <label class="label block text-sm font-medium text-gray-700 mb-1">Notas</label>
-        <textarea id="add-notes" rows="2" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm"></textarea>
-      </div>
-      <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition">
-        Guardar contacto
-      </button>
-    </form>
-  </div>
-</div>
 
 <!-- Upgrade to Cliente Modal (Customer Journey - Etapa A → B) -->
 <div id="upgrade-modal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-40 flex items-center justify-center px-4">
@@ -184,11 +139,8 @@ function loadContacts() {
   const tbody = document.getElementById('contacts-tbody');
   if (!businessId) {
     tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-400">Selecciona un negocio para ver sus contactos</td></tr>';
-    document.getElementById('add-business-id').value = '';
     return;
   }
-
-  document.getElementById('add-business-id').value = businessId;
 
   const url = `${BASE_URL}/admin/crm/${businessId}/list?category=${currentCategory}`;
   fetch(url)
@@ -250,52 +202,6 @@ function filterCategory(cat) {
     b.classList.toggle('text-gray-700', !active);
   });
   loadContacts();
-}
-
-function openAddModal() {
-  const businessId = document.getElementById('business-select').value;
-  if (!businessId) { alert('Primero selecciona un negocio.'); return; }
-  document.getElementById('add-modal').classList.remove('hidden');
-}
-
-function closeAddModal() {
-  document.getElementById('add-modal').classList.add('hidden');
-}
-
-function saveContact(e) {
-  e.preventDefault();
-  const businessId = document.getElementById('add-business-id').value;
-  const name = document.getElementById('add-name').value.trim();
-  if (!name) return;
-
-  const body = new URLSearchParams({
-    _csrf: CSRF,
-    business_id: businessId,
-    name,
-    phone: document.getElementById('add-phone').value.trim(),
-    email: document.getElementById('add-email').value.trim(),
-    category: document.getElementById('add-category').value,
-    notes: document.getElementById('add-notes').value.trim(),
-  });
-
-  fetch(`${BASE_URL}/admin/crm/crear`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: body.toString(),
-  })
-  .then(r => r.json())
-  .then(d => {
-    if (d.ok) {
-      closeAddModal();
-      document.getElementById('add-name').value = '';
-      document.getElementById('add-phone').value = '';
-      document.getElementById('add-email').value = '';
-      document.getElementById('add-notes').value = '';
-      loadContacts();
-    } else {
-      alert(d.error || 'Error al guardar');
-    }
-  });
 }
 
 function openUpgradeModal(id, name) {

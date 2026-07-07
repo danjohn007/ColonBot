@@ -12,7 +12,7 @@ class ContactModel extends Model
         $params = [$businessId];
 
         if ($category && in_array($category, ['prospecto', 'cliente', 'lovemark', 'prospecto_sin_historial', 'prospecto_recurrente', 'cliente_frecuente'])) {
-            if ($category === 'prospecto_sin_historial') {
+            if ($category === 'prospecto_sin_historial' || $category === 'prospecto') {
                 $sql .= " AND c.category = 'prospecto_sin_historial'";
             } elseif ($category === 'prospecto_recurrente') {
                 $sql .= " AND c.category = 'prospecto_recurrente'";
