@@ -113,4 +113,3 @@ function sendInquiry(e, id) {
 }
 </script>
 <?php require APP_PATH . '/views/layout/footer.php'; ?>
-</write_to_file>

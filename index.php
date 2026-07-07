@@ -44,6 +44,7 @@ $router->post('landing/lugar/{slug}/contactar', 'MapController',       'contact'
 $router->get('login',                   'AuthController',      'loginForm');
 $router->get('landing/login',           'AuthController',      'loginForm');
 $router->post('login',                  'AuthController',      'login');
+$router->post('landing/login',          'AuthController',      'login');
 $router->get('logout',                  'AuthController',      'logout');
 $router->get('olvide-contrasena',       'AuthController',      'forgotPasswordForm');
 $router->post('olvide-contrasena',      'AuthController',      'forgotPassword');
@@ -145,6 +146,12 @@ $router->post('registro/prestador/iniciar-sesion', 'PublicRegisterController', '
 $router->get('registro/verificar',              'PublicRegisterController', 'verifyForm');
 $router->post('registro/verificar/codigo',      'PublicRegisterController', 'verifyCode');
 $router->post('registro/reenviar-codigo',       'PublicRegisterController', 'resendCode');
+$router->get('landing/registro/visitante',              'PublicRegisterController', 'visitorForm');
+$router->post('landing/registro/visitante/guardar',     'PublicRegisterController', 'visitorRegister');
+$router->post('landing/registro/visitante/iniciar-sesion', 'PublicRegisterController', 'visitorLogin');
+$router->get('landing/registro/verificar',              'PublicRegisterController', 'verifyForm');
+$router->post('landing/registro/verificar/codigo',      'PublicRegisterController', 'verifyCode');
+$router->post('landing/registro/reenviar-codigo',       'PublicRegisterController', 'resendCode');
 
 // ─── API Pública ──────────────────────────────────────────────────
 $router->get('api/promociones',            'PromotionController', 'apiPromotions');

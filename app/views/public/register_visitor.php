@@ -27,7 +27,7 @@ require APP_PATH . '/views/layout/head.php';
         <h2>Iniciar sesion</h2>
         <p class="text-sm mb-6">Accede a descuentos, favoritos y funcionalidades para visitantes.</p>
 
-        <form method="POST" action="<?= url('registro/visitante/iniciar-sesion') ?>" class="space-y-4">
+        <form method="POST" action="<?= url(($routePrefix ?? '') . 'registro/visitante/iniciar-sesion') ?>" class="space-y-4">
           <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
@@ -49,7 +49,7 @@ require APP_PATH . '/views/layout/head.php';
         <h2>Registro para visitantes</h2>
         <p class="text-sm mb-6">Registrate para obtener descuentos exclusivos, calificar y dejar comentarios.</p>
 
-        <form method="POST" action="<?= url('registro/visitante/guardar') ?>" class="space-y-4">
+        <form method="POST" action="<?= url(($routePrefix ?? '') . 'registro/visitante/guardar') ?>" class="space-y-4">
           <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre completo *</label>
@@ -59,6 +59,14 @@ require APP_PATH . '/views/layout/head.php';
             <label class="block text-sm font-semibold text-gray-700 mb-1">Email *</label>
             <input type="email" name="email" required class="colon-public-input w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none transition">
             <p class="text-xs text-gray-400 mt-1">Te enviaremos un codigo de confirmacion.</p>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Contrasena *</label>
+            <input type="password" name="password" required minlength="8" autocomplete="new-password" class="colon-public-input w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none transition">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Repetir contrasena *</label>
+            <input type="password" name="password_confirm" required minlength="8" autocomplete="new-password" class="colon-public-input w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none transition">
           </div>
           <button type="submit" class="colon-public-btn w-full">
             Registrarse

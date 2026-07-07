@@ -13,7 +13,7 @@ require APP_PATH . '/views/layout/head.php';
     <div class="mb-6 p-4 border border-blue-200 rounded-xl bg-blue-50">
       <h2 class="font-semibold text-gray-900 mb-2">📧 Verificación por Email</h2>
       <p class="text-xs text-gray-500 mb-3">Revisa tu bandeja de entrada y spam, ingresa el código de 6 dígitos.</p>
-      <form method="POST" action="<?= url('registro/verificar/codigo') ?>" class="flex gap-2">
+      <form method="POST" action="<?= url(($routePrefix ?? '') . 'registro/verificar/codigo') ?>" class="flex gap-2">
         <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
         <input type="hidden" name="method" value="email">
         <input type="text" name="code" required maxlength="6" pattern="[0-9]{6}" placeholder="000000"
@@ -30,14 +30,14 @@ require APP_PATH . '/views/layout/head.php';
 
 <script>
 const CSRF = '<?= e($csrf) ?>';
-const BASE_URL = '<?= BASE_URL ?>';
+const RESEND_CODE_URL = '<?= url(($routePrefix ?? '') . 'registro/reenviar-codigo') ?>';
 
 function resendCode(e) {
   e.preventDefault();
   if (!confirm('¿Reenviar código de verificación?')) return;
 
   const body = new URLSearchParams({ _csrf: CSRF, method: 'email' });
-  fetch(`${BASE_URL}/registro/reenviar-codigo`, {
+  fetch(RESEND_CODE_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),
@@ -54,4 +54,3 @@ function resendCode(e) {
 </script>
 
 <?php require APP_PATH . '/views/layout/footer.php'; ?>
-</write_to_file>

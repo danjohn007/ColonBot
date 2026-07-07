@@ -14,9 +14,15 @@ if (!defined('BASE_URL')) {
 }
 
 // ─── Rutas del sistema ─────────────────────────────────────────────────────
-define('ROOT_PATH',   dirname(__DIR__));
-define('APP_PATH',    ROOT_PATH . '/app');
-define('PUBLIC_PATH', ROOT_PATH . '/public');
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(__DIR__));
+}
+if (!defined('APP_PATH')) {
+    define('APP_PATH', ROOT_PATH . '/app');
+}
+if (!defined('PUBLIC_PATH')) {
+    define('PUBLIC_PATH', ROOT_PATH . '/public');
+}
 
 // ─── Detección de carpeta compartida de imágenes ──────────────────────────
 // Si estamos en /sistema/2/ o /sistema/1/, usar /sistema/images/
@@ -45,6 +51,42 @@ define('APP_NAME',    'Plataforma Turística – Colón');
 define('APP_VERSION', '1.0.0');
 define('APP_ENV',     getenv('APP_ENV') ?: 'production'); // development | production
 
+// ─── Registro explícito de errores para diagnosticar HTTP 500 ─────────────
+ini_set('log_errors', '1');
+set_error_handler(function (int $severity, string $message, string $file, int $line): bool {
+    if (!(error_reporting() & $severity)) {
+        return false;
+    }
+
+    $url = ($_SERVER['REQUEST_METHOD'] ?? 'CLI') . ' ' . ($_SERVER['REQUEST_URI'] ?? '');
+    error_log("[ColonBot PHP error] {$message} in {$file}:{$line} | {$url}");
+    return false;
+});
+
+set_exception_handler(function (Throwable $e): void {
+    $url = ($_SERVER['REQUEST_METHOD'] ?? 'CLI') . ' ' . ($_SERVER['REQUEST_URI'] ?? '');
+    error_log('[ColonBot uncaught exception] ' . get_class($e) . ': ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine() . " | {$url}\n" . $e->getTraceAsString());
+    http_response_code(500);
+    if (defined('APP_ENV') && APP_ENV === 'development') {
+        echo '<pre>' . htmlspecialchars((string)$e, ENT_QUOTES, 'UTF-8') . '</pre>';
+    }
+});
+
+register_shutdown_function(function (): void {
+    $error = error_get_last();
+    if (!$error) {
+        return;
+    }
+
+    $fatalTypes = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR];
+    if (!in_array($error['type'], $fatalTypes, true)) {
+        return;
+    }
+
+    $url = ($_SERVER['REQUEST_METHOD'] ?? 'CLI') . ' ' . ($_SERVER['REQUEST_URI'] ?? '');
+    error_log("[ColonBot fatal error] {$error['message']} in {$error['file']}:{$error['line']} | {$url}");
+});
+
 // ─── Sesiones ──────────────────────────────────────────────────────────────
 define('SESSION_NAME',     'colonbot_session');
 define('SESSION_LIFETIME', 3600 * 8); // 8 horas
@@ -64,7 +106,7 @@ if (APP_ENV === 'development') {
     error_reporting(E_ALL);
 } else {
     ini_set('display_errors', 0);
-    error_reporting(0);
+    error_reporting(E_ALL);
 }
 
 // ─── Iniciar sesión ────────────────────────────────────────────────────────

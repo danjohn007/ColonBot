@@ -20,21 +20,45 @@ class TouristController extends Controller
         $user = currentUser();
         $user = $this->users->find((int)$user['id']) ?: $user;
 
-        $topVisited = $this->businesses->topVisited(10);
+        $topVisited = [];
+        $activePromotions = [];
+        $activeEvents = [];
+        $visitedPlaces = [];
+        $myReviews = [];
 
-        $activePromotions = $this->promotions->active();
-        $activeEvents = $this->events->active();
+        try {
+            $topVisited = $this->businesses->topVisited(10);
+        } catch (Throwable $e) {
+            error_log('Visitor dashboard topVisited error: ' . $e->getMessage());
+        }
+
+        try {
+            $activePromotions = $this->promotions->active();
+        } catch (Throwable $e) {
+            error_log('Visitor dashboard promotions error: ' . $e->getMessage());
+        }
+
+        try {
+            $activeEvents = $this->events->active();
+        } catch (Throwable $e) {
+            error_log('Visitor dashboard events error: ' . $e->getMessage());
+        }
+
         try {
             $visitedPlaces = $this->businesses->visitedByUser((int)$user['id']);
             $myReviews = $this->businesses->reviewsByUser((int)$user['id']);
-        } catch (PDOException $e) {
+        } catch (Throwable $e) {
             error_log('Visitor dashboard data error: ' . $e->getMessage());
-            $visitedPlaces = [];
-            $myReviews = [];
             $this->flash('warning', 'Tu panel de visitante está activo. Falta aplicar la migración de historial y reseñas para ver toda la información.');
         }
 
-        $this->view('tourist.dashboard', compact('user', 'topVisited', 'activePromotions', 'activeEvents', 'visitedPlaces', 'myReviews') + ['csrf' => $this->csrf()]);
+        try {
+            $routePrefix = $this->pathForCurrentPrefix('');
+            $this->view('tourist.dashboard', compact('user', 'topVisited', 'activePromotions', 'activeEvents', 'visitedPlaces', 'myReviews') + ['csrf' => $this->csrf(), 'routePrefix' => $routePrefix]);
+        } catch (Throwable $e) {
+            error_log('Visitor dashboard view error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+            throw $e;
+        }
     }
 
     public function register(): void
@@ -60,7 +84,7 @@ class TouristController extends Controller
         if ($email) $_SESSION['user']['email'] = $email;
 
         $this->flash('success', 'Perfil actualizado correctamente.');
-        $this->redirect('turista');
+        $this->redirectForCurrentPrefix('turista');
     }
 
     public function submitReview(): void
@@ -74,21 +98,21 @@ class TouristController extends Controller
 
         if ($businessId <= 0) {
             $this->flash('error', 'Negocio no válido.');
-            $this->redirect('turista');
+            $this->redirectForCurrentPrefix('turista');
         }
 
         $user = currentUser();
         $business = $this->businesses->find($businessId);
         if (!$business) {
             $this->flash('error', 'Negocio no encontrado.');
-            $this->redirect('turista');
+            $this->redirectForCurrentPrefix('turista');
         }
 
         $this->businesses->addReview($businessId, $user['name'], $comment, min(5, max(1, $rating)), (int)$user['id']);
         $this->businesses->updateRating($businessId);
 
         $this->flash('success', '¡Gracias por tu valoración!');
-        $this->redirect('turista');
+        $this->redirectForCurrentPrefix('turista');
     }
 
     public function makeReservation(string $businessId): void

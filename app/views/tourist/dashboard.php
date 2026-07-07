@@ -25,7 +25,7 @@ require APP_PATH . '/views/layout/head.php';
       <h2 class="font-bold text-gray-900 text-lg">Mi perfil</h2>
       <button onclick="toggleProfileForm()" class="text-sm text-orange-600 font-semibold hover:underline">Editar</button>
     </div>
-    <form id="profile-form" method="POST" action="<?= url('turista/registrar') ?>" class="hidden space-y-4">
+    <form id="profile-form" method="POST" action="<?= url(($routePrefix ?? '') . 'turista/registrar') ?>" class="hidden space-y-4">
       <input type="hidden" name="_csrf" value="<?= e($csrf ?? '') ?>">
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <label class="block">

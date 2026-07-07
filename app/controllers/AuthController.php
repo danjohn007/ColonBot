@@ -11,12 +11,24 @@ class AuthController extends Controller
     public function loginForm(): void
     {
         if (isLoggedIn()) {
-            $this->redirect(hasRole('visitor') ? 'turista' : (hasRole('superadmin') ? 'superadmin' : 'admin'));
+            $user = currentUser();
+            $redirect = match ($user['role'] ?? '') {
+                'visitor' => 'turista',
+                'superadmin' => 'superadmin',
+                'colaborador_admin' => 'colaborador',
+                'prestador' => 'admin/crm',
+                default => 'admin',
+            };
+            if (($user['role'] ?? '') === 'visitor') {
+                $this->redirectForCurrentPrefix($redirect);
+            }
+            $this->redirect($redirect);
         }
         $a = random_int(1, 9);
         $b = random_int(1, 9);
         $_SESSION['captcha_sum'] = $a + $b;
-        $this->view('auth.login', ['csrf' => $this->csrf(), 'captchaA' => $a, 'captchaB' => $b]);
+        $routePrefix = $this->pathForCurrentPrefix('');
+        $this->view('auth.login', ['csrf' => $this->csrf(), 'captchaA' => $a, 'captchaB' => $b, 'routePrefix' => $routePrefix]);
     }
 
     public function login(): void
@@ -29,7 +41,7 @@ class AuthController extends Controller
         unset($_SESSION['captcha_sum']);
         if ($captchaInput === null || $captchaExpected === null || $captchaInput !== $captchaExpected) {
             $this->flash('error', 'La verificación matemática es incorrecta.');
-            $this->redirect('login');
+            $this->redirectForCurrentPrefix('login');
         }
 
         $email    = trim($_POST['email'] ?? '');
@@ -37,7 +49,7 @@ class AuthController extends Controller
 
         if (!$email || !$password) {
             $this->flash('error', 'Ingresa correo y contraseña.');
-            $this->redirect('login');
+            $this->redirectForCurrentPrefix('login');
         }
 
         $user = $this->users->findByEmail($email);
@@ -45,12 +57,12 @@ class AuthController extends Controller
         if (!$user || !$this->users->verifyPassword($password, $user['password'])) {
             $this->flash('error', 'Credenciales incorrectas.');
             $this->logAction('login_failed', 'users', 0, $email);
-            $this->redirect('login');
+            $this->redirectForCurrentPrefix('login');
         }
 
         if (!$user['active']) {
             $this->flash('error', 'Tu cuenta está desactivada.');
-            $this->redirect('login');
+            $this->redirectForCurrentPrefix('login');
         }
 
         $_SESSION['user'] = [
@@ -68,6 +80,9 @@ class AuthController extends Controller
             'prestador'         => 'admin/crm',
             default             => 'admin',
         };
+        if ($user['role'] === 'visitor') {
+            $this->redirectForCurrentPrefix($redirect);
+        }
         $this->redirect($redirect);
     }
 
@@ -81,7 +96,8 @@ class AuthController extends Controller
     public function forgotPasswordForm(): void
     {
         if (isLoggedIn()) {
-            $this->redirect(hasRole('visitor') ? 'turista' : (hasRole('superadmin') ? 'superadmin' : 'admin'));
+            $user = currentUser();
+            $this->redirect(($user['role'] ?? '') === 'visitor' ? 'turista' : (($user['role'] ?? '') === 'superadmin' ? 'superadmin' : 'admin'));
         }
         $this->view('auth.forgot_password', ['csrf' => $this->csrf()]);
     }

@@ -29,6 +29,32 @@ abstract class Controller
         exit;
     }
 
+    protected function currentRouteUri(): string
+    {
+        $requestPath = trim((string)(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? ''), '/');
+        $basePath = trim((string)(parse_url(BASE_URL, PHP_URL_PATH) ?? ''), '/');
+
+        if ($basePath !== '' && ($requestPath === $basePath || strpos($requestPath, $basePath . '/') === 0)) {
+            $requestPath = trim(substr($requestPath, strlen($basePath)), '/');
+        }
+
+        return $requestPath;
+    }
+
+    protected function pathForCurrentPrefix(string $path, string $prefix = 'landing'): string
+    {
+        $path = ltrim($path, '/');
+        $routeUri = $this->currentRouteUri();
+        $hasPrefix = $routeUri === $prefix || strpos($routeUri, $prefix . '/') === 0;
+
+        return $hasPrefix ? $prefix . '/' . $path : $path;
+    }
+
+    protected function redirectForCurrentPrefix(string $path, string $prefix = 'landing'): void
+    {
+        $this->redirect($this->pathForCurrentPrefix($path, $prefix));
+    }
+
     protected function requireAuth(string $role = 'admin'): void
     {
         if (!isset($_SESSION['user'])) {

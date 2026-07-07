@@ -73,7 +73,9 @@ function setting(string $key, string $default = ''): string
 
 function slugify(string $text): string
 {
-    $text = mb_strtolower($text, 'UTF-8');
+    $text = function_exists('mb_strtolower')
+        ? mb_strtolower($text, 'UTF-8')
+        : strtolower($text);
     $text = strtr($text, [
         'á'=>'a','é'=>'e','í'=>'i','ó'=>'o','ú'=>'u',
         'ä'=>'a','ë'=>'e','ï'=>'i','ö'=>'o','ü'=>'u',

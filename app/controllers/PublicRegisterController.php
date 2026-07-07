@@ -18,9 +18,11 @@ class PublicRegisterController extends Controller
     public function visitorForm(): void
     {
         if (isLoggedIn()) {
-            $this->redirect(hasRole('visitor') ? 'turista' : 'mapa');
+            $user = currentUser();
+            $this->redirectForCurrentPrefix(($user['role'] ?? '') === 'visitor' ? 'turista' : 'mapa');
         }
-        $this->view('public.register_visitor', ['csrf' => $this->csrf()]);
+        $routePrefix = $this->pathForCurrentPrefix('');
+        $this->view('public.register_visitor', ['csrf' => $this->csrf(), 'routePrefix' => $routePrefix]);
     }
 
     /**
@@ -35,26 +37,26 @@ class PublicRegisterController extends Controller
 
         if (!$email || !$password) {
             $this->flash('error', 'Ingresa correo y contraseña.');
-            $this->redirect('registro/visitante');
+            $this->redirectForCurrentPrefix('registro/visitante');
             return;
         }
 
         $user = $this->users->findByEmail($email);
         if (!$user || !$this->users->verifyPassword($password, $user['password'])) {
             $this->flash('error', 'Credenciales incorrectas.');
-            $this->redirect('registro/visitante');
+            $this->redirectForCurrentPrefix('registro/visitante');
             return;
         }
 
         if (!$user['active']) {
             $this->flash('error', 'Tu cuenta está desactivada.');
-            $this->redirect('registro/visitante');
+            $this->redirectForCurrentPrefix('registro/visitante');
             return;
         }
 
         if ($user['role'] !== 'visitor') {
             $this->flash('error', 'Esta cuenta no es de tipo visitante.');
-            $this->redirect('registro/visitante');
+            $this->redirectForCurrentPrefix('registro/visitante');
             return;
         }
 
@@ -66,7 +68,7 @@ class PublicRegisterController extends Controller
         ];
 
         $this->logAction('visitor_login', 'users', $user['id']);
-        $this->redirect('turista'); // Redirigir al dashboard del visitante
+        $this->redirectForCurrentPrefix('turista'); // Redirigir al dashboard del visitante
     }
 
     /**
@@ -78,10 +80,24 @@ class PublicRegisterController extends Controller
 
         $name  = trim($_POST['name'] ?? '');
         $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $passwordConfirm = $_POST['password_confirm'] ?? '';
 
-        if (!$name || !$email) {
-            $this->flash('error', 'Nombre y email son requeridos.');
-            $this->redirect('registro/visitante');
+        if (!$name || !$email || !$password || !$passwordConfirm) {
+            $this->flash('error', 'Nombre, email y contrasena son requeridos.');
+            $this->redirectForCurrentPrefix('registro/visitante');
+            return;
+        }
+
+        if (strlen($password) < 8) {
+            $this->flash('error', 'La contrasena debe tener al menos 8 caracteres.');
+            $this->redirectForCurrentPrefix('registro/visitante');
+            return;
+        }
+
+        if ($password !== $passwordConfirm) {
+            $this->flash('error', 'Las contrasenas no coinciden.');
+            $this->redirectForCurrentPrefix('registro/visitante');
             return;
         }
 
@@ -89,7 +105,7 @@ class PublicRegisterController extends Controller
         $existing = $this->users->findByEmail($email);
         if ($existing) {
             $this->flash('error', 'El email ya está registrado.');
-            $this->redirect('registro/visitante');
+            $this->redirectForCurrentPrefix('registro/visitante');
             return;
         }
 
@@ -102,6 +118,7 @@ class PublicRegisterController extends Controller
             'name'       => $name,
             'email'      => $email,
             'phone'      => '',
+            'password_hash' => $this->users->hashPassword($password),
             'email_code' => $emailCode,
             'created_at' => time(),
         ];
@@ -110,7 +127,7 @@ class PublicRegisterController extends Controller
         $this->sendVerificationEmail($email, $emailCode, $name);
 
         $this->flash('success', 'Te hemos enviado un código de verificación a tu email.');
-        $this->redirect('registro/verificar');
+        $this->redirectForCurrentPrefix('registro/verificar');
     }
 
     /**
@@ -228,12 +245,14 @@ class PublicRegisterController extends Controller
     public function verifyForm(): void
     {
         if (!isset($_SESSION['pending_register'])) {
-            $this->redirect('mapa');
+            $this->redirectForCurrentPrefix('mapa');
             return;
         }
+        $routePrefix = $this->pathForCurrentPrefix('');
         $this->view('public.verify_code', [
-            'csrf'  => $this->csrf(),
-            'email' => $_SESSION['pending_register']['email'],
+            'csrf'        => $this->csrf(),
+            'email'       => $_SESSION['pending_register']['email'],
+            'routePrefix' => $routePrefix,
         ]);
     }
 
@@ -248,7 +267,7 @@ class PublicRegisterController extends Controller
         $pending = $_SESSION['pending_register'] ?? null;
         if (!$pending) {
             $this->flash('error', 'No hay registro pendiente.');
-            $this->redirect('mapa');
+            $this->redirectForCurrentPrefix('mapa');
             return;
         }
 
@@ -258,7 +277,7 @@ class PublicRegisterController extends Controller
 
         if ((string)$code !== (string)$expectedCode) {
             $this->flash('error', 'El código ingresado no es correcto.');
-            $this->redirect('registro/verificar');
+            $this->redirectForCurrentPrefix('registro/verificar');
             return;
         }
 
@@ -291,13 +310,13 @@ class PublicRegisterController extends Controller
      */
     private function completeRegistration(array $pending): void
     {
-        $password = bin2hex(random_bytes(8)); // Generate random password
+        $passwordHash = $pending['password_hash'] ?? password_hash(bin2hex(random_bytes(8)), PASSWORD_DEFAULT);
         $role = $pending['type'] === 'prestador' ? 'prestador' : 'visitor';
 
         $userId = $this->users->insert([
             'name'     => $pending['name'],
             'email'    => $pending['email'],
-            'password' => password_hash($password, PASSWORD_DEFAULT),
+            'password' => $passwordHash,
             'phone'    => $pending['phone'] ?? '',
             'role'     => $role,
             'active'   => 1,
@@ -315,7 +334,7 @@ class PublicRegisterController extends Controller
 
         $this->logAction('public_register', 'users', $userId, "Registro público como $role");
 
-        $redirect = $role === 'prestador' ? 'admin' : 'turista';
+        $redirect = $role === 'prestador' ? 'admin' : $this->pathForCurrentPrefix('turista');
         $this->flash('success', 'Registro completado exitosamente. Bienvenido a CristobalBot.');
         $this->redirect($redirect);
     }

@@ -28,7 +28,7 @@ require APP_PATH . '/views/layout/head.php';
         </div>
         <?php endif; ?>
 
-        <form method="POST" action="<?= url('login') ?>" class="space-y-5">
+        <form method="POST" action="<?= url(($routePrefix ?? '') . 'login') ?>" class="space-y-5">
           <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
 
           <div>
