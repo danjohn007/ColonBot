@@ -21,6 +21,16 @@ class CrmController extends Controller
         $this->view('crm.index', compact('businesses', 'user') + ['csrf' => $this->csrf()]);
     }
 
+    /**
+     * Obtener contactos del CRM directamente desde chatbot_sessions y consultas.
+     * NO usa la tabla contacts.
+     *
+     * Clasificación:
+     * A) prospecto_sin_historial: en chatbot_sessions pero NO en consultas
+     * B) prospecto_recurrente: en consultas con SOLO 'solicitar_informacion'
+     * C) cliente: en consultas con 'compra_reservacion'
+     * D) lovemark: en consultas con 3+ 'compra_reservacion' en mismo negocio
+     */
     public function list(string $businessId): void
     {
         $this->requireAuth('prestador');
@@ -28,16 +38,91 @@ class CrmController extends Controller
         if (!$business) { $this->json(['error' => 'not found'], 404); }
         $this->ownerOrAdmin($business);
 
-        $category = $_GET['category'] ?? '';
+        $categoryFilter = $_GET['category'] ?? '';
+        $db = Database::getInstance();
 
-        // FIRST: run classification to create/update contacts from chatbot sessions
-        // This ensures all chatbot users have records in the contacts table
-        $this->contacts->classifyByChatbotSessions((int)$businessId);
+        // 1) Get ALL chatbot sessions
+        $allSessions = $db->query(
+            "SELECT wa_id, updated_at FROM chatbot_sessions ORDER BY updated_at DESC"
+        );
 
-        // SECOND: read contacts directly from the DB, filtered by category
-        $contacts = $this->contacts->byBusiness((int)$businessId, $category);
+        if (empty($allSessions)) {
+            $this->json([]);
+            return;
+        }
 
-        $this->json($contacts);
+        $results = [];
+
+        foreach ($allSessions as $session) {
+            $waId = $session['wa_id'];
+
+            // Count actions in consultas for this wa_id AND this business
+            $infoCount = (int)$db->query(
+                "SELECT COUNT(*) FROM consultas WHERE wa_id = ? AND business_id = ? AND tipo_accion = 'solicitar_informacion'",
+                [$waId, (int)$businessId]
+            )->fetchColumn();
+
+            $compraCount = (int)$db->query(
+                "SELECT COUNT(*) FROM consultas WHERE wa_id = ? AND business_id = ? AND tipo_accion = 'compra_reservacion'",
+                [$waId, (int)$businessId]
+            )->fetchColumn();
+
+            // Also check if they have compra_reservacion in ANY business
+            $hasCompraAnyBusiness = (int)$db->query(
+                "SELECT COUNT(*) FROM consultas WHERE wa_id = ? AND tipo_accion = 'compra_reservacion' AND business_id = ?",
+                [$waId, (int)$businessId]
+            )->fetchColumn();
+
+            // Determine category
+            if ($compraCount >= 3) {
+                $category = 'lovemark';
+            } elseif ($compraCount >= 1) {
+                $category = 'cliente';
+            } elseif ($infoCount >= 1) {
+                $category = 'prospecto_recurrente';
+            } else {
+                $category = 'prospecto_sin_historial';
+            }
+
+            // Apply category filter if set
+            if ($categoryFilter) {
+                if ($categoryFilter === 'cliente_frecuente') {
+                    if ($category !== 'lovemark') continue;
+                } else if ($category !== $categoryFilter) {
+                    continue;
+                }
+            }
+
+            // Get business name for the place they consulted about
+            $businessName = null;
+            if ($infoCount > 0 || $compraCount > 0) {
+                $bizRow = $db->query(
+                    "SELECT b.name FROM consultas c JOIN businesses b ON b.id = c.business_id WHERE c.wa_id = ? AND c.business_id = ? LIMIT 1",
+                    [$waId, (int)$businessId]
+                );
+                if (!empty($bizRow)) {
+                    $businessName = $bizRow[0]['name'];
+                }
+            }
+
+            $results[] = [
+                'id' => 0,
+                'wa_id' => $waId,
+                'name' => 'Usuario ' . substr($waId, -4),
+                'email' => '',
+                'phone' => $waId,
+                'category' => $category,
+                'total_visits' => $infoCount + $compraCount,
+                'total_spent' => 0,
+                'source' => 'whatsapp',
+                'last_contact_at' => $session['updated_at'],
+                'purchase_count' => $compraCount,
+                'is_chatbot' => true,
+                'business_name' => $businessName,
+            ];
+        }
+
+        $this->json($results);
     }
 
     public function add(): void
