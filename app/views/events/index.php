@@ -53,34 +53,46 @@ require APP_PATH . '/views/layout/head.php';
             <span>🔗 <a href="<?= e($p['public_url']) ?>" target="_blank" class="text-blue-600 hover:underline">URL pública</a></span>
             <?php endif; ?>
           </div>
+          <?php if ($p['image']): ?>
+          <img src="<?= imageUrl($p['image']) ?>" class="mt-3 h-20 w-20 object-cover rounded-lg">
+          <?php endif; ?>
         </div>
         <div class="flex flex-col gap-2 shrink-0">
-          <button onclick="editEvent(<?= htmlspecialchars(json_encode($p), ENT_QUOTES) ?>)" class="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition">Editar</button>
-          <button onclick="toggleStatus(<?= $p['id'] ?>, '<?= $p['status'] === 'active' ? 'inactive' : 'active' ?>')" class="text-xs px-3 py-1.5 <?= $p['status'] === 'active' ? 'bg-red-50 text-red-700 hover:bg-red-100' : 'bg-green-50 text-green-700 hover:bg-green-100' ?> rounded-lg transition">
-            <?= $p['status'] === 'active' ? 'Desactivar' : 'Activar' ?>
-          </button>
-          <?php if (in_array($user['role'], ['superadmin', 'colaborador_admin'])): ?>
-          <button onclick="approveEvent(<?= $p['id'] ?>)" class="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition">Aprobar</button>
-          <?php if (!$p['bot_authorized'] && $p['status'] === 'approved'): ?>
-          <button onclick="authorizeBot(<?= $p['id'] ?>)" class="text-xs px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition">🤖 Autorizar Bot</button>
-          <?php endif; ?>
-          <?php endif; ?>
+          <div class="flex flex-wrap gap-1">
+            <?php if (in_array($user['role'], ['superadmin', 'colaborador_admin'])): ?>
+              <?php if ($p['status'] === 'pending'): ?>
+              <button onclick="approveEvent(<?= $p['id'] ?>)" class="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition">✅ Aprobar</button>
+              <?php endif; ?>
+              <?php if ($p['status'] === 'approved' && !$p['bot_authorized']): ?>
+              <button onclick="authorizeBot(<?= $p['id'] ?>)" class="text-xs px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition">🤖 Publicar en Bot</button>
+              <?php endif; ?>
+              <!-- 1-click authorization for chatbot publication -->
+              <?php if ($p['status'] === 'approved' && !$p['bot_authorized']): ?>
+              <button onclick="authorizeBotPublish(<?= $p['id'] ?>)" class="text-xs px-3 py-1.5 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition">📢 1 Click - Publicar</button>
+              <?php endif; ?>
+            <?php endif; ?>
+            <button onclick="editEvent(<?= htmlspecialchars(json_encode($p), ENT_QUOTES) ?>)" class="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition">Editar</button>
+            <button onclick="toggleStatus(<?= $p['id'] ?>, '<?= $p['status'] === 'active' ? 'inactive' : 'active' ?>')" class="text-xs px-3 py-1.5 <?= $p['status'] === 'active' ? 'bg-red-50 text-red-700 hover:bg-red-100' : 'bg-green-50 text-green-700 hover:bg-green-100' ?> rounded-lg transition">
+              <?= $p['status'] === 'active' ? 'Desactivar' : 'Activar' ?>
+            </button>
+            <!-- Notify visitors button -->
+            <?php if ($p['status'] === 'active' && $p['public_url']): ?>
+            <button onclick="notifyVisitors(<?= $p['id'] ?>, '<?= e($p['title']) ?>')" class="text-xs px-3 py-1.5 bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100 transition">📣 Notificar Visitantes</button>
+            <?php endif; ?>
+          </div>
         </div>
       </div>
-      <?php if ($p['image']): ?>
-      <img src="<?= imageUrl($p['image']) ?>" class="mt-3 h-20 w-20 object-cover rounded-lg">
-      <?php endif; ?>
     </div>
     <?php endforeach; ?>
     <?php endif; ?>
   </div>
 </main>
 
-<!-- Create/Edit Modal -->
+<!-- Create/Edit Modal: "Crear evento" -->
 <div id="event-modal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-40 flex items-center justify-center px-4">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 relative">
     <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">✕</button>
-    <h2 class="text-lg font-bold text-gray-900 mb-4" id="modal-title">Eventos</h2>
+    <h2 class="text-lg font-bold text-gray-900 mb-4" id="modal-title">Crear evento</h2>
     <form onsubmit="saveEvent(event)" enctype="multipart/form-data" class="space-y-4">
       <input type="hidden" id="event-id" value="">
       <input type="hidden" id="event-business-id" name="business_id" value="<?= $businesses[0]['id'] ?? '' ?>">
@@ -88,7 +100,7 @@ require APP_PATH . '/views/layout/head.php';
       <div class="grid grid-cols-2 gap-4">
         <div class="col-span-2">
           <label class="label block text-sm font-medium text-gray-700 mb-1">Título *</label>
-          <input type="text" id="event-title" required class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
+          <input type="text" id="event-title" required class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="Nombre del evento">
         </div>
         <?php if (count($businesses) > 1): ?>
         <div class="col-span-2">
@@ -102,8 +114,8 @@ require APP_PATH . '/views/layout/head.php';
         </div>
         <?php endif; ?>
         <div class="col-span-2">
-          <label class="label block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-          <textarea id="event-description" rows="3" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm"></textarea>
+          <label class="label block text-sm font-medium text-gray-700 mb-1">Descripción del evento</label>
+          <textarea id="event-description" rows="3" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="Descripción del evento..."></textarea>
         </div>
         <div>
           <label class="label block text-sm font-medium text-gray-700 mb-1">Imagen</label>
@@ -111,19 +123,19 @@ require APP_PATH . '/views/layout/head.php';
         </div>
         <div>
           <label class="label block text-sm font-medium text-gray-700 mb-1">Precio</label>
-          <input type="number" id="event-price" step="0.01" min="0" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
+          <input type="number" id="event-price" step="0.01" min="0" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="0.00">
         </div>
         <div>
-          <label class="label block text-sm font-medium text-gray-700 mb-1">Precio Preventa</label>
-          <input type="number" id="event-presale-price" step="0.01" min="0" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
+          <label class="label block text-sm font-medium text-gray-700 mb-1">Precio de preventa</label>
+          <input type="number" id="event-presale-price" step="0.01" min="0" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="0.00">
         </div>
         <div>
-          <label class="label block text-sm font-medium text-gray-700 mb-1">Aforo</label>
-          <input type="number" id="event-capacity" min="0" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
+          <label class="label block text-sm font-medium text-gray-700 mb-1">Aforo de la sede</label>
+          <input type="number" id="event-capacity" min="0" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="Ej: 100">
         </div>
         <div class="col-span-2">
           <label class="label block text-sm font-medium text-gray-700 mb-1">Ubicación del evento</label>
-          <input type="text" id="event-location" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
+          <input type="text" id="event-location" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="Dirección o lugar del evento">
         </div>
         <div>
           <label class="label block text-sm font-medium text-gray-700 mb-1">Vigencia</label>
@@ -147,7 +159,7 @@ require APP_PATH . '/views/layout/head.php';
         </div>
         <div class="col-span-2">
           <label class="label block text-sm font-medium text-gray-700 mb-1">Condiciones / Restricciones</label>
-          <textarea id="event-conditions" rows="2" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm"></textarea>
+          <textarea id="event-conditions" rows="2" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="Condiciones del evento..."></textarea>
         </div>
       </div>
       <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition">
@@ -162,7 +174,7 @@ const CSRF = '<?= e($csrf) ?>';
 const BASE_URL = '<?= BASE_URL ?>';
 
 function openCreateModal() {
-  document.getElementById('modal-title').textContent = 'Eventos';
+  document.getElementById('modal-title').textContent = 'Crear evento';
   document.getElementById('event-id').value = '';
   document.getElementById('event-title').value = '';
   document.getElementById('event-description').value = '';
@@ -273,6 +285,45 @@ function authorizeBot(id) {
   })
   .then(r => r.json())
   .then(d => { if (d.ok) location.reload(); });
+}
+
+/** 1-click authorization + publish to chatbot */
+function authorizeBotPublish(id) {
+  if (!confirm('¿Autorizar y publicar este evento en el chatbot con 1 clic?')) return;
+  const body = new URLSearchParams({ _csrf: CSRF });
+  fetch(`${BASE_URL}/admin/eventos/${id}/autorizar-bot`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) {
+      alert('✅ Evento autorizado y publicado en el chatbot exitosamente.');
+      location.reload();
+    } else {
+      alert(d.error || 'Error al autorizar');
+    }
+  });
+}
+
+/** Notify all visitor users about a new event */
+function notifyVisitors(eventId, title) {
+  if (!confirm(`¿Notificar a todos los visitantes sobre el evento: "${title}"?`)) return;
+  const body = new URLSearchParams({ _csrf: CSRF, event_id: eventId });
+  fetch(`${BASE_URL}/admin/eventos/${eventId}/notificar`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) {
+      alert(`✅ Notificación enviada a ${d.count || 0} visitante(s).`);
+    } else {
+      alert(d.error || 'Error al notificar');
+    }
+  });
 }
 </script>
 

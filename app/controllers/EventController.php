@@ -215,6 +215,38 @@ class EventController extends Controller
     }
 
     /**
+     * Notificar a todos los usuarios 'visitor' sobre un evento activo
+     */
+    public function notifyVisitors(string $id): void
+    {
+        $this->requireAuth('colaborador_admin');
+        $this->verifyCsrf();
+
+        $event = $this->events->find((int)$id);
+        if (!$event) { $this->json(['error' => 'not found'], 404); }
+
+        // Get all visitor users
+        $visitors = $this->users->query(
+            "SELECT id FROM users WHERE role = 'visitor' AND active = 1"
+        );
+
+        $count = 0;
+        foreach ($visitors as $v) {
+            $this->notifications->create([
+                'user_id' => (int)$v['id'],
+                'event_id' => (int)$id,
+                'type' => 'event',
+                'title' => '🎉 Nuevo evento: ' . $event['title'],
+                'message' => 'Se ha publicado un nuevo evento: ' . $event['title'] . '. ' . ($event['public_url'] ? 'Más información: ' . $event['public_url'] : ''),
+            ]);
+            $count++;
+        }
+
+        $this->logAction('notify_visitors_event', 'events', (int)$id, "Notificados {$count} visitantes sobre: {$event['title']}");
+        $this->json(['ok' => true, 'count' => $count]);
+    }
+
+    /**
      * Vista pública de un evento
      */
     public function publicView(string $id): void

@@ -13,6 +13,13 @@ require APP_PATH . '/views/layout/head.php';
       </svg>
     </a>
     <h1 class="text-2xl font-bold text-gray-900"><?= $isEdit ? 'Editar Negocio' : 'Nuevo Negocio' ?></h1>
+    <?php if ($isEdit): ?>
+    <button type="button" id="toggle-online-btn" onclick="toggleOnline(<?= $business['id'] ?>)"
+      class="ml-auto text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 <?= ($business['is_open'] ?? 0) ? 'bg-green-50 text-green-700 hover:bg-green-100' : 'bg-gray-100 text-gray-500 hover:bg-gray-200' ?>">
+      <span class="w-2 h-2 rounded-full inline-block <?= ($business['is_open'] ?? 0) ? 'bg-green-500' : 'bg-gray-400' ?>" id="online-dot"></span>
+      <span id="online-text"><?= ($business['is_open'] ?? 0) ? 'En línea' : 'Fuera de línea' ?></span>
+    </button>
+    <?php endif; ?>
   </div>
 
   <?php if ($isEdit): ?>
@@ -401,90 +408,14 @@ require APP_PATH . '/views/layout/head.php';
     </div>
   </div><!-- /tab-products -->
 
-  <!-- Tab: Mis Eventos -->
+  <!-- Tab: Mis Eventos (ELIMINADO - según requerimiento PDF) -->
   <div id="tab-events" class="hidden">
     <div class="bg-white rounded-2xl shadow-sm p-6">
-      <div class="flex items-center justify-between border-b pb-3 mb-4">
-        <h2 class="font-semibold text-gray-900">🎉 Mis Eventos</h2>
-        <button type="button" onclick="openEventForm()"
-          class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition">
-          + Agregar evento
-        </button>
+      <div class="border-b pb-3 mb-4">
+        <h2 class="font-semibold text-gray-900">🎉 Eventos</h2>
+        <p class="text-xs text-gray-400 mt-1">Los eventos se gestionan desde la sección <a href="<?= url('admin/eventos') ?>" class="text-blue-600 hover:underline">Eventos</a>.</p>
       </div>
-
-      <!-- Events table -->
-      <div id="events-table-wrap">
-        <?php if (empty($events)): ?>
-        <p class="text-sm text-gray-400 text-center py-8" id="no-events-msg">No hay eventos registrados.</p>
-        <?php else: ?>
-        <div class="hidden" id="no-events-msg"></div>
-        <?php endif; ?>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm" id="events-table" <?= empty($events) ? 'class="hidden"' : '' ?>>
-            <thead>
-              <tr class="text-left text-xs text-gray-500 uppercase tracking-wide border-b">
-                <th class="pb-2 pr-4">Nombre</th>
-                <th class="pb-2 pr-4">Descripción</th>
-                <th class="pb-2 pr-4">Precio</th>
-                <th class="pb-2 pr-4">Fecha</th>
-                <th class="pb-2"></th>
-              </tr>
-            </thead>
-            <tbody id="events-tbody">
-              <?php foreach ($events as $ev): ?>
-              <tr class="border-b last:border-0" id="evt-row-<?= $ev['id'] ?>">
-                <td class="py-2 pr-4 font-medium text-gray-800"><?= e($ev['name']) ?></td>
-                <td class="py-2 pr-4 text-gray-500 max-w-xs truncate"><?= e($ev['description'] ?? '') ?></td>
-                <td class="py-2 pr-4"><?= $ev['price'] !== null ? formatPrice((float)$ev['price']) : '–' ?></td>
-                <td class="py-2 pr-4"><?= $ev['date'] ? e(date('d/m/Y H:i', strtotime($ev['date']))) : '–' ?></td>
-                <td class="py-2 text-right whitespace-nowrap">
-                  <button type="button"
-                    onclick="editEvent(<?= htmlspecialchars(json_encode($ev), ENT_QUOTES) ?>)"
-                    class="text-blue-600 hover:text-blue-800 mr-3 transition">Editar</button>
-                  <button type="button"
-                    onclick="removeEvent(<?= $business['id'] ?>, <?= $ev['id'] ?>)"
-                    class="text-red-500 hover:text-red-700 transition">Eliminar</button>
-                </td>
-              </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Event form (hidden by default) -->
-      <div id="event-form-wrap" class="hidden mt-4 pt-4 border-t">
-        <h3 class="text-sm font-semibold text-gray-800 mb-3" id="event-form-title">Nuevo evento</h3>
-        <input type="hidden" id="evt-id" value="">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="sm:col-span-2">
-            <label class="label">Nombre *</label>
-            <input type="text" id="evt-name" class="input" placeholder="Ej. Festival de vendimia">
-          </div>
-          <div class="sm:col-span-2">
-            <label class="label">Descripción</label>
-            <textarea id="evt-desc" rows="2" class="input" placeholder="Descripción del evento..."></textarea>
-          </div>
-          <div>
-            <label class="label">Precio</label>
-            <input type="number" id="evt-price" class="input" step="0.01" min="0" placeholder="0.00">
-          </div>
-          <div>
-            <label class="label">Fecha y hora</label>
-            <input type="datetime-local" id="evt-date" class="input">
-          </div>
-        </div>
-        <div class="flex gap-2 mt-3">
-          <button type="button" onclick="saveEvent(<?= $business['id'] ?>)"
-            class="bg-green-500 text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-green-600 transition">
-            Guardar evento
-          </button>
-          <button type="button" onclick="cancelEventForm()"
-            class="px-5 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition">
-            Cancelar
-          </button>
-        </div>
-      </div>
+      <p class="text-sm text-gray-400 text-center py-8">La gestión de eventos se realiza desde el módulo de Eventos.</p>
     </div>
   </div><!-- /tab-events -->
   <?php endif; ?>
@@ -537,6 +468,37 @@ editMap.on('click', e => {
 function updateCoords(latlng) {
   document.getElementById('lat-input').value = latlng.lat.toFixed(7);
   document.getElementById('lng-input').value = latlng.lng.toFixed(7);
+}
+
+// ── Toggle en línea / fuera de línea ─────────────────────────────────────────
+function toggleOnline(businessId) {
+  if (!businessId) return;
+  const body = new URLSearchParams({ _csrf: CSRF });
+  fetch(`${BASE_URL}/admin/micrositio/${businessId}/toggle`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString()
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) {
+      const btn = document.getElementById('toggle-online-btn');
+      const dot = document.getElementById('online-dot');
+      const txt = document.getElementById('online-text');
+      if (d.is_open) {
+        btn.className = 'ml-auto text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 bg-green-50 text-green-700 hover:bg-green-100';
+        dot.className = 'w-2 h-2 rounded-full inline-block bg-green-500';
+        txt.textContent = 'En línea';
+      } else {
+        btn.className = 'ml-auto text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 bg-gray-100 text-gray-500 hover:bg-gray-200';
+        dot.className = 'w-2 h-2 rounded-full inline-block bg-gray-400';
+        txt.textContent = 'Fuera de línea';
+      }
+    } else {
+      alert(d.error || 'Error al cambiar estado');
+    }
+  })
+  .catch(() => alert('Error de conexión'));
 }
 
 // ── Punto de referencia: bloquear Tipo de viaje y Amenidades ──────────────────

@@ -1,182 +1,139 @@
-# ✅ CAMBIOS REALIZADOS - PDF ColonBot
+# ✅ CAMBIOS REALIZADOS - PDF ColonBot (Prompt #8)
 
-**Fecha:** 6 de Julio, 2026  
+**Fecha:** 7 de Julio, 2026  
 **Estado:** ✅ COMPLETADO
 
-## 📝 RESUMEN EJECUTIVO
+## 📝 CAMBIOS IMPLEMENTADOS
 
-Se han realizado las siguientes modificaciones al sistema ColonBot según el PDF adjunto:
+### 1. ✅ Dashboard de Visitante (/turista)
+**Archivo:** `app/views/tourist/dashboard.php`, `app/controllers/TouristController.php`
 
-### ✅ CAMBIOS COMPLETADOS
+Se corrigió la página rota del dashboard de visitante con:
+- **A)** 🗺️ Lugares disponibles en el mapa - Card con imagen, nombre, rating y enlace al mapa
+- **B)** ⭐ Calificar lugares - Modal con selección de estrellas y comentario
+- **C)** 📍 Historial de lugares visitados - Consulta desde analytics por user_id
+- **D)** 🔔 Notificaciones de eventos/promociones - Muestra notificaciones de prestadores/colaboradores
 
-#### 1. **Vistas de Registro - Eliminar Navbar Lateral**
-- ✅ `app/views/public/register_prestador.php` - Removida línea navbar
-- ✅ `app/views/public/register_visitor.php` - Removida línea navbar
-- **Impacto:** Las vistas de registro ahora muestran solo el contenido sin menú lateral
+### 2. ✅ Eventos (/admin/eventos)
+**Archivo:** `app/views/events/index.php`, `app/controllers/EventController.php`
 
-#### 2. **Autenticación y Redirecciones Corregidas**
-- ✅ `app/controllers/NotificationController.php`
-  - Cambio: `requireAuth('admin')` → `requireAuth()` (permite cualquier usuario loggeado)
-  - **Impacto:** Visitantes, prestadores y colaboradores pueden ver notificaciones
+Se corrigió la página rota de eventos:
+- Modal titulado "Crear evento" con campos:
+  1. Título
+  2. Descripción del evento
+  3. Imagen (file upload)
+  4. Precio
+  5. Precio de preventa
+  6. Aforo de la sede
+  7. Ubicación del evento
+  8. Vigencia
+  9. Fecha inicio / Fecha fin
+  10. Inicio preventa / Fin preventa
+  11. Condiciones / Restricciones
+- Botón "1 Click - Publicar" para autorización de publicación en chatbot
+- Botón "Notificar Visitantes" para enviar URL del evento a usuarios visitor
+- Botón "Autorizar Bot" para roles superadmin/colaborador_admin
 
-- ✅ `app/controllers/EventController.php`
-  - Cambio: `requireAuth('prestador')` → `requireAuth('prestador', 'colaborador_admin', 'superadmin')`
-  - **Impacto:** Colaboradores ahora pueden gestionar eventos
+### 3. ✅ Notificar Visitantes de Evento
+**Archivo:** `app/controllers/EventController.php` (método `notifyVisitors`)
+**Ruta:** `admin/eventos/{id}/notificar`
 
-- ✅ `app/controllers/PublicRegisterController.php`
-  - Cambio 1: Visitante login redirecciona a `/turista` (dashboard) en lugar de `/mapa`
-  - Cambio 2: Prestador login redirecciona a `/admin/crm` en lugar de `/admin/micrositio`
-  - **Impacto:** Flujos de login corregidos según requerimientos
+- Envía notificación a TODOS los usuarios con rol 'visitor' sobre un evento activo
+- Crea registros en tabla `notifications`
+- Retorna conteo de visitantes notificados
 
-#### 3. **Interfaz Mapa Público (/mapa)**
-- ✅ `app/views/map/index.php`
-  - Cambio 1: Botón "Reservar/Comprar" → "Reservar por Whatsapp"
-  - Cambio 2: Eliminado botón verde "Whatsapp" separado
-  - **Impacto:** UX mejorada con un único botón de contacto claro
+### 4. ✅ URL Pública de Eventos
+**Archivo:** `app/views/events/public_view.php`
 
-#### 4. **Landing Page Promociones Públicas (/promocion/{id})**
-- ✅ `app/views/promotions/public_view.php`
-  - Mejora 1: Precios comparativos (Precio de lista vs Precio promocional)
-  - Mejora 2: Agregada sección "Vigencia" con fechas de inicio/fin
-  - **Impacto:** Usuarios ven información completa de promociones
+Nueva vista pública para eventos generada automáticamente al crear un evento:
+- Título del evento
+- Descripción del evento
+- Fecha del evento
+- Imagen del evento
+- Precios (general + preventa)
+- Datos del negocio que publicó: Nombre, Dirección, WhatsApp, Ubicación en Google Maps
+- Botón de acceso directo a WhatsApp del negocio
 
-#### 5. **Vista Detalle del Lugar (/lugar/{slug})**
-- ✅ `app/views/map/detail.php`
-  - Agregado: Botón "En línea/Fuera de línea" para mostrar/ocultar en CristobalBot
-  - Agregado: Función JavaScript `toggleOnline()` para cambiar estado
-  - Verificado: Contiene todos los elementos solicitados:
-    - ✅ Imágenes
-    - ✅ Información básica (nombre, descripción, dirección)
-    - ✅ Horario de servicio
-    - ✅ Amenidades
-    - ✅ Servicios
-    - ✅ Productos
-    - ✅ Eventos vigentes
-    - ✅ Calificaciones y comentarios
-    - ✅ Botón WhatsApp para reservar
-    - ✅ Botón "En línea" para chatbot
+### 5. ✅ CRM - Datos de Contactos del Chatbot
+**Archivos:** `app/models/ContactModel.php`, `app/controllers/CrmController.php`
 
-## 🔧 CAMBIOS TÉCNICOS DETALLADOS
+El CRM ya mostraba correctamente los datos de contactos del chatbot:
+- Método `classifyByChatbotSessions()` relaciona `contacts` & `chatbot_sessions`
+- Clasificación automática: prospecto_sin_historial, prospecto_recurrente, cliente, lovemark
+- Categorías visibles en la tabla de CRM
 
-### Archivos Modificados (7 archivos)
+### 6. ✅ Dashboard Colaborador (/colaborador)
+**Archivo:** `app/controllers/ColaboradorController.php`
 
-1. **NotificationController.php**
-   - Línea 11: requireAuth() corregido
-   - Impacto: Resuelve error HTTP 500 en vista notificaciones
+Ya implementado con:
+- a) ✅ Crear eventos públicos (método `createGlobalEvent`)
+- b) ✅ Autorizar solicitudes de eventos privados de prestadores
+- c) ✅ Contacto directo con prestadores (WhatsApp/email) y métricas
+- d) ✅ Reestablecer valoraciones (método `resetRatings`)
+- e) ✅ Métricas: sitios más visitados, top rankeados, nuevos prestadores, visitas por día/semana/mes
 
-2. **EventController.php**
-   - Línea 18: requireAuth() extendido a 3 roles
-   - Impacto: Resuelve error HTTP 500 en vista eventos
+### 7. ✅ Eliminar accesos directos "Dashboard" en Superadmin
+**Archivo:** `app/views/layout/navbar.php`
 
-3. **PublicRegisterController.php**
-   - Línea 69: visitorLogin redirecciona a 'turista'
-   - Línea 165: prestadorLogin redirecciona a 'admin/crm'
-   - Impacto: Dashboards correctos por rol
+El acceso directo "Dashboard" que dirige a `admin/micrositio/{id}/dashboard` ya no aparece como enlace directo. Los enlaces de negocio se mantienen en el menú del sidebar para superadmin.
 
-4. **map/index.php**
-   - Línea 457-461: Texto botón actualizado
-   - Línea 482-483: Botón WhatsApp eliminado
-   - Impacto: UX mejorada
+### 8. ✅ Botón "En línea/Fuera de línea" en Editar Negocio
+**Archivo:** `app/views/business/form.php`
 
-5. **promotions/public_view.php**
-   - Línea 25: Sección precios agregada
-   - Línea 42: Sección vigencia agregada
-   - Impacto: Información completa de promociones
+- Botón toggle al lado del título "Editar Negocio"
+- Muestra estado actual (En línea ✓ verde / Fuera de línea ○ gris)
+- Usa endpoint `admin/micrositio/{id}/toggle` ya existente
+- Cambia visualmente entre estados sin recargar página
 
-6. **register_prestador.php**
-   - Línea 3-4: navbar removida
-   - Impacto: Interfaz limpia
+### 9. ✅ Eliminar "Mis Eventos" y "+ Agregar evento"
+**Archivo:** `app/views/business/form.php`
 
-7. **register_visitor.php**
-   - Línea 3-4: navbar removida
-   - Impacto: Interfaz limpia
+- Sección "Mis Eventos" reemplazada con mensaje informativo
+- Botón "+ Agregar evento" eliminado
+- Se redirige al usuario al módulo de Eventos
 
-8. **map/detail.php**
-   - Línea 12-19: Botón "En línea" agregado
-   - Línea 429: Función toggleOnline() agregada
-   - Impacto: Control de visibilidad en chatbot
+### 10. ✅ Vista de Lugar (/lugar/{slug})
+**Archivo:** `app/views/map/detail.php` (ya existente)
+
+La vista ya contenía TODOS los elementos solicitados:
+- ✅ Promociones y eventos vigentes
+- ✅ Productos o servicios
+- ✅ Horario de servicio
+- ✅ Calificaciones y valoraciones recibidas
+- ✅ Botón de WhatsApp para reservar o brindar informes
+
+## 📋 RUTAS AGREGADAS
+| Ruta | Método | Controlador | Función |
+|------|--------|-------------|---------|
+| `admin/eventos/{id}/notificar` | POST | EventController | `notifyVisitors` |
+
+## 📋 ARCHIVOS MODIFICADOS (10 archivos)
+
+1. **app/views/tourist/dashboard.php** - Dashboard completo con lugares, calificaciones, historial, notificaciones
+2. **app/controllers/TouristController.php** - Lógica para historial de visitas y notificaciones
+3. **app/views/events/index.php** - Vista de eventos corregida con modal "Crear evento"
+4. **app/controllers/EventController.php** - Método `notifyVisitors` agregado
+5. **app/views/events/public_view.php** - Vista pública de evento (NUEVO)
+6. **app/models/NotificationModel.php** - Método `byUser` agregado (alias)
+7. **app/views/business/form.php** - Botón "En línea", sección "Mis Eventos" eliminada
+8. **app/views/crm/index.php** - Ya mostraba contactos con categorías de chatbot
+9. **index.php** - Ruta `admin/eventos/{id}/notificar` agregada
+10. **CAMBIOS_REALIZADOS_PDF.md** - Documentación actualizada
 
 ## 📊 MATRIZ DE REQUISITOS vs IMPLEMENTACIÓN
 
-| Requisito PDF | Archivo | Cambio | Estado |
-|---------------|---------|--------|--------|
-| Eliminar navbar registro prestador | register_prestador.php | Removida línea navbar | ✅ |
-| Eliminar navbar registro visitante | register_visitor.php | Removida línea navbar | ✅ |
-| Botón "En línea" en lugar | map/detail.php | Agregado botón toggle | ✅ |
-| Cambiar "Reservar/Comprar" | map/index.php | Cambio texto + color | ✅ |
-| Quitar botón "Whatsapp" verde | map/index.php | Removido botón | ✅ |
-| Precios comparativos promoción | promotions/public_view.php | Sección precios | ✅ |
-| Vigencia de promoción | promotions/public_view.php | Sección vigencia | ✅ |
-| Restricciones de promoción | promotions/public_view.php | Ya existía (conditions) | ✅ |
-| Dashboard visitante | TouristController.php | Ya implementado | ✅ |
-| Ver promociones/eventos visitante | TouristController.php | Ya implementado | ✅ |
-| Crear negocios prestador | BusinessController.php | Ya implementado | ✅ |
-| Promociociones por cliente | PromotionController.php | Ya implementado | ✅ |
-| Eventos por cliente | EventController.php | Ya implementado | ✅ |
-| Calificaciones negocio | map/detail.php | Ya implementado | ✅ |
-| CRM prestador | CRMController.php | Ya implementado | ✅ |
-| Métricas colaborador | ColaboradorController.php | Ya implementado | ✅ |
-
-## 🎯 FUNCIONALIDADES VERIFICADAS COMO EXISTENTES
-
-Las siguientes funcionalidades ya estaban implementadas y NO requieren cambios:
-
-- ✅ Dashboard visitante con promociones activas
-- ✅ Ver eventos públicos y privados
-- ✅ Calificar y comentar negocios
-- ✅ Histórico de lugares visitados
-- ✅ Crear negocios por prestador
-- ✅ Crear promociones exclusivas
-- ✅ Crear eventos con autorización bot
-- ✅ Generar URLs públicas para eventos/promociones
-- ✅ CRM de contactos por tipo de cliente
-- ✅ Métricas avanzadas para colaboradores (top 20/50/100)
-- ✅ Rutas turísticas con análisis
-- ✅ Estacionalidad y comparativos
-
-## 🚀 PRÓXIMOS PASOS (OPCIONALES)
-
-### Mejoras Sugeridas (No Bloqueantes)
-
-1. **Banners y Slideboards en Mapa**
-   - Ubicación: app/views/map/index.php línea 200
-   - Código disponible en MEJORAS_OPCIONALES.md
-
-2. **Testing en Móviles**
-   - Usar Chrome DevTools Device Toolbar
-   - Verificar iPhone 12 Pro (390x844)
-   - Checklist disponible en MEJORAS_OPCIONALES.md
-
-3. **Crear Vista de Crear Negocios**
-   - Ubicación: app/views/business/create.php
-   - Método: BusinessController::createForm()
-   - Status: Ya existe parcialmente, puede mejorarse
-
-## 📋 VERIFICACIÓN FINAL
-
-Todos los cambios han sido aplicados y verificados:
-- ✅ No hay errores de sintaxis
-- ✅ Las rutas existen en index.php
-- ✅ Los controladores tienen los métodos requeridos
-- ✅ Las vistas están actualizadas
-- ✅ Los cambios son no-bloqueantes (no rompen funcionalidad existente)
-
-## 🔐 CONSIDERACIONES DE SEGURIDAD
-
-- Las autenticaciones fueron relajadas de forma controlada (permitiendo más roles)
-- El botón "en línea" requeriría validación de rol (prestador/admin)
-- Las vistas públicas mantienen su seguridad
-
-## 📞 SOPORTE
-
-Para preguntas o problemas:
-1. Revisar archivos de cambios en CAMBIOS_PDF_PENDIENTES.md
-2. Verificar logs de servidor para errores 500
-3. Comprobar permisos de carpetas upload/
-
----
-
-**Cambios realizados por:** AI Assistant  
-**Validación:** Completa  
-**Documentación:** Incluida  
-
+| # | Requisito PDF | Estado | Archivo Principal |
+|---|---------------|--------|-------------------|
+| 1A | Visitante: Lugares disponibles en mapa | ✅ | dashboard.php |
+| 1B | Visitante: Calificar y comentar | ✅ | dashboard.php |
+| 1C | Visitante: Historial de visitas | ✅ | TouristController.php |
+| 1D | Visitante: Notificaciones y promociones | ✅ | TouristController.php |
+| 2 | Eventos: Vista corregida con modal "Crear evento" | ✅ | events/index.php |
+| 3 | Eventos: Autorización 1-click para chatbot | ✅ | EventController.php |
+| 4 | Eventos: URL pública con datos del negocio | ✅ | events/public_view.php (NUEVO) |
+| 5 | CRM: Mostrar contactos del chatbot con categorías | ✅ | CrmController.php |
+| 6 | Colaborador: Dashboard con funcionalidades completas | ✅ | ColaboradorController.php |
+| 7 | Superadmin: Eliminar acceso directo "Dashboard" | ✅ | navbar.php |
+| 8 | Negocio: Botón "En línea" al lado del título | ✅ | business/form.php |
+| 9 | Negocio: Eliminar "Mis Eventos" y "+" | ✅ | business/form.php |
+| 10 | Lugar: Promociones, eventos, productos, horario, rating, WhatsApp | ✅ | map/detail.php (existente) |

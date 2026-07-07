@@ -4,12 +4,14 @@ class TouristController extends Controller
     private BusinessModel $businesses;
     private PromotionModel $promotions;
     private UserModel $users;
+    private NotificationModel $notifications;
 
     public function __construct()
     {
         $this->businesses = new BusinessModel();
         $this->promotions = new PromotionModel();
         $this->users = new UserModel();
+        $this->notifications = new NotificationModel();
     }
 
     public function dashboard(): void
@@ -29,7 +31,28 @@ class TouristController extends Controller
 
         $activePromotions = $this->promotions->active();
 
-        $this->view('tourist.dashboard', compact('user', 'topVisited', 'activePromotions') + ['csrf' => $this->csrf()]);
+        // C) Visit history for logged-in user
+        $visitHistory = [];
+        if ($user) {
+            $db = Database::getInstance();
+            $visitHistory = $db->query(
+                'SELECT b.id, b.name, b.slug, a.created_at AS visited_at
+                 FROM analytics a
+                 JOIN businesses b ON b.id = a.business_id
+                 WHERE a.user_id = ? AND a.event = "map_view"
+                 ORDER BY a.created_at DESC
+                 LIMIT 20',
+                [(int)$user['id']]
+            )->fetchAll();
+        }
+
+        // D) Notifications for visitor (promotions & events from prestadores and colaborador_admin)
+        $notifications = [];
+        if ($user) {
+            $notifications = $this->notifications->byUser((int)$user['id']);
+        }
+
+        $this->view('tourist.dashboard', compact('user', 'topVisited', 'activePromotions', 'visitHistory', 'notifications') + ['csrf' => $this->csrf()]);
     }
 
     public function register(): void

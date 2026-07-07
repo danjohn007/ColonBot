@@ -16,6 +16,11 @@ class NotificationModel extends Model
         );
     }
 
+    public function byUser(int $userId): array
+    {
+        return $this->forUser($userId);
+    }
+
     public function unreadCount(int $userId): int
     {
         $row = $this->queryOne(

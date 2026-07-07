@@ -99,6 +99,7 @@ $router->post('admin/eventos/{id}/editar',   'EventController', 'update');
 $router->post('admin/eventos/{id}/toggle',   'EventController', 'toggleStatus');
 $router->post('admin/eventos/{id}/aprobar',  'EventController', 'approve');
 $router->post('admin/eventos/{id}/autorizar-bot', 'EventController', 'authorizeBot');
+$router->post('admin/eventos/{id}/notificar', 'EventController', 'notifyVisitors');
 $router->get('evento/{id}',                  'EventController', 'publicView');
 $router->get('evento/{id}/{slug}',           'EventController', 'publicView');
 
