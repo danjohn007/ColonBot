@@ -37,6 +37,8 @@ $router->get('landing/mapa',            'MapController',       'index');
 $router->get('landing/mapa/{id}',       'MapController',       'index');
 $router->get('lugar/{slug}',            'MapController',       'detail');
 $router->post('lugar/{slug}/contactar', 'MapController',       'contact');
+$router->get('landing/lugar/{slug}',            'MapController',       'detail');
+$router->post('landing/lugar/{slug}/contactar', 'MapController',       'contact');
 
 // Autenticación
 $router->get('login',                   'AuthController',      'loginForm');
@@ -67,6 +69,9 @@ $router->post('admin/negocio/{id}/evento/{eid}/eliminar', 'BusinessController', 
 $router->get('admin/notificaciones',    'NotificationController', 'index');
 $router->post('admin/notificaciones/{id}/leer', 'NotificationController', 'markRead');
 $router->post('admin/notificaciones/leer-todas', 'NotificationController', 'markAllRead');
+$router->get('landing/admin/notificaciones',    'NotificationController', 'index');
+$router->post('landing/admin/notificaciones/{id}/leer', 'NotificationController', 'markRead');
+$router->post('landing/admin/notificaciones/leer-todas', 'NotificationController', 'markAllRead');
 
 // ─── Prestador de Servicios (Micrositio) ─────────────────────────
 $router->get('admin/micrositio',            'BusinessController', 'microsite');
@@ -124,6 +129,11 @@ $router->post('turista/registrar',         'TouristController', 'register');
 $router->post('turista/valorar',           'TouristController', 'submitReview');
 $router->get('turista/emergencia',         'TouristController', 'emergency');
 $router->get('turista/reservar/{id}',      'TouristController', 'makeReservation');
+$router->get('landing/turista',                    'TouristController', 'dashboard');
+$router->post('landing/turista/registrar',         'TouristController', 'register');
+$router->post('landing/turista/valorar',           'TouristController', 'submitReview');
+$router->get('landing/turista/emergencia',         'TouristController', 'emergency');
+$router->get('landing/turista/reservar/{id}',      'TouristController', 'makeReservation');
 
 // ─── Registro Público (Visitantes y Prestadores) ──────────────────
 $router->get('registro/visitante',              'PublicRegisterController', 'visitorForm');
@@ -187,6 +197,7 @@ $router->get('api/negocios',            'ApiController',       'businesses');
 $router->get('api/negocios/{id}',       'ApiController',       'business');
 $router->post('api/analitica',          'ApiController',       'trackEvent');
 $router->post('api/review',             'ApiController',       'submitReview');
+$router->post('landing/api/review',     'ApiController',       'submitReview');
 $router->get('api/hikvision/{id}/stream', 'ApiController',     'hikStream');
 $router->get('api/shelly/{id}/estado',  'ApiController',       'shellyStatus');
 $router->post('api/shelly/{id}/toggle', 'ApiController',       'shellyToggle');

@@ -25,6 +25,18 @@ class BusinessModel extends Model
         );
     }
 
+    public function topVisited(int $limit = 10): array
+    {
+        return $this->query(
+            'SELECT b.*, c.name AS category_name, c.color AS category_color, c.icon AS category_icon
+             FROM businesses b
+             JOIN categories c ON c.id = b.category_id
+             WHERE b.status = "published" AND b.is_open = 1
+             ORDER BY b.visits DESC, b.rating DESC
+             LIMIT ' . max(1, min(50, $limit))
+        );
+    }
+
     public function findBySlug(string $slug): ?array
     {
         return $this->queryOne(
@@ -146,10 +158,14 @@ class BusinessModel extends Model
 
     public function recordVisitorVisit(int $userId, int $businessId): void
     {
-        $this->execute(
-            'INSERT INTO visitor_place_visits (user_id, business_id, visited_at) VALUES (?,?,NOW())',
-            [$userId, $businessId]
-        );
+        try {
+            $this->execute(
+                'INSERT INTO visitor_place_visits (user_id, business_id, visited_at) VALUES (?,?,NOW())',
+                [$userId, $businessId]
+            );
+        } catch (PDOException $e) {
+            error_log('Visitor visit history skipped: ' . $e->getMessage());
+        }
     }
 
     public function addImage(int $businessId, string $path, string $caption = ''): void
@@ -228,22 +244,41 @@ class BusinessModel extends Model
 
     public function reviews(int $businessId): array
     {
-        return $this->query(
-            'SELECT r.*, COALESCE(u.name, r.user_name) AS display_name
-             FROM reviews r
-             LEFT JOIN users u ON u.id = r.user_id
-             WHERE r.business_id = ?
-             ORDER BY r.created_at DESC',
-            [$businessId]
-        );
+        try {
+            return $this->query(
+                'SELECT r.*, COALESCE(u.name, r.user_name) AS display_name
+                 FROM reviews r
+                 LEFT JOIN users u ON u.id = r.user_id
+                 WHERE r.business_id = ?
+                 ORDER BY r.created_at DESC',
+                [$businessId]
+            );
+        } catch (PDOException $e) {
+            error_log('Reviews user relation skipped: ' . $e->getMessage());
+            return $this->query(
+                'SELECT r.*, r.user_name AS display_name
+                 FROM reviews r
+                 WHERE r.business_id = ?
+                 ORDER BY r.created_at DESC',
+                [$businessId]
+            );
+        }
     }
 
     public function addReview(int $businessId, string $userName, string $comment, int $rating, ?int $userId = null): bool
     {
-        return $this->execute(
-            'INSERT INTO reviews (business_id, user_id, user_name, comment, rating) VALUES (?,?,?,?,?)',
-            [$businessId, $userId, $userName, $comment, $rating]
-        );
+        try {
+            return $this->execute(
+                'INSERT INTO reviews (business_id, user_id, user_name, comment, rating) VALUES (?,?,?,?,?)',
+                [$businessId, $userId, $userName, $comment, $rating]
+            );
+        } catch (PDOException $e) {
+            error_log('Review user relation skipped: ' . $e->getMessage());
+            return $this->execute(
+                'INSERT INTO reviews (business_id, user_name, comment, rating) VALUES (?,?,?,?)',
+                [$businessId, $userName, $comment, $rating]
+            );
+        }
     }
 
     public function reviewsByUser(int $userId): array

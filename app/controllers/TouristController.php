@@ -20,20 +20,19 @@ class TouristController extends Controller
         $user = currentUser();
         $user = $this->users->find((int)$user['id']) ?: $user;
 
-        // Top visited & recommended
-        $topVisited = $this->businesses->query(
-            'SELECT b.*, c.name AS category_name, c.color AS category_color, c.icon AS category_icon
-             FROM businesses b
-             JOIN categories c ON c.id = b.category_id
-             WHERE b.status = "published" AND b.is_open = 1
-             ORDER BY b.visits DESC, b.rating DESC
-             LIMIT 10'
-        );
+        $topVisited = $this->businesses->topVisited(10);
 
         $activePromotions = $this->promotions->active();
         $activeEvents = $this->events->active();
-        $visitedPlaces = $this->businesses->visitedByUser((int)$user['id']);
-        $myReviews = $this->businesses->reviewsByUser((int)$user['id']);
+        try {
+            $visitedPlaces = $this->businesses->visitedByUser((int)$user['id']);
+            $myReviews = $this->businesses->reviewsByUser((int)$user['id']);
+        } catch (PDOException $e) {
+            error_log('Visitor dashboard data error: ' . $e->getMessage());
+            $visitedPlaces = [];
+            $myReviews = [];
+            $this->flash('warning', 'Tu panel de visitante está activo. Falta aplicar la migración de historial y reseñas para ver toda la información.');
+        }
 
         $this->view('tourist.dashboard', compact('user', 'topVisited', 'activePromotions', 'activeEvents', 'visitedPlaces', 'myReviews') + ['csrf' => $this->csrf()]);
     }
