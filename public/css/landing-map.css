@@ -15,7 +15,6 @@
 .colon-hero,
 .colon-routes-section,
 .colon-bot-section,
-.colon-gallery-section,
 .colon-map-shell,
 .colon-auth-page {
   font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -250,8 +249,7 @@
   min-height: 520px;
 }
 
-.colon-routes-section,
-.colon-gallery-section {
+.colon-routes-section {
   padding: clamp(68px, 8vw, 112px) clamp(20px, 7vw, 96px);
 }
 
@@ -305,8 +303,13 @@
   padding: clamp(20px, 2.5vw, 32px);
   border-radius: 24px;
   color: #fff;
+  text-decoration: none;
   background: var(--colon-ink);
   box-shadow: 0 14px 36px rgba(23, 32, 45, .08);
+}
+
+.colon-route-card:hover {
+  color: #fff;
 }
 
 .colon-route-card::before {
@@ -713,8 +716,7 @@
     grid-auto-rows: 300px;
   }
 
-  .colon-routes-section,
-  .colon-gallery-section {
+  .colon-routes-section {
     padding-inline: 18px;
   }
 

@@ -12,7 +12,6 @@ $landingProfiles = [
     'intro' => 'Explora experiencias, productos locales y anfitriones listos para recibirte.',
     'routes_title' => 'Momentos para saborear, caminar y compartir.',
     'routes_copy' => 'Combina recorridos guiados, productos regionales y pausas escenicas en una ruta hecha a tu ritmo.',
-    'gallery_title' => 'Experiencias que se quedan contigo.',
     'slides' => ['queso-vino.jpeg', 'noche-restaurante.jpeg', 'el-chino.jpeg', 'gordita.jpeg'],
   ],
   'turismo-cultural' => [
@@ -22,7 +21,6 @@ $landingProfiles = [
     'intro' => 'Encuentra puntos culturales, corredores artesanales y lugares con memoria.',
     'routes_title' => 'Una ruta para mirar Colon con calma.',
     'routes_copy' => 'Conecta arquitectura, oficios locales, historia y encuentros con la comunidad.',
-    'gallery_title' => 'Patrimonio, manos y memoria.',
     'slides' => ['dulces-tradicionales.jpeg', 'el-chino.jpeg', 'noche-restaurante.jpeg', 'queso-vino.jpeg'],
   ],
   'ecoturismo-y-aventura' => [
@@ -32,7 +30,6 @@ $landingProfiles = [
     'intro' => 'Filtra lugares para aventura, descanso al aire libre y paisajes abiertos.',
     'routes_title' => 'Aventura con horizonte Colonense.',
     'routes_copy' => 'Planea salidas familiares, con amigos o en pareja entre senderos, agua y vistas amplias.',
-    'gallery_title' => 'Paisaje, ruta y movimiento.',
     'slides' => ['noche-restaurante.jpeg', 'queso-vino.jpeg', 'dulces-tradicionales.jpeg', 'gordita.jpeg'],
   ],
   'turismo-religioso' => [
@@ -42,7 +39,6 @@ $landingProfiles = [
     'intro' => 'Ubica espacios religiosos, fiestas patronales y puntos cercanos para completar tu visita.',
     'routes_title' => 'Tradicion espiritual en cada parada.',
     'routes_copy' => 'Crea una ruta serena entre templos, plazas, servicios y experiencias locales.',
-    'gallery_title' => 'Devocion, arquitectura y comunidad.',
     'slides' => ['el-chino.jpeg', 'dulces-tradicionales.jpeg', 'noche-restaurante.jpeg', 'queso-vino.jpeg'],
   ],
   'turismo-gastronomico' => [
@@ -52,7 +48,6 @@ $landingProfiles = [
     'intro' => 'Encuentra restaurantes, productos locales y paradas ideales para comer bien.',
     'routes_title' => 'Una ruta para probar Colon.',
     'routes_copy' => 'Arma el dia entre desayunos, antojitos, sobremesa, dulces y cenas con identidad local.',
-    'gallery_title' => 'Mesa, producto y sabor.',
     'slides' => ['gordita.jpeg', 'el-chino.jpeg', 'queso-vino.jpeg', 'dulces-tradicionales.jpeg'],
   ],
 ];
@@ -63,8 +58,14 @@ $landingDefault = [
   'intro' => 'Explora atractivos, sabores y experiencias desde el mapa interactivo del turismo en Colon.',
   'routes_title' => 'Elige tu forma de vivir Colon.',
   'routes_copy' => 'Descubre atractivos publicos y privados de acuerdo al estilo de visita que quieras realizar: familiar, en pareja, con amigos o pet friendly.',
-  'gallery_title' => 'Atractivos, sabores y momentos.',
   'slides' => ['noche-restaurante.jpeg', 'dulces-tradicionales.jpeg', 'queso-vino.jpeg', 'el-chino.jpeg'],
+];
+$landingRouteUrls = [
+  'turismo-de-experiencias' => 'https://colon.click/landing/mapa/turismo-de-experiencias',
+  'turismo-cultural' => 'https://colon.click/landing/mapa/turismo-cultural',
+  'ecoturismo-y-aventura' => 'https://colon.click/landing/mapa/ecoturismo-y-aventura',
+  'turismo-religioso' => 'https://colon.click/landing/mapa/turismo-religioso',
+  'turismo-gastronomico' => 'https://colon.click/landing/mapa/turismo-gastronomico',
 ];
 $landingContent = $landingProfiles[$preloadCat ?? ''] ?? $landingDefault;
 $routeCardsBySlug = [
@@ -95,11 +96,19 @@ $routeCardsBySlug = [
   ],
 ];
 $defaultRouteCards = [
-  ['label' => 'Turismo Cultural', 'title' => 'Mercados, artesanias e historia', 'copy' => 'Corredores artesanales, museos, mercados, haciendas y recorridos turisticos.', 'img' => 'dulces-tradicionales.jpeg'],
-  ['label' => 'Experiencias', 'title' => 'Queserias, vinedos y miradores', 'copy' => 'Productos locales y nativos, restaurantes gourmet, balnearios y paseos a caballo.', 'img' => 'queso-vino.jpeg'],
-  ['label' => 'Gastronomia', 'title' => 'De la fonda al restaurante', 'copy' => 'Sabores locales, antojitos y lo mejor de la gastronomia del municipio.', 'img' => 'gordita.jpeg', 'wide' => true],
+  ['label' => 'Experiencias', 'title' => 'Queserias, vinedos y miradores', 'copy' => 'Productos locales y nativos, restaurantes gourmet, balnearios y paseos a caballo.', 'img' => 'queso-vino.jpeg', 'href' => $landingRouteUrls['turismo-de-experiencias']],
+  ['label' => 'Turismo Cultural', 'title' => 'Mercados, artesanias e historia', 'copy' => 'Corredores artesanales, museos, mercados, haciendas y recorridos turisticos.', 'img' => 'dulces-tradicionales.jpeg', 'href' => $landingRouteUrls['turismo-cultural']],
+  ['label' => 'Ecoturismo y aventura', 'title' => 'Senderos, naturaleza y aire libre', 'copy' => 'Cerros, presas, pesca, camping y rutas para conectar con el paisaje.', 'img' => 'noche-restaurante.jpeg', 'href' => $landingRouteUrls['ecoturismo-y-aventura']],
+  ['label' => 'Turismo religioso', 'title' => 'Fe, peregrinacion y patrimonio', 'copy' => 'Iglesias, celebraciones, conventos y recorridos con valor espiritual e historico.', 'img' => 'el-chino.jpeg', 'href' => $landingRouteUrls['turismo-religioso']],
+  ['label' => 'Gastronomia', 'title' => 'De la fonda al restaurante', 'copy' => 'Sabores locales, antojitos y lo mejor de la gastronomia del municipio.', 'img' => 'gordita.jpeg', 'href' => $landingRouteUrls['turismo-gastronomico'], 'wide' => true],
 ];
 $routeCards = $routeCardsBySlug[$preloadCat ?? ''] ?? $defaultRouteCards;
+if (!empty($preloadCat) && isset($landingRouteUrls[$preloadCat])) {
+  foreach ($routeCards as &$card) {
+    $card['href'] = $card['href'] ?? $landingRouteUrls[$preloadCat];
+  }
+  unset($card);
+}
 require APP_PATH . '/views/layout/head.php';
 ?>
 <style>
@@ -308,11 +317,11 @@ require APP_PATH . '/views/layout/head.php';
 
   <div class="colon-route-grid colon-dynamic-routes">
     <?php foreach ($routeCards as $card): ?>
-    <article class="colon-route-card <?= !empty($card['wide']) ? 'colon-route-wide' : '' ?> reveal-up" style="--route-img: url('<?= asset('img/landing/' . $card['img']) ?>')">
+    <a href="<?= e($card['href'] ?? '#explorar-mapa') ?>" class="colon-route-card <?= !empty($card['wide']) ? 'colon-route-wide' : '' ?> reveal-up" style="--route-img: url('<?= asset('img/landing/' . $card['img']) ?>')">
       <span><?= e($card['label']) ?></span>
       <h3><?= e($card['title']) ?></h3>
       <p><?= e($card['copy']) ?></p>
-    </article>
+    </a>
     <?php endforeach; ?>
   </div>
 
@@ -347,7 +356,7 @@ require APP_PATH . '/views/layout/head.php';
 
 <section id="cristo-bot" class="colon-bot-section">
   <div class="colon-bot-visual reveal-scale" aria-hidden="true">
-    <span class="colon-bot-badge"><img src="<?= asset('img/cristo-bot-logo.png') ?>" alt=""></span>
+    <span class="colon-bot-badge"><img src="<?= asset('img/cristo-bot-nino.png') ?>" alt=""></span>
   </div>
   <div class="colon-bot-content reveal-up">
     <p class="colon-eyebrow">WhatsApp</p>
@@ -364,35 +373,6 @@ require APP_PATH . '/views/layout/head.php';
       Contáctalo aquí
     </a>
     <?php endif; ?>
-  </div>
-</section>
-
-<section class="colon-gallery-section">
-  <div class="colon-section-head">
-    <div>
-      <p class="colon-eyebrow reveal-up colon-dynamic-copy">Galeria</p>
-      <h2 class="colon-display reveal-up colon-dynamic-copy"><?= e($landingContent['gallery_title']) ?></h2>
-      <p class="colon-eyebrow reveal-up">Galería</p>
-      <h2 class="colon-display reveal-up">Atractivos, sabores y momentos.</h2>
-    </div>
-  </div>
-  <div class="colon-gallery">
-    <figure class="reveal-scale">
-      <img src="<?= asset('img/landing/el-chino.jpeg') ?>" alt="Fachada de restaurante en Colón">
-      <figcaption>Gastronomía</figcaption>
-    </figure>
-    <figure class="reveal-scale">
-      <img src="<?= asset('img/landing/noche-restaurante.jpeg') ?>" alt="Restaurante iluminado de noche">
-      <figcaption>Experiencias</figcaption>
-    </figure>
-    <figure class="colon-gallery-wide reveal-scale">
-      <img src="<?= asset('img/landing/dulces-tradicionales.jpeg') ?>" alt="Dulces tradicionales">
-      <figcaption>Cultural</figcaption>
-    </figure>
-    <figure class="reveal-scale">
-      <img src="<?= asset('img/landing/queso-vino.jpeg') ?>" alt="Quesos y vino">
-      <figcaption>Productos locales</figcaption>
-    </figure>
   </div>
 </section>
 
