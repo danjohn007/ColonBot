@@ -209,8 +209,8 @@ function loadContacts() {
         } else if (c.category === 'prospecto_recurrente') {
           categoryLabel = '🔄 Prospecto recurrente';
           categoryClass = 'text-orange-600 bg-orange-50';
-        } else if (c.category === 'prospecto_sin_historial' || c.category === 'prospecto') {
-          categoryLabel = c.is_chatbot ? '🆕 WhatsApp' : '📋 Prospecto';
+        } else if (c.category === 'prospecto_sin_historial') {
+          categoryLabel = c.is_chatbot ? '🆕 WhatsApp' : '📋 Prospecto sin historial';
           categoryClass = 'text-purple-600 bg-purple-50';
         } else {
           categoryLabel = '📋 Prospecto';

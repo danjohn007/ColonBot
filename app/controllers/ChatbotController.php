@@ -7,12 +7,16 @@ class ChatbotController extends Controller
     private BusinessModel $businesses;
     private CategoryModel $categories;
     private SettingModel  $settings;
+    private ConsultaModel $consultas;
+    private ContactModel  $contacts;
 
     public function __construct()
     {
         $this->businesses = new BusinessModel();
         $this->categories = new CategoryModel();
         $this->settings   = new SettingModel();
+        $this->consultas  = new ConsultaModel();
+        $this->contacts   = new ContactModel();
     }
 
     /** Verificación del webhook (GET) */
@@ -157,6 +161,32 @@ class ChatbotController extends Controller
         $lines[] = "\nEscribe *menú* para regresar al inicio.";
 
         return ['type' => 'text', 'text' => ['body' => implode("\n\n", $lines)]];
+    }
+
+    /**
+     * Registrar en la tabla 'consultas' cuando un usuario solicita información
+     * de un negocio específico a través del chatbot.
+     */
+    private function registrarSolicitudInfo(string $from, int $businessId): void
+    {
+        try {
+            $this->consultas->registrarSolicitudInfo($from, $businessId);
+        } catch (Throwable $e) {
+            logError('Error al registrar consulta: ' . $e->getMessage(), __FILE__, __LINE__);
+        }
+    }
+
+    /**
+     * Registrar en la tabla 'consultas' cuando un usuario realiza una
+     * compra/reservación en un negocio a través del chatbot.
+     */
+    private function registrarCompraReservacion(string $from, int $businessId): void
+    {
+        try {
+            $this->consultas->registrarCompraReservacion($from, $businessId);
+        } catch (Throwable $e) {
+            logError('Error al registrar consulta: ' . $e->getMessage(), __FILE__, __LINE__);
+        }
     }
 
     private function emergencyNumbers(): array
