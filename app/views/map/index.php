@@ -4,12 +4,108 @@ $extraHead = '<link rel="preconnect" href="https://fonts.googleapis.com">' . PHP
   . '  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . PHP_EOL
   . '  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">' . PHP_EOL
   . '  <link rel="stylesheet" href="' . asset('css/landing-map.css') . '">';
+$landingProfiles = [
+  'turismo-de-experiencias' => [
+    'eyebrow' => 'Turismo de experiencias',
+    'title' => 'Vive Colon con todos los sentidos',
+    'copy' => 'Queserias, vinedos, miradores y prestadores locales para armar una ruta memorable.',
+    'intro' => 'Explora experiencias, productos locales y anfitriones listos para recibirte.',
+    'routes_title' => 'Momentos para saborear, caminar y compartir.',
+    'routes_copy' => 'Combina recorridos guiados, productos regionales y pausas escenicas en una ruta hecha a tu ritmo.',
+    'gallery_title' => 'Experiencias que se quedan contigo.',
+    'slides' => ['queso-vino.jpeg', 'noche-restaurante.jpeg', 'el-chino.jpeg', 'gordita.jpeg'],
+  ],
+  'turismo-cultural' => [
+    'eyebrow' => 'Turismo cultural',
+    'title' => 'Historia viva, oficios y tradiciones',
+    'copy' => 'Recorre mercados, artesanias, museos, haciendas y espacios que cuentan la identidad de Colon.',
+    'intro' => 'Encuentra puntos culturales, corredores artesanales y lugares con memoria.',
+    'routes_title' => 'Una ruta para mirar Colon con calma.',
+    'routes_copy' => 'Conecta arquitectura, oficios locales, historia y encuentros con la comunidad.',
+    'gallery_title' => 'Patrimonio, manos y memoria.',
+    'slides' => ['dulces-tradicionales.jpeg', 'el-chino.jpeg', 'noche-restaurante.jpeg', 'queso-vino.jpeg'],
+  ],
+  'ecoturismo-y-aventura' => [
+    'eyebrow' => 'Ecoturismo y aventura',
+    'title' => 'Aire libre, paisaje y adrenalina suave',
+    'copy' => 'Senderismo, cerros, presas, pesca, camping y rutas para conectar con la naturaleza.',
+    'intro' => 'Filtra lugares para aventura, descanso al aire libre y paisajes abiertos.',
+    'routes_title' => 'Aventura con horizonte Colonense.',
+    'routes_copy' => 'Planea salidas familiares, con amigos o en pareja entre senderos, agua y vistas amplias.',
+    'gallery_title' => 'Paisaje, ruta y movimiento.',
+    'slides' => ['noche-restaurante.jpeg', 'queso-vino.jpeg', 'dulces-tradicionales.jpeg', 'gordita.jpeg'],
+  ],
+  'turismo-religioso' => [
+    'eyebrow' => 'Turismo religioso',
+    'title' => 'Fe, peregrinacion y patrimonio',
+    'copy' => 'Iglesias, celebraciones, conventos y recorridos con valor espiritual e historico.',
+    'intro' => 'Ubica espacios religiosos, fiestas patronales y puntos cercanos para completar tu visita.',
+    'routes_title' => 'Tradicion espiritual en cada parada.',
+    'routes_copy' => 'Crea una ruta serena entre templos, plazas, servicios y experiencias locales.',
+    'gallery_title' => 'Devocion, arquitectura y comunidad.',
+    'slides' => ['el-chino.jpeg', 'dulces-tradicionales.jpeg', 'noche-restaurante.jpeg', 'queso-vino.jpeg'],
+  ],
+  'turismo-gastronomico' => [
+    'eyebrow' => 'Turismo gastronomico',
+    'title' => 'Sabores locales, de la fonda al restaurante',
+    'copy' => 'Antojitos, dulces tradicionales, vino, queso y propuestas de cocina para descubrir Colon por el paladar.',
+    'intro' => 'Encuentra restaurantes, productos locales y paradas ideales para comer bien.',
+    'routes_title' => 'Una ruta para probar Colon.',
+    'routes_copy' => 'Arma el dia entre desayunos, antojitos, sobremesa, dulces y cenas con identidad local.',
+    'gallery_title' => 'Mesa, producto y sabor.',
+    'slides' => ['gordita.jpeg', 'el-chino.jpeg', 'queso-vino.jpeg', 'dulces-tradicionales.jpeg'],
+  ],
+];
+$landingDefault = [
+  'eyebrow' => 'Mapa Interactivo',
+  'title' => 'Colon te conquistara',
+  'copy' => 'Combina el estilo de visita que quieras realizar con la ruta ideal y encuentra la mejor hospitalidad de los Colonenses.',
+  'intro' => 'Explora atractivos, sabores y experiencias desde el mapa interactivo del turismo en Colon.',
+  'routes_title' => 'Elige tu forma de vivir Colon.',
+  'routes_copy' => 'Descubre atractivos publicos y privados de acuerdo al estilo de visita que quieras realizar: familiar, en pareja, con amigos o pet friendly.',
+  'gallery_title' => 'Atractivos, sabores y momentos.',
+  'slides' => ['noche-restaurante.jpeg', 'dulces-tradicionales.jpeg', 'queso-vino.jpeg', 'el-chino.jpeg'],
+];
+$landingContent = $landingProfiles[$preloadCat ?? ''] ?? $landingDefault;
+$routeCardsBySlug = [
+  'turismo-de-experiencias' => [
+    ['label' => 'Producto local', 'title' => 'Queso, vino y sabores de origen', 'copy' => 'Paradas para probar, comprar y conversar con anfitriones locales.', 'img' => 'queso-vino.jpeg'],
+    ['label' => 'Plan de tarde', 'title' => 'Miradores, sobremesa y noche', 'copy' => 'Experiencias para bajar el ritmo y disfrutar Colon sin prisa.', 'img' => 'noche-restaurante.jpeg'],
+    ['label' => 'Ruta memorable', 'title' => 'Momentos hechos para compartir', 'copy' => 'Combina gastronomia, servicios y atractivos cercanos en una sola salida.', 'img' => 'gordita.jpeg', 'wide' => true],
+  ],
+  'turismo-cultural' => [
+    ['label' => 'Tradicion', 'title' => 'Mercados, dulces y oficios', 'copy' => 'Encuentra lugares donde la identidad local se vive en cada detalle.', 'img' => 'dulces-tradicionales.jpeg'],
+    ['label' => 'Historia', 'title' => 'Haciendas, plazas y memoria', 'copy' => 'Recorridos para conectar arquitectura, relatos y vida cotidiana.', 'img' => 'el-chino.jpeg'],
+    ['label' => 'Comunidad', 'title' => 'Cultura con anfitriones locales', 'copy' => 'Haz una ruta con paradas utiles para comer, comprar y aprender.', 'img' => 'noche-restaurante.jpeg', 'wide' => true],
+  ],
+  'ecoturismo-y-aventura' => [
+    ['label' => 'Aire libre', 'title' => 'Senderos y paisajes abiertos', 'copy' => 'Opciones para caminar, respirar y descubrir vistas del municipio.', 'img' => 'noche-restaurante.jpeg'],
+    ['label' => 'Naturaleza', 'title' => 'Presas, cerros y descanso', 'copy' => 'Lugares para convivir con amigos, familia o pareja.', 'img' => 'queso-vino.jpeg'],
+    ['label' => 'Aventura suave', 'title' => 'Rutas para moverte a tu ritmo', 'copy' => 'Planea una salida con servicios cercanos y puntos de interes.', 'img' => 'dulces-tradicionales.jpeg', 'wide' => true],
+  ],
+  'turismo-religioso' => [
+    ['label' => 'Fe', 'title' => 'Templos y celebraciones', 'copy' => 'Ubica espacios religiosos y fiestas patronales de Colon.', 'img' => 'el-chino.jpeg'],
+    ['label' => 'Patrimonio', 'title' => 'Arquitectura y tradicion', 'copy' => 'Recorridos serenos con valor historico y espiritual.', 'img' => 'dulces-tradicionales.jpeg'],
+    ['label' => 'Peregrinacion', 'title' => 'Una visita cuidada de principio a fin', 'copy' => 'Complementa la ruta con servicios, comida y puntos cercanos.', 'img' => 'noche-restaurante.jpeg', 'wide' => true],
+  ],
+  'turismo-gastronomico' => [
+    ['label' => 'Antojitos', 'title' => 'Sabores de fonda y mercado', 'copy' => 'Paradas casuales para probar recetas locales y antojos de la region.', 'img' => 'gordita.jpeg'],
+    ['label' => 'Sobremesa', 'title' => 'Restaurantes y cocina local', 'copy' => 'Opciones para comer bien y convertir la visita en experiencia.', 'img' => 'el-chino.jpeg'],
+    ['label' => 'Producto regional', 'title' => 'Queso, vino y dulces tradicionales', 'copy' => 'Arma una ruta para llevarte Colon tambien a casa.', 'img' => 'queso-vino.jpeg', 'wide' => true],
+  ],
+];
+$defaultRouteCards = [
+  ['label' => 'Turismo Cultural', 'title' => 'Mercados, artesanias e historia', 'copy' => 'Corredores artesanales, museos, mercados, haciendas y recorridos turisticos.', 'img' => 'dulces-tradicionales.jpeg'],
+  ['label' => 'Experiencias', 'title' => 'Queserias, vinedos y miradores', 'copy' => 'Productos locales y nativos, restaurantes gourmet, balnearios y paseos a caballo.', 'img' => 'queso-vino.jpeg'],
+  ['label' => 'Gastronomia', 'title' => 'De la fonda al restaurante', 'copy' => 'Sabores locales, antojitos y lo mejor de la gastronomia del municipio.', 'img' => 'gordita.jpeg', 'wide' => true],
+];
+$routeCards = $routeCardsBySlug[$preloadCat ?? ''] ?? $defaultRouteCards;
 require APP_PATH . '/views/layout/head.php';
 ?>
 <style>
   .map-title {
     font-family: 'Georgia', 'Times New Roman', serif;
-    background: linear-gradient(135deg, #6B21A8, #2563EB, #059669);
+    background: linear-gradient(135deg, #f97316, #ea580c, #c2410c);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -34,13 +130,15 @@ require APP_PATH . '/views/layout/head.php';
 
 <section class="colon-hero" id="inicio" aria-label="Colón te conquistará">
   <div class="colon-hero-bg" aria-hidden="true">
-    <img class="colon-hero-slide is-active" src="<?= asset('img/landing/noche-restaurante.jpeg') ?>" alt="">
-    <img class="colon-hero-slide" src="<?= asset('img/landing/dulces-tradicionales.jpeg') ?>" alt="">
-    <img class="colon-hero-slide" src="<?= asset('img/landing/queso-vino.jpeg') ?>" alt="">
-    <img class="colon-hero-slide" src="<?= asset('img/landing/el-chino.jpeg') ?>" alt="">
+    <?php foreach ($landingContent['slides'] as $i => $slide): ?>
+    <img class="colon-hero-slide <?= $i === 0 ? 'is-active' : '' ?>" src="<?= asset('img/landing/' . $slide) ?>" alt="">
+    <?php endforeach; ?>
   </div>
   <div class="colon-hero-shade" aria-hidden="true"></div>
   <div class="colon-hero-content">
+    <p class="colon-eyebrow reveal-up colon-dynamic-copy"><?= e($landingContent['eyebrow']) ?></p>
+    <h1 class="colon-hero-title reveal-up colon-dynamic-copy"><?= e($landingContent['title']) ?></h1>
+    <p class="colon-hero-copy reveal-up colon-dynamic-copy"><?= e($landingContent['copy']) ?></p>
     <p class="colon-eyebrow reveal-up">Mapa Interactivo</p>
     <h1 class="colon-hero-title reveal-up">Colón te conquistará</h1>
     <p class="colon-hero-copy reveal-up">Combina el estilo de visita que quieras realizar con la ruta ideal y encuentra la mejor hospitalidad de los Colonenses.</p>
@@ -60,8 +158,10 @@ require APP_PATH . '/views/layout/head.php';
 <main class="flex-1 flex flex-col" id="explorar-mapa">
   <section class="colon-map-shell">
     <div class="colon-map-intro reveal-up">
+      <p class="colon-eyebrow colon-dynamic-copy">Disena tu ruta</p>
+      <h2 class="colon-dynamic-copy"><?= e($landingContent['intro']) ?></h2>
       <p class="colon-eyebrow">Diseña tu ruta</p>
-      <h2>Explora atractivos, sabores y experiencias desde el mapa turístico de Colón.</h2>
+      <h2>Explora atractivos, sabores y experiencias desde el mapa interactivo del turismo en Colón.</h2>
     </div>
   <!-- Filter Bar -->
   <div class="bg-white border-b shadow-sm px-4 py-3 colon-filter-bar">
@@ -69,7 +169,7 @@ require APP_PATH . '/views/layout/head.php';
       <!-- Search -->
       <div class="flex-1 min-w-48 relative">
         <input type="text" id="search-input" placeholder="🔍 Buscar lugares..."
-          class="w-full pl-4 pr-10 py-2 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+          class="colon-filter-input w-full pl-4 pr-10 py-2 text-sm border border-gray-300 rounded-full focus:outline-none transition">
         <button onclick="doSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -78,21 +178,21 @@ require APP_PATH . '/views/layout/head.php';
       </div>
       <!-- Mis Favoritos -->
       <button id="btn-mis-favoritos" onclick="openFavoritos()"
-        class="flex items-center gap-1.5 text-sm px-3 py-2 rounded-full bg-pink-50 text-pink-600 border border-pink-200 hover:bg-pink-100 transition font-medium whitespace-nowrap">
+        class="flex items-center gap-1.5 text-sm px-3 py-2 rounded-full bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 transition font-medium whitespace-nowrap">
         <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
         Mis Favoritos
-        <span id="fav-count" class="hidden bg-pink-500 text-white text-xs rounded-full px-1.5 py-0.5 font-bold leading-none"></span>
+        <span id="fav-count" class="hidden bg-orange-600 text-white text-xs rounded-full px-1.5 py-0.5 font-bold leading-none"></span>
       </button>
       <!-- Category filters -->
       <div class="flex gap-2 flex-wrap">
         <button onclick="filterCat('')" data-cat=""
-          class="cat-btn text-xs px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition font-medium active-cat">
+          class="cat-btn colon-chip text-xs px-3 py-1.5 rounded-full bg-orange-600 text-white transition font-medium active-cat">
           Todos
         </button>
 <?php foreach ($categories as $cat): ?>
         <?php if ($cat['slug'] === 'punto-de-referencia') continue; ?>
         <button onclick="filterCat('<?= e($cat['slug']) ?>')" data-cat="<?= e($cat['slug']) ?>"
-          class="cat-btn text-xs px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition font-medium"
+          class="cat-btn colon-chip text-xs px-3 py-1.5 rounded-full transition font-medium"
           style="--cat-color: <?= e($cat['color']) ?>">
           <span class="cat-icon"><?= getCategoryEmoji($cat['icon'] ?? '') ?></span>
           <?= e($cat['name']) ?>
@@ -105,23 +205,23 @@ require APP_PATH . '/views/layout/head.php';
     <div class="max-w-7xl mx-auto flex flex-wrap gap-2 items-center mt-2">
       <span class="text-xs font-semibold text-gray-500 mr-1">Tipo de viaje:</span>
       <button onclick="filterTripType('')" data-trip-type=""
-        class="trip-type-btn text-xs px-3 py-1.5 rounded-full bg-blue-600 text-white transition font-medium">
+        class="trip-type-btn text-xs px-3 py-1.5 rounded-full bg-orange-600 text-white transition font-medium">
         Todos
       </button>
       <button onclick="filterTripType('familiar')" data-trip-type="familiar"
-        class="trip-type-btn text-xs px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition font-medium">
+        class="trip-type-btn colon-chip text-xs px-3 py-1.5 rounded-full transition font-medium">
         👨‍👩‍👧‍👦 Familiar
       </button>
       <button onclick="filterTripType('amigos')" data-trip-type="amigos"
-        class="trip-type-btn text-xs px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition font-medium">
+        class="trip-type-btn colon-chip text-xs px-3 py-1.5 rounded-full transition font-medium">
         🧑‍🤝‍🧑 Amigos
       </button>
       <button onclick="filterTripType('pareja')" data-trip-type="pareja"
-        class="trip-type-btn text-xs px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition font-medium">
+        class="trip-type-btn colon-chip text-xs px-3 py-1.5 rounded-full transition font-medium">
         💑 Pareja
       </button>
       <button onclick="filterTripType('petfriendly')" data-trip-type="petfriendly"
-        class="trip-type-btn text-xs px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition font-medium">
+        class="trip-type-btn colon-chip text-xs px-3 py-1.5 rounded-full transition font-medium">
         🐾 Petfriendly
       </button>
     </div>
@@ -169,7 +269,7 @@ require APP_PATH . '/views/layout/head.php';
     <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col z-10">
       <div class="flex items-center justify-between p-4 border-b">
         <h2 class="font-bold text-gray-900 flex items-center gap-2">
-          <svg class="w-5 h-5 text-pink-500 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <svg class="w-5 h-5 text-orange-500 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
           Mis Favoritos
         </h2>
         <button onclick="closeFavoritos()" class="text-gray-400 hover:text-gray-600">
@@ -197,10 +297,23 @@ require APP_PATH . '/views/layout/head.php';
 <section class="colon-routes-section">
   <div class="colon-section-head">
     <div>
+      <p class="colon-eyebrow reveal-up colon-dynamic-copy">Rutas sugeridas</p>
+      <h2 class="colon-display reveal-up colon-dynamic-copy"><?= e($landingContent['routes_title']) ?></h2>
+      <p class="colon-section-copy reveal-up colon-dynamic-copy"><?= e($landingContent['routes_copy']) ?></p>
       <p class="colon-eyebrow reveal-up">Rutas sugeridas</p>
       <h2 class="colon-display reveal-up">Elige tu forma de vivir Colón.</h2>
     </div>
     <p class="colon-section-copy reveal-up">Descubre atractivos públicos y privados de acuerdo al estilo de visita que quieras realizar: familiar, en pareja, con amigos o pet friendly.</p>
+  </div>
+
+  <div class="colon-route-grid colon-dynamic-routes">
+    <?php foreach ($routeCards as $card): ?>
+    <article class="colon-route-card <?= !empty($card['wide']) ? 'colon-route-wide' : '' ?> reveal-up" style="--route-img: url('<?= asset('img/landing/' . $card['img']) ?>')">
+      <span><?= e($card['label']) ?></span>
+      <h3><?= e($card['title']) ?></h3>
+      <p><?= e($card['copy']) ?></p>
+    </article>
+    <?php endforeach; ?>
   </div>
 
   <div class="colon-route-grid">
@@ -234,7 +347,7 @@ require APP_PATH . '/views/layout/head.php';
 
 <section id="cristo-bot" class="colon-bot-section">
   <div class="colon-bot-visual reveal-scale" aria-hidden="true">
-    <span>🤖</span>
+    <span class="colon-bot-badge"><img src="<?= asset('img/cristo-bot-logo.png') ?>" alt=""></span>
   </div>
   <div class="colon-bot-content reveal-up">
     <p class="colon-eyebrow">WhatsApp</p>
@@ -257,6 +370,8 @@ require APP_PATH . '/views/layout/head.php';
 <section class="colon-gallery-section">
   <div class="colon-section-head">
     <div>
+      <p class="colon-eyebrow reveal-up colon-dynamic-copy">Galeria</p>
+      <h2 class="colon-display reveal-up colon-dynamic-copy"><?= e($landingContent['gallery_title']) ?></h2>
       <p class="colon-eyebrow reveal-up">Galería</p>
       <h2 class="colon-display reveal-up">Atractivos, sabores y momentos.</h2>
     </div>
@@ -320,12 +435,12 @@ require APP_PATH . '/views/layout/head.php';
 </div>
 
 <!-- Banners de registro público entre mapa y footer -->
-<div class="bg-gradient-to-r from-purple-50 to-blue-50 border-t border-b border-gray-200">
+<div class="colon-public-band">
   <div class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-4">
     <!-- Banner 1: Visitante -->
-    <a href="<?= url('registro/visitante') ?>" class="block bg-white rounded-2xl shadow-sm border border-purple-100 p-6 hover:shadow-md hover:border-purple-300 transition group">
+    <a href="<?= url('registro/visitante') ?>" class="block colon-public-card rounded-2xl p-6 transition group">
       <div class="flex items-start gap-4">
-        <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition">👤</div>
+        <div class="w-12 h-12 rounded-full colon-public-icon flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition">👤</div>
         <div>
           <h3 class="font-bold text-gray-900 text-sm mb-1">Regístrate como visitante y obtén descuentos exclusivos</h3>
           <p class="text-xs text-gray-500">Califica y deja comentarios de nuestros atractivos turísticos, aquí</p>
@@ -333,9 +448,9 @@ require APP_PATH . '/views/layout/head.php';
       </div>
     </a>
     <!-- Banner 2: Prestador -->
-    <a href="<?= url('registro/prestador') ?>" class="block bg-white rounded-2xl shadow-sm border border-blue-100 p-6 hover:shadow-md hover:border-blue-300 transition group">
+    <a href="<?= url('registro/prestador') ?>" class="block colon-public-card rounded-2xl p-6 transition group">
       <div class="flex items-start gap-4">
-        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition">🏪</div>
+        <div class="w-12 h-12 rounded-full colon-public-icon flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition">🏪</div>
         <div>
           <h3 class="font-bold text-gray-900 text-sm mb-1">¿Eres prestador de servicio?</h3>
           <p class="text-xs text-gray-500">Da de alta tu negocio aquí</p>
@@ -411,7 +526,7 @@ if (BOUNDARY_DATA && BOUNDARY_DATA.length > 0) {
   if (Array.isArray(BOUNDARY_DATA[0])) {
     BOUNDARY_DATA.forEach(ring => {
       L.polyline(ring, {
-        color: '#8B5CF6',
+        color: '#f97316',
         weight: 2,
         opacity: 0.8,
         dashArray: '8, 8',
@@ -420,7 +535,7 @@ if (BOUNDARY_DATA && BOUNDARY_DATA.length > 0) {
   } else {
     // Compatibilidad con formato plano anterior
     L.polyline(BOUNDARY_DATA, {
-      color: '#8B5CF6',
+      color: '#f97316',
       weight: 2,
       opacity: 0.8,
       dashArray: '8, 8',
@@ -433,7 +548,7 @@ if (navigator.geolocation) {
   navigator.geolocation.getCurrentPosition(pos => {
     const { latitude: lat, longitude: lng } = pos.coords;
     L.circleMarker([lat, lng], {
-      radius: 8, color: '#3B82F6', fillColor: '#3B82F6', fillOpacity: 0.8, weight: 2,
+      radius: 8, color: '#f97316', fillColor: '#f97316', fillOpacity: 0.8, weight: 2,
     }).addTo(map).bindPopup('\u{1F4CD} Tu ubicaci\u00F3n');
   });
 }
@@ -472,7 +587,7 @@ function loadPOIs() {
       allRefPoints.forEach(poi => {
         if (!poi.lat || !poi.lng) return;
         const refEmoji = isotipoToEmoji(poi.isotipo) || iconToEmoji(poi.category_icon);
-        const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#8B5CF6', refEmoji) });
+        const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#f97316', refEmoji) });
         m.addTo(map);
         m.on('click', () => showPOI(poi));
         markers.push(m);
@@ -482,7 +597,7 @@ function loadPOIs() {
       allPois.forEach(poi => {
         if (!poi.lat || !poi.lng) return;
         const poiEmoji = isotipoToEmoji(poi.isotipo);
-        const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#3B82F6', poiEmoji) });
+        const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#f97316', poiEmoji) });
         m.addTo(map);
         m.on('click', () => showPOI(poi));
         markers.push(m);
@@ -539,7 +654,7 @@ function showPOI(poi) {
   const tripTypeBadges = (poi.trip_types && poi.trip_types.length > 0)
     ? poi.trip_types.map(tt => {
         const label = TRIP_TYPE_MAP[tt] || tt;
-        return `<span class="inline-block text-xs px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 font-medium">${label}</span>`;
+        return `<span class="inline-block text-xs px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 border border-orange-200 font-medium">${label}</span>`;
       }).join(' ')
     : '';
 
@@ -554,10 +669,10 @@ function showPOI(poi) {
     <div class="flex items-start justify-between gap-2 mb-2">
       <h3 class="font-bold text-gray-900 text-base leading-tight">${poi.name}</h3>
       <div class="flex items-center gap-1 shrink-0">
-        <span class="text-xs px-2 py-1 rounded-full text-white font-medium" style="background:${poi.category_color}">${categoryEmoji} ${poi.category}</span>
+        <span class="text-xs px-2 py-1 rounded-full text-white font-medium bg-orange-600">${categoryEmoji} ${poi.category}</span>
         <button onclick="toggleFavorito(${poi.id})" id="fav-btn-${poi.id}"
-          class="p-1.5 rounded-full hover:bg-pink-50 transition" title="${isFav ? 'Quitar de favoritos' : 'A\u00F1adir a favoritos'}">
-          <svg class="w-5 h-5 ${isFav ? 'text-pink-500 fill-current' : 'text-gray-300'}" viewBox="0 0 24 24">
+          class="p-1.5 rounded-full hover:bg-orange-50 transition" title="${isFav ? 'Quitar de favoritos' : 'A\u00F1adir a favoritos'}">
+          <svg class="w-5 h-5 ${isFav ? 'text-orange-500 fill-current' : 'text-gray-300'}" viewBox="0 0 24 24">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
               ${isFav ? '' : 'stroke="currentColor" stroke-width="1.5" fill="none"'}/>
           </svg>
@@ -574,31 +689,31 @@ function showPOI(poi) {
     ${!isPuntoReferencia && tripTypeBadges ? `<div class="flex flex-wrap gap-1 mb-3">${tripTypeBadges}</div>` : ''}
     <div class="grid grid-cols-2 gap-2">
       ${!isPuntoReferencia ? `
-      <a href="${poi.url}" class="col-span-2 flex items-center justify-center gap-2 bg-blue-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 transition">
+      <a href="${poi.url}" class="col-span-2 flex items-center justify-center gap-2 bg-orange-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-orange-700 transition">
         Ver detalle
       </a>
       ` : ''}
       ${!isPuntoReferencia ? (CHATBOT_ACTIVE && CHATBOT_WA_NUMBER
         ? `<a href="https://wa.me/${CHATBOT_WA_NUMBER}?text=${encodeURIComponent('Hola, quiero ver las opciones para ' + poi.name)}" target="_blank"
-            class="col-span-2 flex items-center justify-center gap-2 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-purple-700 transition">
+            class="col-span-2 flex items-center justify-center gap-2 bg-orange-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-orange-700 transition">
             \u{1F4AC} Reservar por Whatsapp
           </a>`
         : `<button type="button" onclick="toggleReservarMenu(this)"
-            class="col-span-2 flex items-center justify-center gap-2 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-purple-700 transition">
+            class="col-span-2 flex items-center justify-center gap-2 bg-orange-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-orange-700 transition">
             \u{1F4AC} Reservar por Whatsapp
           </button>
           <div class="col-span-2 hidden reservar-menu">
             <div class="grid grid-cols-2 gap-2 mt-1">
-              <a href="${poi.url}#productos" class="flex items-center justify-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 py-2 rounded-xl text-sm font-medium hover:bg-blue-100 transition">
+              <a href="${poi.url}#productos" class="flex items-center justify-center gap-1.5 bg-orange-50 text-orange-700 border border-orange-200 py-2 rounded-xl text-sm font-medium hover:bg-orange-100 transition">
                 \u{1F6CD}\u{FE0F} Productos
               </a>
-              <a href="${poi.url}#servicios" class="flex items-center justify-center gap-1.5 bg-green-50 text-green-700 border border-green-200 py-2 rounded-xl text-sm font-medium hover:bg-green-100 transition">
+              <a href="${poi.url}#servicios" class="flex items-center justify-center gap-1.5 bg-orange-50 text-orange-700 border border-orange-200 py-2 rounded-xl text-sm font-medium hover:bg-orange-100 transition">
                 \u{1F4CB} Servicios
               </a>
               <a href="${poi.url}#amenidades" class="flex items-center justify-center gap-1.5 bg-orange-50 text-orange-700 border border-orange-200 py-2 rounded-xl text-sm font-medium hover:bg-orange-100 transition">
                 \u{1F6CE}\u{FE0F} Amenidades
               </a>
-              <a href="${poi.url}#eventos" class="flex items-center justify-center gap-1.5 bg-purple-50 text-purple-700 border border-purple-200 py-2 rounded-xl text-sm font-medium hover:bg-purple-100 transition">
+              <a href="${poi.url}#eventos" class="flex items-center justify-center gap-1.5 bg-orange-50 text-orange-700 border border-orange-200 py-2 rounded-xl text-sm font-medium hover:bg-orange-100 transition">
                 \u{1F389} Eventos
               </a>
             </div>
@@ -644,7 +759,7 @@ function closeBottomSheet() {
 function setActiveCatButton(cat) {
   document.querySelectorAll('.cat-btn').forEach(b => {
     const active = b.dataset.cat === cat;
-    b.classList.toggle('bg-blue-600', active);
+    b.classList.toggle('bg-orange-600', active);
     b.classList.toggle('text-white', active);
     b.classList.toggle('bg-gray-100', !active);
     b.classList.toggle('text-gray-700', !active);
@@ -662,7 +777,7 @@ function filterCat(cat) {
 function setActiveIsotipoButton(isotipo) {
   document.querySelectorAll('.isotipo-btn').forEach(b => {
     const active = b.dataset.isotipo === isotipo;
-    b.classList.toggle('bg-blue-600', active);
+    b.classList.toggle('bg-orange-600', active);
     b.classList.toggle('text-white', active);
     b.classList.toggle('bg-gray-100', !active);
     b.classList.toggle('text-gray-700', !active);
@@ -672,7 +787,7 @@ function setActiveIsotipoButton(isotipo) {
 function setActiveTripTypeButton(tripType) {
   document.querySelectorAll('.trip-type-btn').forEach(b => {
     const active = b.dataset.tripType === tripType;
-    b.classList.toggle('bg-blue-600', active);
+    b.classList.toggle('bg-orange-600', active);
     b.classList.toggle('text-white', active);
     b.classList.toggle('bg-gray-100', !active);
     b.classList.toggle('text-gray-700', !active);
@@ -695,7 +810,7 @@ function filterTripType(tripType) {
   allRefPoints.forEach(poi => {
     if (!poi.lat || !poi.lng) return;
     const refEmoji = isotipoToEmoji(poi.isotipo) || iconToEmoji(poi.category_icon);
-    const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#8B5CF6', refEmoji) });
+    const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#f97316', refEmoji) });
     m.addTo(map);
     m.on('click', () => showPOI(poi));
     markers.push(m);
@@ -705,7 +820,7 @@ function filterTripType(tripType) {
   filtered.forEach(poi => {
     if (!poi.lat || !poi.lng) return;
     const poiEmoji = isotipoToEmoji(poi.isotipo);
-    const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#3B82F6', poiEmoji) });
+    const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#f97316', poiEmoji) });
     m.addTo(map);
     m.on('click', () => showPOI(poi));
     markers.push(m);
@@ -725,7 +840,7 @@ function filterIsotipo(isotipo) {
   filtered.forEach(poi => {
     if (!poi.lat || !poi.lng) return;
     const poiEmoji = isotipoToEmoji(poi.isotipo);
-    const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#3B82F6', poiEmoji) });
+    const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#f97316', poiEmoji) });
     m.addTo(map);
     m.on('click', () => showPOI(poi));
     markers.push(m);
@@ -783,7 +898,7 @@ function toggleFavorito(id) {
   document.querySelectorAll(`#fav-btn-${id}`).forEach(btn => {
     const isFav = isFavorito(id);
     const svg = btn.querySelector('svg');
-    svg.className = `w-5 h-5 ${isFav ? 'text-pink-500 fill-current' : 'text-gray-300'}`;
+    svg.className = `w-5 h-5 ${isFav ? 'text-orange-500 fill-current' : 'text-gray-300'}`;
     const path = svg.querySelector('path');
     if (isFav) {
       path.removeAttribute('stroke');
@@ -822,9 +937,9 @@ function openFavoritos() {
         <img src="${poi.cover}" class="w-14 h-14 object-cover rounded-lg shrink-0" onerror="this.src='/assets/img/placeholder.svg'">
         <div class="flex-1 min-w-0">
           <p class="font-semibold text-gray-900 text-sm truncate">${poi.name}</p>
-          <span class="text-xs px-2 py-0.5 rounded-full text-white font-medium" style="background:${poi.category_color}">${categoryEmoji} ${poi.category}</span>
+          <span class="text-xs px-2 py-0.5 rounded-full text-white font-medium bg-orange-600">${categoryEmoji} ${poi.category}</span>
         </div>
-        <button data-remove-id="${poi.id}" class="p-1.5 text-pink-500 hover:bg-pink-50 rounded-full transition shrink-0 fav-remove-btn" title="Quitar de favoritos">
+        <button data-remove-id="${poi.id}" class="p-1.5 text-orange-500 hover:bg-orange-50 rounded-full transition shrink-0 fav-remove-btn" title="Quitar de favoritos">
           <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
         </button>
       </div>`;

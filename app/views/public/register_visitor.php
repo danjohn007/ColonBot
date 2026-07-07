@@ -1,62 +1,71 @@
 <?php
-$pageTitle = 'Registro Visitante – CristobalBot';
+$pageTitle = 'Registro Visitante - CristobalBot';
+$extraHead = '<link rel="preconnect" href="https://fonts.googleapis.com">' . PHP_EOL
+  . '  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . PHP_EOL
+  . '  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">' . PHP_EOL
+  . '  <link rel="stylesheet" href="' . asset('css/landing-map.css') . '">';
 require APP_PATH . '/views/layout/head.php';
 ?>
 
-<main class="max-w-lg mx-auto px-4 py-8 mb-24">
-  <!-- Login Tab -->
-  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-    <h1 class="text-2xl font-bold text-gray-900 mb-2">🔑 Iniciar Sesión</h1>
-    <p class="text-sm text-gray-500 mb-6">¿Ya tienes una cuenta? Inicia sesión para acceder a descuentos y funcionalidades.</p>
+<main class="colon-auth-page">
+  <div class="colon-auth-shell">
+    <section class="colon-auth-copy">
+      <img src="<?= asset('img/cristo-bot-logo.png') ?>" alt="Cristo Bot Colon" class="colon-auth-logo mb-6">
+      <p class="colon-eyebrow">Visitantes</p>
+      <h1>Explora Colon mejor</h1>
+      <p>Guarda lugares, descubre beneficios y participa con comentarios que ayudan a otros viajeros a vivir una ruta mas completa.</p>
+    </section>
 
-    <?php $f = flash(); if ($f): ?>
-    <div class="mb-4 p-3 rounded-xl text-sm <?= $f['type'] === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200' ?>">
-      <?= e($f['msg']) ?>
-    </div>
-    <?php endif; ?>
-
-    <form method="POST" action="<?= url('registro/visitante/iniciar-sesion') ?>" class="space-y-4">
-      <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-        <input type="email" name="email" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+    <section class="colon-auth-card">
+      <?php $f = flash(); if ($f): ?>
+      <div class="mb-4 p-3 rounded-xl text-sm <?= $f['type'] === 'success' ? 'bg-orange-50 text-orange-700 border border-orange-200' : 'bg-red-50 text-red-700 border border-red-200' ?>">
+        <?= e($f['msg']) ?>
       </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-        <input type="password" name="password" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-      </div>
-      <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 transition">
-        Iniciar Sesión
-      </button>
-    </form>
-  </div>
+      <?php endif; ?>
 
-  <div class="relative flex items-center mb-6">
-    <div class="flex-1 border-t border-gray-200"></div>
-    <span class="px-3 text-sm text-gray-400">o</span>
-    <div class="flex-1 border-t border-gray-200"></div>
-  </div>
+      <div class="colon-auth-panel">
+        <h2>Iniciar sesion</h2>
+        <p class="text-sm mb-6">Accede a descuentos, favoritos y funcionalidades para visitantes.</p>
 
-  <!-- Register Tab -->
-  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-    <h1 class="text-2xl font-bold text-gray-900 mb-2">📝 Registro para Visitantes</h1>
-    <p class="text-sm text-gray-500 mb-6">Regístrate y obtén descuentos exclusivos, califica y deja comentarios de nuestros atractivos turísticos.</p>
+        <form method="POST" action="<?= url('registro/visitante/iniciar-sesion') ?>" class="space-y-4">
+          <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+            <input type="email" name="email" required class="colon-public-input w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none transition">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Contrasena</label>
+            <input type="password" name="password" required class="colon-public-input w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none transition">
+          </div>
+          <button type="submit" class="colon-public-btn w-full">
+            Iniciar sesion
+          </button>
+        </form>
+      </div>
 
-    <form method="POST" action="<?= url('registro/visitante/guardar') ?>" class="space-y-4">
-      <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre completo *</label>
-        <input type="text" name="name" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+      <div class="colon-form-divider">o</div>
+
+      <div class="colon-auth-panel">
+        <h2>Registro para visitantes</h2>
+        <p class="text-sm mb-6">Registrate para obtener descuentos exclusivos, calificar y dejar comentarios.</p>
+
+        <form method="POST" action="<?= url('registro/visitante/guardar') ?>" class="space-y-4">
+          <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre completo *</label>
+            <input type="text" name="name" required class="colon-public-input w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none transition">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Email *</label>
+            <input type="email" name="email" required class="colon-public-input w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none transition">
+            <p class="text-xs text-gray-400 mt-1">Te enviaremos un codigo de confirmacion.</p>
+          </div>
+          <button type="submit" class="colon-public-btn w-full">
+            Registrarse
+          </button>
+        </form>
       </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-        <input type="email" name="email" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-        <p class="text-xs text-gray-400 mt-1">Te enviaremos un código de confirmación</p>
-      </div>
-      <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition">
-        Registrarse
-      </button>
-    </form>
+    </section>
   </div>
 </main>
 

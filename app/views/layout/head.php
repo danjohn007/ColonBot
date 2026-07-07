@@ -28,7 +28,7 @@
     }
     main h1 { color: var(--color-secondary); }
     .site-title-brand {
-      background: linear-gradient(135deg, #6B21A8, #2563EB, #059669);
+      background: linear-gradient(135deg, #f97316, #ea580c, #c2410c);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;

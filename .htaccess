@@ -1,4 +1,5 @@
 Options -Indexes
+DirectoryIndex index.php
 RewriteEngine On
 
 # Redirigir a HTTPS (descomentar en producción)
@@ -12,7 +13,7 @@ RewriteRule ^assets/(.*)$ public/$1 [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
-# Reescribir todo lo demás al index.php
+# Reescribir todo lo demás al front controller alterno
 RewriteRule ^(.*)$ index.php [QSA,L]
 
 # Seguridad: bloquear acceso directo a config y app

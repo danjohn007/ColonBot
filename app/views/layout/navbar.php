@@ -16,7 +16,7 @@ $flash = flash();
       <!-- Logo -->
       <a href="https://colon.click/sistema/mapa" class="flex items-center gap-3 font-bold text-lg">
         <img src="<?= asset('img/colon.png') ?>" alt="Colón te conquistará" class="h-12 w-auto">
-        <img src="<?= asset('img/ColonBotimg.png') ?>" alt="Colón Administración" class="h-10 w-auto">
+        <img src="<?= asset('img/cristo-bot-logo.png') ?>" alt="Cristo Bot Colón" class="h-10 w-auto rounded-full">
         <img src="<?= asset('img/logo-header-nuevo.jpeg') ?>" alt="Ayuntamiento de Colón" class="h-12 w-auto hidden sm:inline-block">
         <span class="text-base font-semibold whitespace-nowrap hidden sm:inline site-title-brand"><?= e(setting('site_name', 'CristobalBot: Mapa interactivo del turismo en Colón')) ?></span>
       </a>
@@ -26,7 +26,7 @@ $flash = flash();
         <?php if ($user): ?>
           <a href="<?= url('logout') ?>" class="text-xs text-red-600 hover:text-red-700 transition hidden sm:inline">Salir</a>
         <?php else: ?>
-          <a href="<?= url('login') ?>" class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs hover:opacity-90 transition">Ingresar</a>
+          <a href="<?= url('login') ?>" class="bg-orange-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-orange-700 transition">Ingresar</a>
         <?php endif; ?>
       </div>
     </div>

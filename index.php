@@ -33,11 +33,14 @@ $router->get('',                        'MapController',       'index');
 $router->get('mapa',                    'MapController',       'index');
 $router->get('mapa/poi',                'MapController',       'poi');
 $router->get('mapa/{id}',              'MapController',       'index');
+$router->get('landing/mapa',            'MapController',       'index');
+$router->get('landing/mapa/{id}',       'MapController',       'index');
 $router->get('lugar/{slug}',            'MapController',       'detail');
 $router->post('lugar/{slug}/contactar', 'MapController',       'contact');
 
 // Autenticación
 $router->get('login',                   'AuthController',      'loginForm');
+$router->get('landing/login',           'AuthController',      'loginForm');
 $router->post('login',                  'AuthController',      'login');
 $router->get('logout',                  'AuthController',      'logout');
 $router->get('olvide-contrasena',       'AuthController',      'forgotPasswordForm');
