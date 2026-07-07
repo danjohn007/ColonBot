@@ -91,7 +91,7 @@ class ChatbotController extends Controller
             return $this->menuPrincipal();
         }
 
-        // Submenús por palabra clave
+        // Categorías
         if (str_contains($text, 'restaurante') || $text === 'cat_restaurantes') {
             return $this->listByCategory('restaurantes', '🍽️ Restaurantes en Colón');
         }
@@ -109,6 +109,18 @@ class ChatbotController extends Controller
         }
         if (str_contains($text, 'emergencia') || str_contains($text, 'urgencia') || str_contains($text, 'policia') || str_contains($text, 'bombero') || str_contains($text, 'ambulancia') || $text === 'emergencias') {
             return $this->emergencyNumbers();
+        }
+
+        // Ver negocio específico: formato "ver_N" donde N es el business_id
+        if (preg_match('/^ver_(\d+)$/', $text, $matches)) {
+            $businessId = (int)$matches[1];
+            return $this->showBusinessDetail($from, $businessId);
+        }
+
+        // Reservar en negocio: formato "reservar_N" donde N es el business_id
+        if (preg_match('/^reservar_(\d+)$/', $text, $matches)) {
+            $businessId = (int)$matches[1];
+            return $this->reserveBusiness($from, $businessId);
         }
 
         // Default
@@ -150,17 +162,129 @@ class ChatbotController extends Controller
             return ['type' => 'text', 'text' => ['body' => "No encontré resultados para esa categoría.\n\n🗺️ Explora el mapa interactivo: " . url('mapa') . "\n\nEscribe *menú* para regresar."]];
         }
 
-        $lines = ["*{$title}*\n"];
-        foreach (array_slice($businesses, 0, 5) as $b) {
+        // Show first 5 businesses as interactive buttons so users can click to see details
+        $firstBatch = array_slice($businesses, 0, 10);
+        
+        $lines = ["*{$title}*\nSelecciona un lugar para ver más detalles:\n"];
+        $buttons = [];
+        
+        foreach ($firstBatch as $idx => $b) {
+            $btnId = 'ver_' . $b['id'];
+            $btnTitle = mb_substr($b['name'], 0, 20);
+            $buttons[] = ['type' => 'reply', 'reply' => ['id' => $btnId, 'title' => $btnTitle]];
+            
+            // Also add to text list with map link as fallback
             $mapLink = url('mapa/' . $b['id']);
-            $dir     = $b['address'] ? $b['address'] : 'Sin dirección';
-
-            $businessLines = "📍 *{$b['name']}*\n   {$dir}\n   Más información en: {$mapLink}";
-            $lines[] = $businessLines;
+            $lines[] = "\n📍 *{$b['name']}*";
+            $lines[] = "   🗺️ " . $mapLink;
         }
         $lines[] = "\nEscribe *menú* para regresar al inicio.";
 
-        return ['type' => 'text', 'text' => ['body' => implode("\n\n", $lines)]];
+        // If we have buttons, send interactive message; otherwise text
+        if (!empty($buttons)) {
+            // Split into groups of 3 (Meta's max buttons per group)
+            $buttonGroups = array_chunk($buttons, 3);
+            $firstGroup = $buttonGroups[0] ?? [];
+            
+            // Store the rest in session for later
+            $_SESSION['chatbot_pending_' . $from] = array_slice($buttonGroups, 1);
+            
+            return [
+                'type' => 'interactive',
+                'interactive' => [
+                    'type' => 'button',
+                    'body' => ['text' => implode("\n", $lines)],
+                    'action' => ['buttons' => $firstGroup]
+                ]
+            ];
+        }
+        
+        return ['type' => 'text', 'text' => ['body' => implode("\n", $lines)]];
+    }
+
+    /**
+     * Muestra el detalle de un negocio y REGISTRA la consulta como 'solicitar_informacion'
+     */
+    private function showBusinessDetail(string $from, int $businessId): array
+    {
+        $business = $this->businesses->find($businessId);
+        if (!$business) {
+            return ['type' => 'text', 'text' => ['body' => "No encontré ese lugar.\n\nEscribe *menú* para regresar."]];
+        }
+
+        // ✅ REGISTRAR ACCIÓN: Solicitar información del negocio
+        $this->registrarSolicitudInfo($from, $businessId);
+
+        $whatsapp = $business['whatsapp'] ?: $business['phone'];
+        $mapLink = url('mapa/' . $business['id']);
+        $waLink = $whatsapp ? 'https://wa.me/' . preg_replace('/\D/', '', $whatsapp) : null;
+
+        $lines = [
+            "*📍 {$business['name']}*\n",
+            "📝 *Descripción:*",
+            ($business['description'] ? mb_substr($business['description'], 0, 300) : 'Sin descripción') . "\n",
+            "📞 *Teléfono:* " . ($business['phone'] ?: 'No disponible'),
+            "🏠 *Dirección:* " . ($business['address'] ?: 'No disponible') . "\n",
+            "🗺️ Ver en el mapa: {$mapLink}",
+        ];
+
+        // Add WhatsApp link if available
+        if ($waLink) {
+            $lines[] = "💬 WhatsApp: {$waLink}";
+        }
+
+        $lines[] = "\nElige una opción:";
+        $buttons = [];
+
+        if ($whatsapp) {
+            $buttons[] = ['type' => 'reply', 'reply' => ['id' => 'reservar_' . $businessId, 'title' => '📅 Reservar']];
+        }
+        $buttons[] = ['type' => 'reply', 'reply' => ['id' => 'menu', 'title' => '🔙 Menú']];
+
+        return [
+            'type' => 'interactive',
+            'interactive' => [
+                'type' => 'button',
+                'body' => ['text' => implode("\n", $lines)],
+                'action' => ['buttons' => $buttons]
+            ]
+        ];
+    }
+
+    /**
+     * Procesa una reservación y REGISTRA la consulta como 'compra_reservacion'
+     */
+    private function reserveBusiness(string $from, int $businessId): array
+    {
+        $business = $this->businesses->find($businessId);
+        if (!$business) {
+            return ['type' => 'text', 'text' => ['body' => "No encontré ese lugar.\n\nEscribe *menú* para regresar."]];
+        }
+
+        $whatsapp = $business['whatsapp'] ?: $business['phone'];
+        if (!$whatsapp) {
+            return ['type' => 'text', 'text' => ['body' => "Este negocio no tiene WhatsApp configurado.\n\nEscribe *menú* para regresar."]];
+        }
+
+        // ✅ REGISTRAR ACCIÓN: Compra/Reservación en el negocio
+        $this->registrarCompraReservacion($from, $businessId);
+
+        $waLink = 'https://wa.me/' . preg_replace('/\D/', '', $whatsapp) . '?text=' . urlencode('Hola, me gustaría hacer una reservación en su negocio.');
+
+        return [
+            'type' => 'interactive',
+            'interactive' => [
+                'type' => 'button',
+                'body' => [
+                    'text' => "*✅ Reservación iniciada en {$business['name']}*\n\nHaz clic en el botón de abajo para comunicarte directamente con el negocio por WhatsApp.\n\nO escribe *menú* para regresar."
+                ],
+                'action' => [
+                    'buttons' => [
+                        ['type' => 'reply', 'reply' => ['id' => 'menu', 'title' => '🔙 Menú']],
+                    ]
+                ]
+            ]
+        ];
     }
 
     /**
@@ -171,6 +295,7 @@ class ChatbotController extends Controller
     {
         try {
             $this->consultas->registrarSolicitudInfo($from, $businessId);
+            error_log("✅ CONSULTA REGISTRADA: SolicitudInfo - wa_id={$from}, business_id={$businessId}");
         } catch (Throwable $e) {
             logError('Error al registrar consulta: ' . $e->getMessage(), __FILE__, __LINE__);
         }
@@ -184,6 +309,7 @@ class ChatbotController extends Controller
     {
         try {
             $this->consultas->registrarCompraReservacion($from, $businessId);
+            error_log("✅ CONSULTA REGISTRADA: CompraReservacion - wa_id={$from}, business_id={$businessId}");
         } catch (Throwable $e) {
             logError('Error al registrar consulta: ' . $e->getMessage(), __FILE__, __LINE__);
         }
