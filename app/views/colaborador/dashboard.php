@@ -39,7 +39,7 @@ require APP_PATH . '/views/layout/head.php';
       <h3 class="font-semibold text-gray-900 mt-2">Métricas avanzadas</h3>
       <p class="text-xs text-gray-400 mt-1">Top rankeados, rutas, estacionalidad</p>
     </a>
-    <a href="<?= url('superadmin/negocios') ?>" class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition text-center">
+    <a href="#prestadores-contacto" class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition text-center">
       <span class="text-3xl">🏢</span>
       <h3 class="font-semibold text-gray-900 mt-2">Negocios</h3>
       <p class="text-xs text-gray-400 mt-1">Administra prestadores de servicios</p>
@@ -61,7 +61,73 @@ require APP_PATH . '/views/layout/head.php';
             <td class="py-2 pr-4 font-medium"><?= e($nb['name']) ?></td>
             <td class="py-2 pr-4 text-gray-500"><?= e($nb['owner_name'] ?? '') ?></td>
             <td class="py-2 pr-4 text-gray-400"><?= date('d/m/Y', strtotime($nb['created_at'])) ?></td>
-            <td class="py-2"><a href="<?= url('superadmin/negocios') ?>" class="text-blue-600 hover:underline text-xs">Ver</a></td>
+            <td class="py-2">
+              <div class="flex flex-wrap gap-2">
+                <a href="#prestadores-contacto" class="text-blue-600 hover:underline text-xs">Ver</a>
+                <?php if (!empty($nb['whatsapp'])): ?>
+                <a href="<?= e(waLink($nb['whatsapp'], 'Hola, te contactamos desde la Direccion de Turismo de Colon.')) ?>" target="_blank" onclick="logProviderContact(<?= (int)$nb['id'] ?>, 'whatsapp')" class="text-green-600 hover:underline text-xs">WhatsApp</a>
+                <?php endif; ?>
+                <?php if (!empty($nb['email'])): ?>
+                <a href="mailto:<?= e($nb['email']) ?>?subject=<?= rawurlencode('Contacto de Direccion de Turismo') ?>" onclick="logProviderContact(<?= (int)$nb['id'] ?>, 'email')" class="text-purple-600 hover:underline text-xs">Email</a>
+                <?php endif; ?>
+              </div>
+            </td>
+          </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+    <?php endif; ?>
+  </div>
+
+  <div id="prestadores-contacto" class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
+    <div class="flex items-center justify-between gap-4 mb-4">
+      <h2 class="font-semibold text-gray-900">Prestadores de servicio</h2>
+      <span class="text-xs text-gray-400"><?= count($providers ?? []) ?> registrados</span>
+    </div>
+    <?php if (empty($providers)): ?>
+    <p class="text-sm text-gray-400 text-center py-4">No hay prestadores registrados</p>
+    <?php else: ?>
+    <div class="overflow-x-auto max-h-96 overflow-y-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-left text-xs text-gray-500 uppercase tracking-wide border-b">
+            <th class="pb-2 pr-4">Negocio</th>
+            <th class="pb-2 pr-4">Duenio</th>
+            <th class="pb-2 pr-4">Contacto</th>
+            <th class="pb-2">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($providers as $provider): ?>
+          <?php $providerEmail = $provider['email'] ?: ($provider['owner_email'] ?? ''); ?>
+          <tr class="border-b last:border-0">
+            <td class="py-2 pr-4">
+              <p class="font-medium"><?= e($provider['name']) ?></p>
+              <p class="text-xs text-gray-400"><?= e($provider['status'] ?? '') ?></p>
+            </td>
+            <td class="py-2 pr-4 text-gray-500"><?= e($provider['owner_name'] ?? '') ?></td>
+            <td class="py-2 pr-4 text-gray-500">
+              <?php if (!empty($provider['whatsapp'])): ?>
+              <p>WhatsApp: <?= e($provider['whatsapp']) ?></p>
+              <?php endif; ?>
+              <?php if ($providerEmail): ?>
+              <p>Email: <?= e($providerEmail) ?></p>
+              <?php endif; ?>
+              <?php if (empty($provider['whatsapp']) && !$providerEmail): ?>
+              <span class="text-gray-400">Sin contacto</span>
+              <?php endif; ?>
+            </td>
+            <td class="py-2">
+              <div class="flex flex-wrap gap-2">
+                <?php if (!empty($provider['whatsapp'])): ?>
+                <a href="<?= e(waLink($provider['whatsapp'], 'Hola, te contactamos desde la Direccion de Turismo de Colon.')) ?>" target="_blank" onclick="logProviderContact(<?= (int)$provider['id'] ?>, 'whatsapp')" class="text-green-600 hover:underline text-xs">WhatsApp</a>
+                <?php endif; ?>
+                <?php if ($providerEmail): ?>
+                <a href="mailto:<?= e($providerEmail) ?>?subject=<?= rawurlencode('Contacto de Direccion de Turismo') ?>" onclick="logProviderContact(<?= (int)$provider['id'] ?>, 'email')" class="text-purple-600 hover:underline text-xs">Email</a>
+                <?php endif; ?>
+              </div>
+            </td>
           </tr>
           <?php endforeach; ?>
         </tbody>
@@ -90,4 +156,10 @@ require APP_PATH . '/views/layout/head.php';
     </div>
   </div>
 </main>
+<script>
+function logProviderContact(id, channel) {
+  fetch(`<?= url('colaborador/negocios/') ?>${id}/contactar?channel=${encodeURIComponent(channel)}`)
+    .catch(() => {});
+}
+</script>
 <?php require APP_PATH . '/views/layout/footer.php'; ?>

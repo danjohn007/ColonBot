@@ -52,7 +52,7 @@ class EventModel extends Model
              FROM events e 
              LEFT JOIN users u ON u.id = e.user_id 
              LEFT JOIN businesses b ON b.id = e.business_id 
-             WHERE e.status = 'approved' AND e.bot_authorized = 0
+             WHERE e.status IN ('active', 'approved') AND e.bot_authorized = 0
              ORDER BY e.created_at ASC"
         );
     }
@@ -83,6 +83,20 @@ class EventModel extends Model
              FROM events e
              LEFT JOIN businesses b ON b.id = e.business_id
              WHERE e.status IN ('active', 'approved')
+             AND (e.end_date IS NULL OR e.end_date >= NOW())
+             ORDER BY e.start_date ASC"
+        );
+    }
+
+    public function activeForChatbot(): array
+    {
+        return $this->query(
+            "SELECT e.*, b.name AS business_name, b.slug AS business_slug,
+                    b.address, b.whatsapp, b.phone
+             FROM events e
+             LEFT JOIN businesses b ON b.id = e.business_id
+             WHERE e.status IN ('active', 'approved')
+             AND e.bot_authorized = 1
              AND (e.end_date IS NULL OR e.end_date >= NOW())
              ORDER BY e.start_date ASC"
         );

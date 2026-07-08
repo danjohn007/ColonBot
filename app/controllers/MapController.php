@@ -74,14 +74,14 @@ class MapController extends Controller
         }
         $this->analytics->track('map_view', $business['id']);
 
-        $images    = $this->businesses->images($business['id']);
-        $amenities = $this->businesses->amenities($business['id']);
-        $allAmenities = $this->businesses->activeAmenities();
-        $services  = $this->businesses->services($business['id']);
-        $products  = $this->businesses->products($business['id']);
-        $events    = $this->businesses->publicEvents((int)$business['id']);
-        $tripTypes = array_column($this->businesses->tripTypes((int)$business['id']), 'trip_type');
-        $reviews   = $this->businesses->reviews((int)$business['id']);
+        $images       = $this->safeDetailData(fn() => $this->businesses->images((int)$business['id']), 'business_images');
+        $amenities    = $this->safeDetailData(fn() => $this->businesses->amenities((int)$business['id']), 'amenities');
+        $allAmenities = $this->safeDetailData(fn() => $this->businesses->activeAmenities(), 'active_amenities');
+        $services     = $this->safeDetailData(fn() => $this->businesses->services((int)$business['id']), 'services');
+        $products     = $this->safeDetailData(fn() => $this->businesses->products((int)$business['id']), 'products');
+        $events       = $this->safeDetailData(fn() => $this->businesses->publicEvents((int)$business['id']), 'public_events');
+        $tripTypes    = array_column($this->safeDetailData(fn() => $this->businesses->tripTypes((int)$business['id']), 'trip_types'), 'trip_type');
+        $reviews      = $this->safeDetailData(fn() => $this->businesses->reviews((int)$business['id']), 'reviews');
         $routePrefix = $this->pathForCurrentPrefix('');
 
         $this->view('map.detail', compact('business', 'images', 'amenities', 'allAmenities', 'services', 'products', 'events', 'tripTypes', 'reviews', 'routePrefix'));
@@ -427,5 +427,15 @@ class MapController extends Controller
         }
 
         return json_encode($rings);
+    }
+
+    private function safeDetailData(callable $loader, string $section): array
+    {
+        try {
+            return $loader();
+        } catch (Throwable $e) {
+            error_log("Map detail {$section} skipped: " . $e->getMessage());
+            return [];
+        }
     }
 }

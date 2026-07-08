@@ -61,7 +61,7 @@ require APP_PATH . '/views/layout/head.php';
           </button>
           <?php if (in_array($user['role'], ['superadmin', 'colaborador_admin'])): ?>
           <button onclick="approveEvent(<?= $p['id'] ?>)" class="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition">Aprobar</button>
-          <?php if (!$p['bot_authorized'] && $p['status'] === 'approved'): ?>
+          <?php if (!$p['bot_authorized'] && in_array($p['status'], ['active', 'approved'], true)): ?>
           <button onclick="authorizeBot(<?= $p['id'] ?>)" class="text-xs px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition">🤖 Autorizar Bot</button>
           <?php endif; ?>
           <?php endif; ?>
@@ -177,6 +177,13 @@ function openCreateModal() {
   document.getElementById('event-presale-end').value = '';
   document.getElementById('event-conditions').value = '';
   document.getElementById('event-image').value = '';
+  const businessSelect = document.getElementById('event-business-select');
+  const businessHidden = document.getElementById('event-business-id');
+  if (businessSelect) {
+    businessSelect.value = '';
+  } else if (businessHidden) {
+    businessHidden.value = businessHidden.defaultValue || '';
+  }
   document.getElementById('event-modal').classList.remove('hidden');
 }
 
@@ -195,6 +202,13 @@ function editEvent(p) {
   document.getElementById('event-presale-start').value = p.presale_start ? p.presale_start.replace(' ', 'T').substring(0, 16) : '';
   document.getElementById('event-presale-end').value = p.presale_end ? p.presale_end.replace(' ', 'T').substring(0, 16) : '';
   document.getElementById('event-conditions').value = p.conditions || '';
+  const businessSelect = document.getElementById('event-business-select');
+  const businessHidden = document.getElementById('event-business-id');
+  if (businessSelect) {
+    businessSelect.value = p.business_id || '';
+  } else if (businessHidden) {
+    businessHidden.value = p.business_id || '';
+  }
   document.getElementById('event-modal').classList.remove('hidden');
 }
 
@@ -209,7 +223,9 @@ function saveEvent(e) {
 
   const fd = new FormData();
   fd.append('_csrf', CSRF);
-  fd.append('business_id', document.getElementById('event-business-id')?.value || document.getElementById('event-business-select')?.value || '');
+  const businessSelect = document.getElementById('event-business-select');
+  const businessHidden = document.getElementById('event-business-id');
+  fd.append('business_id', businessSelect ? businessSelect.value : (businessHidden?.value || ''));
   fd.append('title', document.getElementById('event-title').value.trim());
   fd.append('description', document.getElementById('event-description').value.trim());
   fd.append('price', document.getElementById('event-price').value);

@@ -3,6 +3,8 @@ class ColaboradorController extends Controller
 {
     private BusinessModel $businesses;
     private PromotionModel $promotions;
+    private EventModel $eventModel;
+    private NotificationModel $notifications;
     private AnalyticsModel $analytics;
     private UserModel $users;
 
@@ -10,6 +12,8 @@ class ColaboradorController extends Controller
     {
         $this->businesses = new BusinessModel();
         $this->promotions = new PromotionModel();
+        $this->eventModel = new EventModel();
+        $this->notifications = new NotificationModel();
         $this->analytics = new AnalyticsModel();
         $this->users = new UserModel();
     }
@@ -45,6 +49,13 @@ class ColaboradorController extends Controller
              ORDER BY b.created_at DESC"
         )->fetchAll();
 
+        $providers = $db->query(
+            "SELECT b.*, u.name AS owner_name, u.email AS owner_email
+             FROM businesses b
+             JOIN users u ON u.id = b.user_id
+             ORDER BY b.name ASC"
+        )->fetchAll();
+
         // Visits per day/week/month
         $visitsByDay = $db->query(
             "SELECT DATE(created_at) AS day, COUNT(*) AS total
@@ -63,7 +74,7 @@ class ColaboradorController extends Controller
         $this->view('colaborador.dashboard', compact(
             'totalBiz', 'totalUsers', 'pendingPromos', 'summary',
             'topBusinesses', 'dailyEvents', 'topByCategory',
-            'newProviders', 'visitsByDay', 'visitsByWeek'
+            'newProviders', 'providers', 'visitsByDay', 'visitsByWeek'
         ));
     }
 
@@ -72,9 +83,11 @@ class ColaboradorController extends Controller
         $this->requireAuth('colaborador_admin');
 
         $pendingPromos = $this->promotions->pendingForApproval();
-        $activePromos = $this->promotions->active();
+        $pendingEvents = $this->eventModel->pendingForApproval();
+        $pendingBotEvents = $this->eventModel->pendingBotAuthorization();
+        $activePromos = array_merge($this->promotions->active(), $this->promotions->activeEvents());
 
-        $this->view('colaborador.events', compact('pendingPromos', 'activePromos') + ['csrf' => $this->csrf()]);
+        $this->view('colaborador.events', compact('pendingPromos', 'pendingEvents', 'pendingBotEvents', 'activePromos') + ['csrf' => $this->csrf()]);
     }
 
     public function approvePromotion(string $id): void
@@ -106,7 +119,8 @@ class ColaboradorController extends Controller
             }
         }
 
-        $this->promotions->insert([
+        $publicUrl = trim($_POST['public_url'] ?? '');
+        $id = $this->promotions->insert([
             'business_id' => null,
             'user_id' => currentUser()['id'],
             'title' => $title,
@@ -115,13 +129,26 @@ class ColaboradorController extends Controller
             'price' => null,
             'presale_price' => null,
             'conditions' => trim($_POST['conditions'] ?? ''),
-            'public_url' => trim($_POST['public_url'] ?? ''),
+            'public_url' => $publicUrl ?: null,
             'type' => 'evento',
             'target_segment' => 'todos',
             'status' => 'active',
             'start_date' => $_POST['start_date'] ?? null,
             'end_date' => $_POST['end_date'] ?? null,
         ]);
+
+        if ($publicUrl === '') {
+            $this->promotions->update($id, ['public_url' => BASE_URL . '/promocion/' . $id]);
+        }
+
+        foreach ($this->users->visitors() as $visitor) {
+            $this->notifications->create([
+                'user_id' => (int)$visitor['id'],
+                'type' => 'system',
+                'title' => 'Nuevo evento disponible',
+                'message' => "Ya puedes consultar el evento \"{$title}\" en tu panel de visitante.",
+            ]);
+        }
 
         $this->flash('success', 'Evento público creado exitosamente.');
         $this->redirect('colaborador/eventos');
@@ -147,6 +174,10 @@ class ColaboradorController extends Controller
         $business = $this->businesses->find((int)$businessId);
         if (!$business) { $this->json(['error' => 'not found'], 404); }
 
+        $channel = in_array($_GET['channel'] ?? '', ['whatsapp', 'email'], true) ? $_GET['channel'] : 'contact';
+        $message = trim($_GET['message'] ?? 'Contacto directo con prestador desde panel colaborador.');
+        $this->logAction('contact_provider_' . $channel, 'businesses', (int)$businessId, $message . ' - ' . $business['name']);
+
         $this->json([
             'ok' => true,
             'business' => [
@@ -154,6 +185,7 @@ class ColaboradorController extends Controller
                 'whatsapp' => $business['whatsapp'] ? waLink($business['whatsapp']) : null,
                 'email' => $business['email'],
                 'phone' => $business['phone'],
+                'email_url' => $business['email'] ? 'mailto:' . $business['email'] . '?subject=' . rawurlencode('Contacto de Direccion de Turismo') : null,
             ]
         ]);
     }

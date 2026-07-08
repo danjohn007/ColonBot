@@ -75,6 +75,50 @@ require APP_PATH . '/views/layout/head.php';
     </div>
   </div>
 
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <h2 class="font-semibold text-gray-900 mb-4">Solicitudes de eventos de prestadores</h2>
+      <?php if (empty($pendingEvents)): ?>
+      <p class="text-sm text-gray-400 text-center py-4">No hay eventos pendientes</p>
+      <?php else: ?>
+      <div class="space-y-3 max-h-96 overflow-y-auto">
+        <?php foreach ($pendingEvents as $event): ?>
+        <div class="p-4 border border-yellow-200 rounded-xl bg-yellow-50">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <h3 class="font-semibold text-gray-900 text-sm"><?= e($event['title']) ?></h3>
+              <p class="text-xs text-gray-500 mt-1"><?= e($event['business_name'] ?? 'Sin negocio') ?> - Creado por: <?= e($event['creator_name'] ?? '') ?></p>
+            </div>
+            <button onclick="approveEventRequest(<?= (int)$event['id'] ?>)" class="text-xs px-3 py-1.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">Aprobar</button>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      <?php endif; ?>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <h2 class="font-semibold text-gray-900 mb-4">Listos para publicar en chatbot</h2>
+      <?php if (empty($pendingBotEvents)): ?>
+      <p class="text-sm text-gray-400 text-center py-4">No hay eventos listos para chatbot</p>
+      <?php else: ?>
+      <div class="space-y-3 max-h-96 overflow-y-auto">
+        <?php foreach ($pendingBotEvents as $event): ?>
+        <div class="p-4 border border-indigo-200 rounded-xl bg-indigo-50">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <h3 class="font-semibold text-gray-900 text-sm"><?= e($event['title']) ?></h3>
+              <p class="text-xs text-gray-500 mt-1"><?= e($event['business_name'] ?? 'Evento publico') ?></p>
+            </div>
+            <button onclick="authorizeEventBot(<?= (int)$event['id'] ?>)" class="text-xs px-3 py-1.5 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition">Autorizar bot</button>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      <?php endif; ?>
+    </div>
+  </div>
+
   <!-- Active events -->
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
     <h2 class="font-semibold text-gray-900 mb-4">✅ Eventos y promociones activas</h2>
@@ -120,6 +164,30 @@ function rejectPromotion(id) {
   })
   .then(r => r.json())
   .then(d => { if (d.ok) location.reload(); });
+}
+
+function approveEventRequest(id) {
+  if (!confirm('Aprobar este evento de prestador?')) return;
+  const body = new URLSearchParams({ _csrf: CSRF });
+  fetch(`${BASE_URL}/admin/eventos/${id}/aprobar`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  })
+  .then(r => r.json())
+  .then(d => { if (d.ok) location.reload(); else alert(d.error || 'Error al aprobar'); });
+}
+
+function authorizeEventBot(id) {
+  if (!confirm('Publicar este evento en el chatbot?')) return;
+  const body = new URLSearchParams({ _csrf: CSRF });
+  fetch(`${BASE_URL}/admin/eventos/${id}/autorizar-bot`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  })
+  .then(r => r.json())
+  .then(d => { if (d.ok) location.reload(); else alert(d.error || 'Error al autorizar'); });
 }
 </script>
 <style>

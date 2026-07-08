@@ -6,12 +6,16 @@ class ChatbotController extends Controller
 {
     private BusinessModel $businesses;
     private CategoryModel $categories;
+    private EventModel    $events;
+    private PromotionModel $promotions;
     private SettingModel  $settings;
 
     public function __construct()
     {
         $this->businesses = new BusinessModel();
         $this->categories = new CategoryModel();
+        $this->events     = new EventModel();
+        $this->promotions = new PromotionModel();
         $this->settings   = new SettingModel();
     }
 
@@ -103,6 +107,9 @@ class ChatbotController extends Controller
         if (str_contains($text, 'experiencia') || $text === 'cat_experiencias') {
             return $this->listByCategory('experiencias', '⭐ Experiencias Turísticas');
         }
+        if (str_contains($text, 'evento') || $text === 'eventos') {
+            return $this->listEvents();
+        }
         if (str_contains($text, 'emergencia') || str_contains($text, 'urgencia') || str_contains($text, 'policia') || str_contains($text, 'bombero') || str_contains($text, 'ambulancia') || $text === 'emergencias') {
             return $this->emergencyNumbers();
         }
@@ -155,6 +162,27 @@ class ChatbotController extends Controller
             $lines[] = $businessLines;
         }
         $lines[] = "\nEscribe *menú* para regresar al inicio.";
+
+        return ['type' => 'text', 'text' => ['body' => implode("\n\n", $lines)]];
+    }
+
+    private function listEvents(): array
+    {
+        $events = array_merge($this->events->activeForChatbot(), $this->promotions->activeEvents());
+
+        if (empty($events)) {
+            return ['type' => 'text', 'text' => ['body' => "No hay eventos publicados por ahora.\n\nEscribe *menu* para regresar."]];
+        }
+
+        $lines = ["*Eventos publicados en Colon*\n"];
+        foreach (array_slice($events, 0, 5) as $event) {
+            $date = !empty($event['start_date']) ? date('d/m/Y H:i', strtotime($event['start_date'])) : 'Fecha por confirmar';
+            $place = ($event['business_name'] ?? '') ?: (($event['location'] ?? '') ?: 'Lugar por confirmar');
+            $isPromotionEvent = ($event['type'] ?? '') === 'evento';
+            $link = ($event['public_url'] ?? '') ?: url(($isPromotionEvent ? 'promocion/' : 'evento/') . (int)$event['id']);
+            $lines[] = "*{$event['title']}*\n{$date}\n{$place}\nMas informacion: {$link}";
+        }
+        $lines[] = "\nEscribe *menu* para regresar al inicio.";
 
         return ['type' => 'text', 'text' => ['body' => implode("\n\n", $lines)]];
     }

@@ -111,17 +111,27 @@ class TouristController extends Controller
         }
 
         $rating = min(5, max(1, $rating));
-        $this->businesses->addReview($businessId, $user['name'], $comment, $rating, (int)$user['id']);
-        $this->businesses->updateRating($businessId);
+        try {
+            $this->businesses->addReview($businessId, $user['name'], $comment, $rating, (int)$user['id']);
+            $this->businesses->updateRating($businessId);
+        } catch (Throwable $e) {
+            error_log('Visitor review submit failed: ' . $e->getMessage());
+            $this->flash('error', 'No se pudo guardar la valoracion. Revisa que la migracion de reseñas este aplicada.');
+            $this->redirectForCurrentPrefix('turista');
+        }
 
-        if (!empty($business['user_id'])) {
-            $this->notifications->create([
-                'user_id' => (int)$business['user_id'],
-                'business_id' => $businessId,
-                'type' => 'review',
-                'title' => 'Nueva valoracion de visitante',
-                'message' => "{$user['name']} califico tu negocio con {$rating}/5.",
-            ]);
+        try {
+            if (!empty($business['user_id'])) {
+                $this->notifications->create([
+                    'user_id' => (int)$business['user_id'],
+                    'business_id' => $businessId,
+                    'type' => 'review',
+                    'title' => 'Nueva valoracion de visitante',
+                    'message' => "{$user['name']} califico tu negocio con {$rating}/5.",
+                ]);
+            }
+        } catch (Throwable $e) {
+            error_log('Visitor review notification skipped: ' . $e->getMessage());
         }
 
         $this->flash('success', '¡Gracias por tu valoración!');

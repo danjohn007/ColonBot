@@ -242,8 +242,8 @@ require APP_PATH . '/views/layout/head.php';
     <!-- Map -->
     <div id="map" class="flex-1 z-0"></div>
 
-    <!-- Route Legend Boxes (right side of map) -->
-    <div id="route-legend" class="hidden md:block absolute top-4 right-4 z-20 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-3 max-w-[200px]">
+    <!-- Route Legend Boxes (top corner of map) -->
+    <div id="route-legend" class="hidden md:block absolute top-4 left-4 z-20 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-3 max-w-[200px]">
       <h4 class="text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Rutas Turísticas</h4>
       <div class="space-y-1.5">
         <?php foreach ($categories as $cat): ?>

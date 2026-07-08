@@ -86,6 +86,7 @@ class EventController extends Controller
             $eventType = 'publico';
         }
 
+        $isAdminEvent = in_array($user['role'], ['colaborador_admin', 'superadmin'], true);
         $id = $this->events->insert([
             'business_id' => $businessId > 0 ? $businessId : null,
             'user_id' => currentUser()['id'],
@@ -100,7 +101,11 @@ class EventController extends Controller
             'conditions' => trim($_POST['conditions'] ?? ''),
             'event_type' => $eventType,
             'target_segment' => implode(',', $_POST['target_segment'] ?? ['todos']),
-            'status' => 'pending',
+            'status' => $isAdminEvent ? 'active' : 'pending',
+            'approved_by' => $isAdminEvent ? (int)$user['id'] : null,
+            'bot_authorized' => $isAdminEvent ? 1 : 0,
+            'bot_authorized_by' => $isAdminEvent ? (int)$user['id'] : null,
+            'bot_authorized_at' => $isAdminEvent ? date('Y-m-d H:i:s') : null,
             'start_date' => $_POST['start_date'] ?? null,
             'end_date' => $_POST['end_date'] ?? null,
             'presale_start' => $_POST['presale_start'] ?? null,
@@ -111,8 +116,10 @@ class EventController extends Controller
         $publicUrl = $this->events->generatePublicUrl($id);
         $this->events->update($id, ['public_url' => $publicUrl]);
 
-        // Notify colaborador_admin and superadmin about pending event authorization
-        if ($eventType === 'publico') {
+        // Notify visitors for official events, or admins for provider requests.
+        if ($isAdminEvent) {
+            $this->notifyVisitorsForEvent($id, $title, $businessId > 0 ? $businessId : null);
+        } else {
             $this->notifyAdminsForApproval($id, $title);
         }
 
@@ -215,6 +222,10 @@ class EventController extends Controller
 
         $event = $this->events->find((int)$id);
         if (!$event) { $this->json(['error' => 'not found'], 404); }
+
+        if (!in_array($event['status'], ['active', 'approved'], true)) {
+            $this->json(['error' => 'Primero aprueba el evento antes de publicarlo en chatbot'], 422);
+        }
 
         $this->events->authorizeBot((int)$id, (int)currentUser()['id']);
         $this->logAction('authorize_event_bot', 'events', (int)$id, $event['title']);
