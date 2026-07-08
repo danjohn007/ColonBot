@@ -56,8 +56,8 @@ class PromotionModel extends Model
              LEFT JOIN businesses b ON b.id = p.business_id
              WHERE p.type = 'promocion'
              AND p.status IN ('active', 'approved')
-             AND (p.start_date IS NULL OR p.start_date <= NOW())
-             AND (p.end_date IS NULL OR p.end_date >= NOW())"
+             AND (p.end_date IS NULL OR p.end_date >= NOW())
+             ORDER BY COALESCE(p.start_date, p.created_at) ASC, p.id DESC"
         );
     }
 

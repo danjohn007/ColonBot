@@ -134,7 +134,7 @@ class TouristController extends Controller
             error_log('Visitor review notification skipped: ' . $e->getMessage());
         }
 
-        $this->flash('success', '¡Gracias por tu valoración!');
+        $this->flash('success', 'Gracias, tu opinion se guardo correctamente.');
         $this->redirectForCurrentPrefix('turista');
     }
 
