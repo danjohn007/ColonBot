@@ -1,10 +1,22 @@
 <?php
+$returnTo = trim((string)($_GET['return_to'] ?? ''));
+$viewer = currentUser();
+$backUrl = preg_match('/^(landing\/)?turista(\/perfil)?$/', $returnTo)
+  ? url($returnTo)
+  : url(routePrefix() . (($viewer['role'] ?? '') === 'visitor' ? 'turista' : 'mapa'));
 $pageTitle = e($event['title']) . ' – ' . APP_NAME;
 require APP_PATH . '/views/layout/head.php';
 ?>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
 
 <main class="max-w-3xl mx-auto px-4 py-8 mb-20">
+  <div class="mb-4">
+    <a href="<?= e($backUrl) ?>" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-gray-700 border border-gray-200 shadow-sm hover:bg-gray-50 transition">
+      <span aria-hidden="true">&larr;</span>
+      Volver
+    </a>
+  </div>
+
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <?php if ($event['image']): ?>
     <img src="<?= imageUrl($event['image']) ?>" alt="<?= e($event['title']) ?>" class="w-full h-64 object-cover">

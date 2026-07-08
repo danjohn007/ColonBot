@@ -185,7 +185,7 @@ $loginUrl = url($navPrefix . 'login');
 
         <!-- VISITOR (strict) - merged from turista -->
         <?php if ($role === 'visitor'): ?>
-        <a href="<?= url($navPrefix . 'turista') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+        <a href="<?= url($navPrefix . 'turista/perfil') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">👤</span> Mi Perfil Visitante
         </a>
         <a href="<?= url($navPrefix . 'notificaciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
@@ -228,6 +228,12 @@ document.addEventListener('DOMContentLoaded', function() {
   const closeBtn = document.getElementById('sidebar-close');
   const currentUrl = window.location.pathname || '';
 
+  function syncSidebarToggle() {
+    if (!toggleBtn || !sidebar) return;
+    const sidebarIsOpen = !sidebar.classList.contains('-translate-x-full') && !sidebar.classList.contains('hidden');
+    toggleBtn.style.display = sidebarIsOpen ? 'none' : '';
+  }
+
   // Check if we're on superadmin pages (always pinned)
   const isSuperAdmin = currentUrl.indexOf('/superadmin') !== -1 || currentUrl.indexOf('/admin/') !== -1;
   const isPublicMap = currentUrl.indexOf('/mapa') !== -1 || currentUrl === '/' || currentUrl.endsWith('/');
@@ -251,6 +257,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  syncSidebarToggle();
+
   function toggleSidebar() {
     const currentlyPinned = document.cookie.split('; ').find(row => row.startsWith('sidebar_pinned='));
     const isCurrentlyPinned = currentlyPinned ? currentlyPinned.split('=')[1] === 'true' : false;
@@ -260,11 +268,13 @@ document.addEventListener('DOMContentLoaded', function() {
       document.cookie = 'sidebar_pinned=false; path=/; max-age=' + (60*60*24*365);
       overlay.classList.add('hidden');
       document.body.style.marginLeft = '';
+      syncSidebarToggle();
     } else {
       sidebar.classList.remove('-translate-x-full');
       document.cookie = 'sidebar_pinned=true; path=/; max-age=' + (60*60*24*365);
       overlay.classList.add('hidden');
       document.body.style.marginLeft = '18rem';
+      syncSidebarToggle();
     }
   }
 
@@ -273,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function() {
     overlay.classList.add('hidden');
     document.body.style.marginLeft = '';
     document.cookie = 'sidebar_pinned=false; path=/; max-age=' + (60*60*24*365);
-    if (toggleBtn) toggleBtn.style.display = '';
+    syncSidebarToggle();
   }
 
   if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);

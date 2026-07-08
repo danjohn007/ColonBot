@@ -155,11 +155,13 @@ $router->post('mi-perfil/actualizar',       'ProfileController',   'update');
 
 // ─── Turista ──────────────────────────────────────────────────────
 $router->get('turista',                    'TouristController', 'dashboard');
+$router->get('turista/perfil',             'TouristController', 'profile');
 $router->post('turista/registrar',         'TouristController', 'register');
 $router->post('turista/valorar',           'TouristController', 'submitReview');
 $router->get('turista/emergencia',         'TouristController', 'emergency');
 $router->get('turista/reservar/{id}',      'TouristController', 'makeReservation');
 $router->get('landing/turista',                    'TouristController', 'dashboard');
+$router->get('landing/turista/perfil',             'TouristController', 'profile');
 $router->post('landing/turista/registrar',         'TouristController', 'register');
 $router->post('landing/turista/valorar',           'TouristController', 'submitReview');
 $router->get('landing/turista/emergencia',         'TouristController', 'emergency');

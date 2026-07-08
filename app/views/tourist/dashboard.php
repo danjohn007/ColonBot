@@ -37,6 +37,12 @@ $dateStatus = static function (array $promo): array {
     return ['Disponible', 'bg-emerald-50 text-emerald-700 border-emerald-100'];
 };
 
+$withReturnTo = static function (string $href) use ($prefix): string {
+    $returnTo = rawurlencode($prefix . 'turista');
+    $separator = str_contains($href, '?') ? '&' : '?';
+    return $href . $separator . 'return_to=' . $returnTo;
+};
+
 require APP_PATH . '/views/layout/head.php';
 ?>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
@@ -103,26 +109,8 @@ function swapImageFallback(img) {
         <h2 class="font-bold text-gray-900 text-lg">Mi perfil</h2>
         <p class="text-sm text-gray-500 mt-1"><?= e($user['email'] ?? '') ?><?= $phone ? ' / WhatsApp: ' . e($phone) : '' ?></p>
       </div>
-      <button type="button" onclick="toggleProfileForm()" class="text-sm text-orange-600 font-bold hover:underline">Editar</button>
+      <a href="<?= url($prefix . 'turista/perfil') ?>" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-orange-50 text-orange-700 text-sm font-bold hover:bg-orange-100 transition">Editar perfil</a>
     </div>
-    <form id="profile-form" method="POST" action="<?= url($prefix . 'turista/registrar') ?>" class="hidden mt-5 space-y-4">
-      <input type="hidden" name="_csrf" value="<?= e($csrf ?? '') ?>">
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <label class="block">
-          <span class="text-sm font-medium text-gray-700 mb-1 block">Nombre</span>
-          <input type="text" name="name" value="<?= e($user['name']) ?>" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
-        </label>
-        <label class="block">
-          <span class="text-sm font-medium text-gray-700 mb-1 block">WhatsApp</span>
-          <input type="tel" name="whatsapp" value="<?= e($phone) ?>" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="5214421000000">
-        </label>
-        <label class="block">
-          <span class="text-sm font-medium text-gray-700 mb-1 block">Email</span>
-          <input type="email" name="email" value="<?= e($user['email']) ?>" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
-        </label>
-      </div>
-      <button type="submit" class="bg-orange-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-orange-700 transition">Guardar cambios</button>
-    </form>
   </section>
 
   <div class="grid grid-cols-1 xl:grid-cols-[1.05fr_.95fr] gap-6 mb-6">
@@ -137,7 +125,8 @@ function swapImageFallback(img) {
         <?php endif; ?>
         <?php foreach (array_slice($activePromotions, 0, 6) as $p): ?>
         <?php [$statusText, $statusClass] = $dateStatus($p); ?>
-        <a href="<?= e($p['public_url'] ?: url('promocion/' . (int)$p['id'])) ?>" class="flex gap-4 p-3 border border-gray-100 rounded-xl hover:border-orange-200 hover:bg-orange-50/50 transition">
+        <?php $promoHref = $withReturnTo($p['public_url'] ?: url('promocion/' . (int)$p['id'])); ?>
+        <a href="<?= e($promoHref) ?>" class="flex gap-4 p-3 border border-gray-100 rounded-xl hover:border-orange-200 hover:bg-orange-50/50 transition">
           <?php if (!empty($p['image'])): ?>
           <img src="<?= imageUrl($p['image']) ?>" alt="" class="w-20 h-20 object-cover rounded-lg shrink-0" data-fallback="&#127991;" data-fallback-class="media-tile w-20 h-20 rounded-lg shrink-0" onerror="swapImageFallback(this)">
           <?php else: ?>
@@ -173,7 +162,7 @@ function swapImageFallback(img) {
         <?php $eventHref = ($event['type'] ?? '') === 'evento'
             ? ($event['public_url'] ?: url('promocion/' . (int)$event['id']))
             : url('evento/' . (int)$event['id'] . '/' . slugify($event['title'])); ?>
-        <a href="<?= e($eventHref) ?>" class="flex gap-4 p-3 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/50 transition">
+        <a href="<?= e($withReturnTo($eventHref)) ?>" class="flex gap-4 p-3 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/50 transition">
           <?php if (!empty($event['image'])): ?>
           <img src="<?= imageUrl($event['image']) ?>" alt="" class="w-20 h-20 object-cover rounded-lg shrink-0" data-fallback="&#127881;" data-fallback-class="media-tile event w-20 h-20 rounded-lg shrink-0" onerror="swapImageFallback(this)">
           <?php else: ?>
@@ -271,12 +260,6 @@ function swapImageFallback(img) {
     </section>
   </div>
 </main>
-
-<script>
-function toggleProfileForm() {
-  document.getElementById('profile-form')?.classList.toggle('hidden');
-}
-</script>
 
 <?php require APP_PATH . '/views/layout/bottom_nav.php'; ?>
 <?php require APP_PATH . '/views/layout/footer.php'; ?>

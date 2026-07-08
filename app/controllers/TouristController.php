@@ -63,6 +63,16 @@ class TouristController extends Controller
         }
     }
 
+    public function profile(): void
+    {
+        $this->requireAuth('visitor');
+        $user = currentUser();
+        $user = $this->users->find((int)$user['id']) ?: $user;
+        $routePrefix = $this->pathForCurrentPrefix('');
+
+        $this->view('tourist.profile', compact('user', 'routePrefix') + ['csrf' => $this->csrf()]);
+    }
+
     public function register(): void
     {
         $this->requireAuth('visitor');
@@ -84,8 +94,13 @@ class TouristController extends Controller
         // Refresh session
         $_SESSION['user']['name'] = $name;
         if ($email) $_SESSION['user']['email'] = $email;
+        $_SESSION['user']['phone'] = $whatsapp ?: ($fullUser['phone'] ?? '');
 
         $this->flash('success', 'Perfil actualizado correctamente.');
+        $returnTo = $this->visitorReturnPath((string)($_POST['return_to'] ?? ''));
+        if ($returnTo !== '') {
+            $this->redirect($returnTo);
+        }
         $this->redirectForCurrentPrefix('turista');
     }
 
@@ -155,5 +170,11 @@ class TouristController extends Controller
             'ok' => true,
             'url' => waLink($whatsapp, $msg),
         ]);
+    }
+
+    private function visitorReturnPath(string $returnTo): string
+    {
+        $returnTo = trim($returnTo);
+        return preg_match('/^(landing\/)?turista(\/perfil)?$/', $returnTo) ? $returnTo : '';
     }
 }

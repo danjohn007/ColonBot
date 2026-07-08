@@ -3,6 +3,7 @@ $pageTitle = e($business['name']) . ' – ' . APP_NAME;
 $viewer = currentUser();
 $isVisitor = $viewer && ($viewer['role'] ?? '') === 'visitor';
 $reviewReturnTo = ($routePrefix ?? '') . 'lugar/' . $business['slug'] . '#valoraciones';
+$backPath = $isVisitor ? (($routePrefix ?? '') . 'turista') : (($routePrefix ?? '') . 'mapa');
 require APP_PATH . '/views/layout/head.php';
 ?>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
@@ -10,7 +11,7 @@ require APP_PATH . '/views/layout/head.php';
 <main class="max-w-5xl mx-auto px-4 py-8 mb-20">
   <!-- Breadcrumb -->
   <nav class="text-sm text-gray-500 mb-4">
-    <a href="<?= url(($routePrefix ?? '') . 'mapa') ?>" class="hover:text-blue-600">← Regresar al mapa</a>
+    <a href="<?= url($backPath) ?>" class="hover:text-blue-600">← Volver</a>
   </nav>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">

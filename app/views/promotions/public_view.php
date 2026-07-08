@@ -1,10 +1,22 @@
 <?php
+$returnTo = trim((string)($_GET['return_to'] ?? ''));
+$viewer = currentUser();
+$backUrl = preg_match('/^(landing\/)?turista(\/perfil)?$/', $returnTo)
+  ? url($returnTo)
+  : url(routePrefix() . (($viewer['role'] ?? '') === 'visitor' ? 'turista' : 'mapa'));
 $pageTitle = e($promo['title']) . ' – ' . APP_NAME;
 require APP_PATH . '/views/layout/head.php';
 ?>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
 
 <main class="max-w-3xl mx-auto px-4 py-8 mb-20">
+  <div class="mb-4">
+    <a href="<?= e($backUrl) ?>" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-gray-700 border border-gray-200 shadow-sm hover:bg-gray-50 transition">
+      <span aria-hidden="true">&larr;</span>
+      Volver
+    </a>
+  </div>
+
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <?php if ($promo['image']): ?>
     <img src="<?= imageUrl($promo['image']) ?>" alt="<?= e($promo['title']) ?>" class="w-full h-64 object-cover">
@@ -23,17 +35,17 @@ require APP_PATH . '/views/layout/head.php';
       <p class="text-gray-600 mb-4" style="white-space: pre-wrap;"><?= e($promo['description']) ?></p>
       <?php endif; ?>
       <?php if ($promo['price'] || $promo['presale_price']): ?>
-      <div class=\"grid grid-cols-2 gap-4 mb-4\">
+      <div class="grid grid-cols-2 gap-4 mb-4">
         <?php if ($promo['price']): ?>
-        <div class=\"bg-gray-50 rounded-lg p-3\">
-          <p class=\"text-xs text-gray-500 font-semibold mb-1\">PRECIO DE LISTA</p>
-          <p class=\"text-xl font-bold line-through text-gray-400\">$<?= number_format((float)$promo['price'], 2) ?></p>
+        <div class="bg-gray-50 rounded-lg p-3">
+          <p class="text-xs text-gray-500 font-semibold mb-1">PRECIO DE LISTA</p>
+          <p class="text-xl font-bold line-through text-gray-400">$<?= number_format((float)$promo['price'], 2) ?></p>
         </div>
         <?php endif; ?>
         <?php if ($promo['presale_price']): ?>
-        <div class=\"bg-green-50 rounded-lg p-3\">
-          <p class=\"text-xs text-green-600 font-semibold mb-1\">PRECIO PROMOCIONAL</p>
-          <p class=\"text-xl font-bold text-green-600\">$<?= number_format((float)$promo['presale_price'], 2) ?></p>
+        <div class="bg-green-50 rounded-lg p-3">
+          <p class="text-xs text-green-600 font-semibold mb-1">PRECIO PROMOCIONAL</p>
+          <p class="text-xl font-bold text-green-600">$<?= number_format((float)$promo['presale_price'], 2) ?></p>
         </div>
         <?php endif; ?>
       </div>
@@ -46,9 +58,9 @@ require APP_PATH . '/views/layout/head.php';
       <?php endif; ?>
       <!-- Vigencia -->
       <?php if ($promo['start_date'] || $promo['end_date']): ?>
-      <div class=\"bg-blue-50 rounded-xl p-4 mb-4\">
-        <h3 class=\"font-semibold text-gray-900 text-sm mb-2\">⏳ Vigencia</h3>
-        <div class=\"text-sm text-gray-600\">
+      <div class="bg-blue-50 rounded-xl p-4 mb-4">
+        <h3 class="font-semibold text-gray-900 text-sm mb-2">⏳ Vigencia</h3>
+        <div class="text-sm text-gray-600">
           <?php if ($promo['start_date']): ?>
           <p>Inicia: <strong><?= date('d/m/Y', strtotime($promo['start_date'])) ?></strong></p>
           <?php endif; ?>
