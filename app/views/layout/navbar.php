@@ -80,7 +80,11 @@ $navPrefix = routePrefix();
       </a>
 
       <?php if ($user):
-        $role = $user['role']; // Strict role check - no hasRole() to avoid overlaps
+        $role = match ($user['role'] ?? '') {
+          'admin_colaborador', 'colaborador', 'admin' => 'colaborador_admin',
+          'turista' => 'visitor',
+          default => $user['role'] ?? '',
+        }; // Strict role check - no hasRole() to avoid overlaps
       ?>
 
         <!-- SUPERADMIN (strict) -->
@@ -183,7 +187,7 @@ $navPrefix = routePrefix();
         <div class="border-t border-gray-200 my-3"></div>
 
         <!-- Configuraciones above logout -->
-        <?php if (in_array($role, ['superadmin', 'colaborador_admin', 'prestador', 'colaborador'])): ?>
+        <?php if (in_array($role, ['superadmin', 'colaborador_admin', 'prestador'])): ?>
         <a href="<?= url('configuraciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">⚙️</span> Configuraciones
         </a>

@@ -96,11 +96,10 @@ class PromotionModel extends Model
         $businessId = $promo['business_id'];
 
         if (in_array('todos', $segments)) {
-            $db = Database::getInstance();
-            return $db->query(
+            return $this->query(
                 "SELECT * FROM contacts WHERE business_id = ? ORDER BY created_at DESC",
                 [$businessId]
-            )->fetchAll();
+            );
         }
 
         $conditions = [];
@@ -122,8 +121,7 @@ class PromotionModel extends Model
         if (empty($conditions)) return [];
 
         $sql = "SELECT * FROM contacts c WHERE c.business_id = ? AND (" . implode(' OR ', $conditions) . ") ORDER BY c.created_at DESC";
-        $db = Database::getInstance();
-        return $db->query($sql, $params)->fetchAll();
+        return $this->query($sql, $params);
     }
 
     public function logSend(int $promotionId, ?int $contactId, string $via = 'whatsapp'): void

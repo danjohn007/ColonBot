@@ -57,13 +57,18 @@ function hasRole(string $role): bool
 {
     $user = currentUser();
     if (!$user) return false;
+    $userRole = match ($user['role'] ?? '') {
+        'admin_colaborador', 'colaborador', 'admin' => 'colaborador_admin',
+        'turista' => 'visitor',
+        default => $user['role'] ?? '',
+    };
     return match ($role) {
-        'superadmin'        => $user['role'] === 'superadmin',
-        'admin'             => in_array($user['role'], ['colaborador_admin', 'superadmin'], true),
-        'colaborador_admin' => in_array($user['role'], ['colaborador_admin', 'superadmin'], true),
-        'prestador'         => in_array($user['role'], ['prestador', 'colaborador_admin', 'superadmin'], true),
-        'colaborador'       => in_array($user['role'], ['colaborador_admin', 'superadmin'], true),
-        'visitor'           => in_array($user['role'], ['visitor', 'colaborador_admin', 'superadmin'], true),
+        'superadmin'        => $userRole === 'superadmin',
+        'admin'             => in_array($userRole, ['colaborador_admin', 'superadmin'], true),
+        'colaborador_admin' => in_array($userRole, ['colaborador_admin', 'superadmin'], true),
+        'prestador'         => in_array($userRole, ['prestador', 'colaborador_admin', 'superadmin'], true),
+        'colaborador'       => in_array($userRole, ['colaborador_admin', 'superadmin'], true),
+        'visitor'           => in_array($userRole, ['visitor', 'colaborador_admin', 'superadmin'], true),
         default             => true,
     };
 }

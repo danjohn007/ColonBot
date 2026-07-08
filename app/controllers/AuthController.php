@@ -12,14 +12,15 @@ class AuthController extends Controller
     {
         if (isLoggedIn()) {
             $user = currentUser();
-            $redirect = match ($user['role'] ?? '') {
+            $role = $this->normalizeRole($user['role'] ?? '');
+            $redirect = match ($role) {
                 'visitor' => 'turista',
                 'superadmin' => 'superadmin',
                 'colaborador_admin' => 'colaborador',
                 'prestador' => 'admin/crm',
                 default => 'admin',
             };
-            if (($user['role'] ?? '') === 'visitor') {
+            if ($role === 'visitor') {
                 $this->redirectForCurrentPrefix($redirect);
             }
             $this->redirect($redirect);
@@ -73,14 +74,17 @@ class AuthController extends Controller
         ];
 
         $this->logAction('login', 'users', $user['id']);
-        $redirect = match ($user['role']) {
+        $role = $this->normalizeRole($user['role']);
+        $_SESSION['user']['role'] = $role;
+
+        $redirect = match ($role) {
             'superadmin'        => 'superadmin',
             'colaborador_admin' => 'colaborador',
             'visitor'           => 'turista',
             'prestador'         => 'admin/crm',
             default             => 'admin',
         };
-        if ($user['role'] === 'visitor') {
+        if ($role === 'visitor') {
             $this->redirectForCurrentPrefix($redirect);
         }
         $this->redirect($redirect);

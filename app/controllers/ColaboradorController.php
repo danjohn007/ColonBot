@@ -23,59 +23,93 @@ class ColaboradorController extends Controller
         $this->requireAuth('colaborador_admin');
 
         // Metrics
-        $totalBiz = $this->businesses->count();
-        $totalUsers = $this->users->count();
-        $pendingPromos = $this->promotions->pendingForApproval();
-        $summary = $this->analytics->summary();
-        $topBusinesses = $this->analytics->topBusinesses(50);
-        $dailyEvents = $this->analytics->dailyEvents(30);
+        $totalBiz = $this->safeCount('businesses');
+        $totalUsers = $this->safeCount('users');
+        $pendingPromos = $this->safeRows(
+            'SELECT p.*, u.name AS creator_name, b.name AS business_name
+             FROM promotions p
+             LEFT JOIN users u ON u.id = p.user_id
+             LEFT JOIN businesses b ON b.id = p.business_id
+             WHERE p.status = "pending"
+             ORDER BY p.created_at ASC',
+            'dashboard_pending_promos'
+        );
+        $summary = $this->safeSummary();
+        $topBusinesses = $this->safeRows(
+            'SELECT b.name, COUNT(a.id) AS visits
+             FROM analytics a
+             JOIN businesses b ON b.id = a.business_id
+             WHERE a.business_id IS NOT NULL
+             GROUP BY a.business_id
+             ORDER BY visits DESC
+             LIMIT 50',
+            'dashboard_top_businesses'
+        );
+        $dailyEvents = $this->safeRows(
+            'SELECT DATE(created_at) AS day, event, COUNT(*) AS total
+             FROM analytics
+             WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+             GROUP BY day, event
+             ORDER BY day ASC',
+            'dashboard_daily_events'
+        );
 
         // Top visited this month
-        $db = Database::getInstance();
-        $topByCategory = $db->query(
-            'SELECT c.name AS category, b.name, b.rating, b.visits,
-                    ROW_NUMBER() OVER (PARTITION BY b.category_id ORDER BY b.rating DESC) AS rn
-             FROM businesses b
-             JOIN categories c ON c.id = b.category_id
-             WHERE b.status = "published"
-             ORDER BY c.name, b.rating DESC'
-        )->fetchAll();
+        $topByCategory = $this->safeRows(
+            'SELECT ranked.category, ranked.name, ranked.rating, ranked.visits, ranked.rn
+             FROM (
+                SELECT c.name AS category, b.name, b.rating, b.visits,
+                       @rn := IF(@cat = c.name, @rn + 1, 1) AS rn,
+                       @cat := c.name
+                FROM businesses b
+                JOIN categories c ON c.id = b.category_id
+                CROSS JOIN (SELECT @rn := 0, @cat := "") vars
+                WHERE b.status = "published"
+                ORDER BY c.name, b.rating DESC
+             ) ranked
+             ORDER BY ranked.category, ranked.rn',
+            'dashboard_top_by_category'
+        );
 
         // New providers this month
-        $newProviders = $db->query(
+        $newProviders = $this->safeRows(
             "SELECT b.*, u.name AS owner_name FROM businesses b
              JOIN users u ON u.id = b.user_id
              WHERE b.created_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
-             ORDER BY b.created_at DESC"
-        )->fetchAll();
+             ORDER BY b.created_at DESC",
+            'dashboard_new_providers'
+        );
 
-        $providers = $db->query(
+        $providers = $this->safeRows(
             "SELECT b.*, u.name AS owner_name, u.email AS owner_email
              FROM businesses b
              JOIN users u ON u.id = b.user_id
-             ORDER BY b.name ASC"
-        )->fetchAll();
+             ORDER BY b.name ASC",
+            'dashboard_providers'
+        );
 
         // Visits per day/week/month
-        $visitsByDay = $db->query(
+        $visitsByDay = $this->safeRows(
             "SELECT DATE(created_at) AS day, COUNT(*) AS total
              FROM analytics
              WHERE event = 'map_view' AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-             GROUP BY day ORDER BY day"
-        )->fetchAll();
+             GROUP BY day ORDER BY day",
+            'dashboard_visits_by_day'
+        );
 
-        $visitsByWeek = $db->query(
+        $visitsByWeek = $this->safeRows(
             "SELECT WEEK(created_at) AS week, COUNT(*) AS total
              FROM analytics
              WHERE event = 'map_view' AND created_at >= DATE_SUB(NOW(), INTERVAL 4 WEEK)
-             GROUP BY week ORDER BY week"
-        )->fetchAll();
+             GROUP BY week ORDER BY week",
+            'dashboard_visits_by_week'
+        );
 
         $this->view('colaborador.dashboard', compact(
             'totalBiz', 'totalUsers', 'pendingPromos', 'summary',
             'topBusinesses', 'dailyEvents', 'topByCategory',
             'newProviders', 'providers', 'visitsByDay', 'visitsByWeek'
-        ));
+        ) + ['csrf' => $this->csrf()]);
     }
 
     public function events(): void
@@ -159,11 +193,20 @@ class ColaboradorController extends Controller
         $this->requireAuth('colaborador_admin');
         $this->verifyCsrf();
 
-        $db = Database::getInstance();
-        $db->execute('DELETE FROM reviews WHERE business_id = ?', [(int)$businessId]);
-        $db->execute('UPDATE businesses SET rating = 0 WHERE id = ?', [(int)$businessId]);
+        $business = $this->businesses->find((int)$businessId);
+        if (!$business) { $this->json(['error' => 'not found'], 404); }
 
-        $this->logAction('reset_ratings', 'businesses', (int)$businessId);
+        $db = Database::getInstance();
+        try {
+            $stmt = $db->prepare('DELETE FROM reviews WHERE business_id = ?');
+            $stmt->execute([(int)$businessId]);
+        } catch (Throwable $e) {
+            error_log('Reset ratings reviews delete skipped: ' . $e->getMessage());
+        }
+        $stmt = $db->prepare('UPDATE businesses SET rating = 0 WHERE id = ?');
+        $stmt->execute([(int)$businessId]);
+
+        $this->logAction('reset_ratings', 'businesses', (int)$businessId, $business['name']);
         $this->json(['ok' => true]);
     }
 
@@ -194,54 +237,230 @@ class ColaboradorController extends Controller
     {
         $this->requireAuth('colaborador_admin');
 
-        $db = Database::getInstance();
+        $topSites = $this->metricRows(
+            "SELECT b.id, b.name, b.slug, c.name AS category, b.rating, b.visits,
+                    COALESCE(COUNT(a.id), 0) AS tracked_visits
+             FROM businesses b
+             JOIN categories c ON c.id = b.category_id
+             LEFT JOIN analytics a ON a.business_id = b.id AND a.event = 'map_view'
+             WHERE b.status = 'published'
+             GROUP BY b.id
+             ORDER BY tracked_visits DESC, b.visits DESC
+             LIMIT 100",
+            'top_sites'
+        );
 
-        // Top 20, 50, 100 by category
-        $topByCategory = $db->query(
+        $topByCategory = $this->metricRows(
             'SELECT c.name AS category, b.name, b.rating, b.visits, b.slug,
                     @rn := IF(@cat = c.name, @rn + 1, 1) AS rn,
                     @cat := c.name
              FROM businesses b
              JOIN categories c ON c.id = b.category_id, (SELECT @rn := 0, @cat := "") AS vars
              WHERE b.status = "published"
-             ORDER BY c.name, b.rating DESC'
-        )->fetchAll();
+             ORDER BY c.name, b.rating DESC',
+            'top_by_category'
+        );
 
-        // Most visited routes (by subcategory or trip_type)
-        $topRoutes = $db->query(
+        $recentTopReviews = $this->metricRows(
+            "SELECT r.rating, r.comment, r.created_at, b.name AS business_name,
+                    b.slug AS business_slug, c.name AS category_name
+             FROM reviews r
+             JOIN businesses b ON b.id = r.business_id
+             JOIN categories c ON c.id = b.category_id
+             WHERE r.rating >= 4
+             ORDER BY r.created_at DESC
+             LIMIT 30",
+            'recent_top_reviews'
+        );
+
+        $topRoutes = $this->metricRows(
             "SELECT tt.trip_type, COUNT(DISTINCT b.id) AS total_businesses,
-                    SUM(b.visits) AS total_visits,
+                    COALESCE(SUM(route_views.total), 0) AS total_visits,
                     AVG(b.rating) AS avg_rating
              FROM business_trip_types tt
              JOIN businesses b ON b.id = tt.business_id
+             LEFT JOIN (
+                SELECT business_id, COUNT(*) AS total
+                FROM analytics
+                WHERE event = 'map_view'
+                GROUP BY business_id
+             ) route_views ON route_views.business_id = b.id
              WHERE b.status = 'published'
              GROUP BY tt.trip_type
-             ORDER BY total_visits DESC"
-        )->fetchAll();
+             ORDER BY total_visits DESC",
+            'top_routes'
+        );
 
-        // Seasonal comparison
-        $seasonalData = $db->query(
+        $newProviders = $this->metricRows(
+            "SELECT b.id, b.name, b.slug, b.created_at, b.status, u.name AS owner_name,
+                    c.name AS category_name
+             FROM businesses b
+             JOIN users u ON u.id = b.user_id
+             JOIN categories c ON c.id = b.category_id
+             ORDER BY b.created_at DESC
+             LIMIT 50",
+            'new_providers'
+        );
+
+        $providerVisits = $this->metricRows(
+            "SELECT b.id, b.name,
+                    SUM(CASE WHEN DATE(a.created_at) = CURDATE() THEN 1 ELSE 0 END) AS today,
+                    SUM(CASE WHEN YEARWEEK(a.created_at, 1) = YEARWEEK(CURDATE(), 1) THEN 1 ELSE 0 END) AS this_week,
+                    SUM(CASE WHEN YEAR(a.created_at) = YEAR(CURDATE()) AND MONTH(a.created_at) = MONTH(CURDATE()) THEN 1 ELSE 0 END) AS this_month,
+                    COUNT(a.id) AS total
+             FROM businesses b
+             LEFT JOIN analytics a ON a.business_id = b.id AND a.event = 'map_view'
+             GROUP BY b.id
+             ORDER BY total DESC, b.name ASC
+             LIMIT 100",
+            'provider_visits'
+        );
+
+        $dailyVisits = $this->metricRows(
+            "SELECT DATE(created_at) AS period, COUNT(*) AS total
+             FROM analytics
+             WHERE event = 'map_view' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+             GROUP BY period
+             ORDER BY period DESC",
+            'daily_visits'
+        );
+
+        $weeklyVisits = $this->metricRows(
+            "SELECT YEAR(created_at) AS year, WEEK(created_at, 1) AS week, COUNT(*) AS total
+             FROM analytics
+             WHERE event = 'map_view' AND created_at >= DATE_SUB(NOW(), INTERVAL 16 WEEK)
+             GROUP BY year, week
+             ORDER BY year DESC, week DESC",
+            'weekly_visits'
+        );
+
+        $monthlyVisits = $this->metricRows(
+            "SELECT YEAR(created_at) AS year, MONTH(created_at) AS month, COUNT(*) AS total
+             FROM analytics
+             WHERE event = 'map_view' AND created_at >= DATE_SUB(NOW(), INTERVAL 18 MONTH)
+             GROUP BY year, month
+             ORDER BY year DESC, month DESC",
+            'monthly_visits'
+        );
+
+        $seasonalData = $this->metricRows(
             "SELECT MONTH(a.created_at) AS month,
                     COUNT(*) AS total,
                     WEEK(a.created_at) AS week
              FROM analytics a
              WHERE a.event = 'map_view' AND a.created_at >= DATE_SUB(NOW(), INTERVAL 1 YEAR)
              GROUP BY month, week
-             ORDER BY month"
-        )->fetchAll();
+             ORDER BY month",
+            'seasonal_data'
+        );
 
-        // Most visited by trip type
-        $byTripType = $db->query(
+        $eventSeasonality = $this->metricRows(
+            "SELECT source, month, COUNT(*) AS total
+             FROM (
+                SELECT 'evento' AS source, MONTH(start_date) AS month
+                FROM events
+                WHERE start_date IS NOT NULL
+                UNION ALL
+                SELECT type AS source, MONTH(start_date) AS month
+                FROM promotions
+                WHERE start_date IS NOT NULL
+             ) x
+             GROUP BY source, month
+             ORDER BY month, source",
+            'event_seasonality'
+        );
+
+        $byTripType = $this->metricRows(
             "SELECT tt.trip_type,
-                    COUNT(DISTINCT cp.contact_id) AS total_visitors
+                    COUNT(DISTINCT b.id) AS total_businesses,
+                    COALESCE(SUM(route_views.total), 0) AS total_visitors
              FROM business_trip_types tt
              JOIN businesses b ON b.id = tt.business_id
-             LEFT JOIN contacts c ON c.business_id = b.id
-             LEFT JOIN contact_purchases cp ON cp.contact_id = c.id
+             LEFT JOIN (
+                SELECT business_id, COUNT(*) AS total
+                FROM analytics
+                WHERE event = 'map_view'
+                GROUP BY business_id
+             ) route_views ON route_views.business_id = b.id
              GROUP BY tt.trip_type
-             ORDER BY total_visitors DESC"
-        )->fetchAll();
+             ORDER BY total_visitors DESC",
+            'by_trip_type'
+        );
 
-        $this->view('colaborador.metrics', compact('topByCategory', 'topRoutes', 'seasonalData', 'byTripType'));
+        $routesVsTourism = $this->metricRows(
+            "SELECT tt.trip_type, c.name AS category_name,
+                    COUNT(DISTINCT b.id) AS total_businesses,
+                    COALESCE(SUM(route_views.total), 0) AS total_visits,
+                    AVG(b.rating) AS avg_rating
+             FROM business_trip_types tt
+             JOIN businesses b ON b.id = tt.business_id
+             JOIN categories c ON c.id = b.category_id
+             LEFT JOIN (
+                SELECT business_id, COUNT(*) AS total
+                FROM analytics
+                WHERE event = 'map_view'
+                GROUP BY business_id
+             ) route_views ON route_views.business_id = b.id
+             GROUP BY tt.trip_type, c.id
+             ORDER BY tt.trip_type, total_visits DESC",
+            'routes_vs_tourism'
+        );
+
+        $this->view('colaborador.metrics', compact(
+            'topSites', 'topByCategory', 'recentTopReviews', 'topRoutes',
+            'newProviders', 'providerVisits', 'dailyVisits', 'weeklyVisits',
+            'monthlyVisits', 'seasonalData', 'eventSeasonality', 'byTripType',
+            'routesVsTourism'
+        ));
+    }
+
+    private function metricRows(string $sql, string $label): array
+    {
+        return $this->safeRows($sql, "Colaborador metric {$label}");
+    }
+
+    private function safeRows(string $sql, string $label): array
+    {
+        try {
+            return Database::getInstance()->query($sql)->fetchAll();
+        } catch (Throwable $e) {
+            error_log("Colaborador query {$label} skipped: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    private function safeCount(string $table): int
+    {
+        if (!preg_match('/^[a-z_]+$/', $table)) {
+            return 0;
+        }
+
+        try {
+            return (int)Database::getInstance()->query("SELECT COUNT(*) FROM `{$table}`")->fetchColumn();
+        } catch (Throwable $e) {
+            error_log("Colaborador count {$table} skipped: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    private function safeSummary(): array
+    {
+        return [
+            'total_events'      => $this->safeScalar('SELECT COUNT(*) FROM analytics', 'summary_total_events'),
+            'map_views'         => $this->safeScalar("SELECT COUNT(*) FROM analytics WHERE event='map_view'", 'summary_map_views'),
+            'whatsapp_clicks'   => $this->safeScalar("SELECT COUNT(*) FROM analytics WHERE event='whatsapp_click'", 'summary_whatsapp_clicks'),
+            'chatbot_sessions'  => $this->safeScalar('SELECT COUNT(*) FROM chatbot_sessions', 'summary_chatbot_sessions'),
+            'directions_clicks' => $this->safeScalar("SELECT COUNT(*) FROM analytics WHERE event='directions_click'", 'summary_directions_clicks'),
+        ];
+    }
+
+    private function safeScalar(string $sql, string $label): int
+    {
+        try {
+            return (int)Database::getInstance()->query($sql)->fetchColumn();
+        } catch (Throwable $e) {
+            error_log("Colaborador scalar {$label} skipped: " . $e->getMessage());
+            return 0;
+        }
     }
 }

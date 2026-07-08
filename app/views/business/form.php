@@ -74,7 +74,7 @@ require APP_PATH . '/views/layout/head.php';
           <div class="sm:col-span-2">
             <label class="label">Tipo de viaje <span class="text-xs text-gray-400">(selecciona uno o varios)</span></label>
             <div class="flex flex-wrap gap-3 mt-1" id="trip-types-container">
-              <?php $tripTypeOptions = ['familiar'=>'👨‍👩‍👧‍👦 Familiar', 'amigos'=>'🧑‍🤝‍🧑 Viaje de amigos', 'pareja'=>'💑 Pareja', 'petfriendly'=>'🐾 Petfriendly']; ?>
+              <?php $tripTypeOptions = ['familiar'=>'👨‍👩‍👧‍👦 Familiar', 'amigos'=>'🧑‍🤝‍🧑 Viaje de amigos', 'pareja'=>'💑 Pareja', 'adultos_mayores'=>'Adultos mayores', 'petfriendly'=>'🐾 Petfriendly']; ?>
               <?php foreach ($tripTypeOptions as $val => $label): ?>
               <label class="flex items-center gap-2 cursor-pointer select-none">
                 <input type="checkbox" name="trip_types[]" value="<?= $val ?>"

@@ -255,26 +255,74 @@ class BusinessModel extends Model
 
     public function publicEvents(int $businessId): array
     {
-        return $this->query(
-            "SELECT e.id, e.title AS name, e.title, e.description, e.price,
-                    e.start_date AS date, e.start_date, e.end_date, e.image,
-                    e.public_url, e.status, 'events' AS source
-             FROM events e
-             WHERE e.business_id = ?
-               AND e.status IN ('active', 'approved')
-               AND (e.end_date IS NULL OR e.end_date >= NOW())
-             UNION ALL
-             SELECT p.id, p.title AS name, p.title, p.description, p.price,
-                    p.start_date AS date, p.start_date, p.end_date, p.image,
-                    p.public_url, p.status, 'promotions' AS source
-             FROM promotions p
-             WHERE p.business_id = ?
-               AND p.type = 'evento'
-               AND p.status IN ('active', 'approved')
-               AND (p.end_date IS NULL OR p.end_date >= NOW())
-             ORDER BY date, id",
-            [$businessId, $businessId]
-        );
+        try {
+            return $this->query(
+                "SELECT e.id, e.title AS name, e.title, e.description, e.price,
+                        e.start_date AS date, e.start_date, e.end_date, e.image,
+                        e.public_url, e.status, 'events' AS source
+                 FROM events e
+                 WHERE e.business_id = ?
+                   AND e.status IN ('active', 'approved')
+                   AND (e.end_date IS NULL OR e.end_date >= NOW())
+                 UNION ALL
+                 SELECT p.id, p.title AS name, p.title, p.description, p.price,
+                        p.start_date AS date, p.start_date, p.end_date, p.image,
+                        p.public_url, p.status, 'promotions' AS source
+                 FROM promotions p
+                 WHERE p.business_id = ?
+                   AND p.type = 'evento'
+                   AND p.status IN ('active', 'approved')
+                   AND (p.end_date IS NULL OR p.end_date >= NOW())
+                 ORDER BY date, id",
+                [$businessId, $businessId]
+            );
+        } catch (PDOException $e) {
+            return array_merge(
+                $this->legacyPublicEvents($businessId),
+                $this->promotionPublicEvents($businessId)
+            );
+        }
+    }
+
+    private function legacyPublicEvents(int $businessId): array
+    {
+        try {
+            return $this->query(
+                "SELECT e.id, e.name AS name, e.name AS title, e.description, e.price,
+                        e.date AS date, e.date AS start_date, NULL AS end_date,
+                        NULL AS image, NULL AS public_url, 'active' AS status,
+                        'events' AS source
+                 FROM events e
+                 WHERE e.business_id = ?
+                   AND (e.date IS NULL OR e.date >= NOW())
+                 ORDER BY e.date, e.id",
+                [$businessId]
+            );
+        } catch (PDOException $e) {
+            error_log('Legacy public events skipped: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    private function promotionPublicEvents(int $businessId): array
+    {
+        try {
+            return $this->query(
+                "SELECT p.id, p.title AS name, p.title, p.description, p.price,
+                        p.start_date AS date, p.start_date, p.end_date, p.image,
+                        p.public_url, p.status, 'promotions' AS source
+                 FROM promotions p
+                 WHERE p.business_id = ?
+                   AND p.type = 'evento'
+                   AND p.status IN ('active', 'approved')
+                   AND (p.end_date IS NULL OR p.end_date >= NOW())
+                 ORDER BY p.start_date, p.id",
+                [$businessId]
+            );
+        } catch (PDOException $e) {
+            error_log('Promotion public events skipped: ' . $e->getMessage());
+            return [];
+        }
     }
 
     public function reviews(int $businessId): array

@@ -276,14 +276,17 @@ class PromotionController extends Controller
 
         // Track view
         $db = Database::getInstance();
-        $db->execute(
-            'INSERT INTO promotion_views (promotion_id, ip, user_agent) VALUES (?,?,?)',
-            [(int)$id, $_SERVER['REMOTE_ADDR'] ?? null, substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255)]
-        );
+        $stmt = $db->prepare('INSERT INTO promotion_views (promotion_id, ip, user_agent) VALUES (?,?,?)');
+        $stmt->execute([(int)$id, $_SERVER['REMOTE_ADDR'] ?? null, substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255)]);
 
         // Count views
-        $viewCount = (int)$db->query('SELECT COUNT(*) FROM promotion_views WHERE promotion_id = ?', [(int)$id])->fetchColumn();
-        $inquiryCount = (int)$db->query('SELECT COUNT(*) FROM promotion_inquiries WHERE promotion_id = ?', [(int)$id])->fetchColumn();
+        $stmt = $db->prepare('SELECT COUNT(*) FROM promotion_views WHERE promotion_id = ?');
+        $stmt->execute([(int)$id]);
+        $viewCount = (int)$stmt->fetchColumn();
+
+        $stmt = $db->prepare('SELECT COUNT(*) FROM promotion_inquiries WHERE promotion_id = ?');
+        $stmt->execute([(int)$id]);
+        $inquiryCount = (int)$stmt->fetchColumn();
 
         $this->view('promotions.public_view', compact('promo', 'viewCount', 'inquiryCount'));
     }
@@ -302,10 +305,8 @@ class PromotionController extends Controller
         $message = trim($_POST['message'] ?? '');
 
         $db = Database::getInstance();
-        $db->execute(
-            'INSERT INTO promotion_inquiries (promotion_id, name, phone, email, message) VALUES (?,?,?,?,?)',
-            [(int)$id, $name, $phone, $email, $message]
-        );
+        $stmt = $db->prepare('INSERT INTO promotion_inquiries (promotion_id, name, phone, email, message) VALUES (?,?,?,?,?)');
+        $stmt->execute([(int)$id, $name, $phone, $email, $message]);
 
         $this->json(['ok' => true, 'message' => 'Solicitud enviada exitosamente']);
     }

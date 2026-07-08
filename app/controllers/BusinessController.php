@@ -77,18 +77,30 @@ class BusinessController extends Controller
         // Analytics from map & whatsapp
         $analyticsModel = new AnalyticsModel();
         $db = Database::getInstance();
-        $mapViews = (int)$db->query(
-            "SELECT COUNT(*) FROM analytics WHERE business_id = ? AND event = 'map_view'",
-            [(int)$id]
-        )->fetchColumn();
-        $waClicks = (int)$db->query(
-            "SELECT COUNT(*) FROM analytics WHERE business_id = ? AND event = 'whatsapp_click'",
-            [(int)$id]
-        )->fetchColumn();
+        $stmt = $db->prepare("SELECT COUNT(*) FROM analytics WHERE business_id = ? AND event = 'map_view'");
+        $stmt->execute([(int)$id]);
+        $mapViews = (int)$stmt->fetchColumn();
+
+        $stmt = $db->prepare("SELECT COUNT(*) FROM analytics WHERE business_id = ? AND event = 'whatsapp_click'");
+        $stmt->execute([(int)$id]);
+        $waClicks = (int)$stmt->fetchColumn();
+
+        $stmt = $db->prepare("SELECT COUNT(*) FROM analytics WHERE business_id = ? AND event = 'directions_click'");
+        $stmt->execute([(int)$id]);
+        $directionsClicks = (int)$stmt->fetchColumn();
+
+        $stmt = $db->prepare(
+            'SELECT COUNT(*)
+             FROM chatbot_sessions cs
+             LEFT JOIN contacts c ON c.wa_id = cs.wa_id
+             WHERE c.business_id = ?'
+        );
+        $stmt->execute([(int)$id]);
+        $chatbotSessions = (int)$stmt->fetchColumn();
 
         $this->view('business.microsite_dashboard', compact(
             'business', 'user', 'images', 'services', 'products', 'events', 'reviews',
-            'metrics', 'chartData', 'mapViews', 'waClicks'
+            'metrics', 'chartData', 'mapViews', 'waClicks', 'directionsClicks', 'chatbotSessions'
         ) + ['csrf' => $this->csrf()]);
     }
 
@@ -106,16 +118,17 @@ class BusinessController extends Controller
         $format = $period === 'year' ? '%Y-%m' : '%Y-%m-%d';
         $interval = $period === 'year' ? 12 : ($period === 'month' ? 30 : 7);
 
-        $chartData = $db->query(
+        $stmt = $db->prepare(
             "SELECT DATE_FORMAT(created_at, '$format') AS label,
                     SUM(CASE WHEN event = 'map_view' THEN 1 ELSE 0 END) AS map_views,
                     SUM(CASE WHEN event = 'whatsapp_click' THEN 1 ELSE 0 END) AS wa_clicks
              FROM analytics
              WHERE business_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL $interval $period)
              GROUP BY label
-             ORDER BY label ASC",
-            [(int)$id]
-        )->fetchAll();
+             ORDER BY label ASC"
+        );
+        $stmt->execute([(int)$id]);
+        $chartData = $stmt->fetchAll();
 
         $this->json($chartData);
     }

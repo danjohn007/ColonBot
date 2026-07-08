@@ -60,7 +60,7 @@ abstract class Controller
         if (!isset($_SESSION['user'])) {
             $this->redirect('login');
         }
-        $userRole = $_SESSION['user']['role'] ?? '';
+        $userRole = $this->normalizeRole($_SESSION['user']['role'] ?? '');
         $allowed  = match ($role) {
             'superadmin'        => ['superadmin'],
             'admin'             => ['colaborador_admin', 'superadmin'],
@@ -74,6 +74,15 @@ abstract class Controller
             http_response_code(403);
             die('Acceso no autorizado');
         }
+    }
+
+    protected function normalizeRole(string $role): string
+    {
+        return match ($role) {
+            'admin_colaborador', 'colaborador', 'admin' => 'colaborador_admin',
+            'turista' => 'visitor',
+            default => $role,
+        };
     }
 
     protected function isPost(): bool

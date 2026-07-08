@@ -126,6 +126,9 @@ require APP_PATH . '/views/layout/head.php';
                 <?php if ($providerEmail): ?>
                 <a href="mailto:<?= e($providerEmail) ?>?subject=<?= rawurlencode('Contacto de Direccion de Turismo') ?>" onclick="logProviderContact(<?= (int)$provider['id'] ?>, 'email')" class="text-purple-600 hover:underline text-xs">Email</a>
                 <?php endif; ?>
+                <button type="button" onclick="resetProviderRatings(<?= (int)$provider['id'] ?>)" class="text-red-600 hover:underline text-xs">
+                  Reestablecer valoraciones
+                </button>
               </div>
             </td>
           </tr>
@@ -157,9 +160,31 @@ require APP_PATH . '/views/layout/head.php';
   </div>
 </main>
 <script>
+const COLABORADOR_CSRF = '<?= e($csrf ?? '') ?>';
+
 function logProviderContact(id, channel) {
   fetch(`<?= url('colaborador/negocios/') ?>${id}/contactar?channel=${encodeURIComponent(channel)}`)
     .catch(() => {});
+}
+
+function resetProviderRatings(id) {
+  if (!confirm('Esto eliminara todas las reseñas y pondra la calificacion del prestador en 0. ¿Continuar?')) return;
+
+  const body = new URLSearchParams({ _csrf: COLABORADOR_CSRF });
+  fetch(`<?= url('colaborador/negocios/') ?>${id}/reestablecer-valoraciones`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  })
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok) {
+        location.reload();
+      } else {
+        alert(d.error || 'No se pudieron reestablecer las valoraciones.');
+      }
+    })
+    .catch(() => alert('Error de conexion.'));
 }
 </script>
 <?php require APP_PATH . '/views/layout/footer.php'; ?>

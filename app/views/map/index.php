@@ -230,6 +230,10 @@ require APP_PATH . '/views/layout/head.php';
         class="trip-type-btn colon-chip text-xs px-3 py-1.5 rounded-full transition font-medium">
         💑 Pareja
       </button>
+      <button onclick="filterTripType('adultos_mayores')" data-trip-type="adultos_mayores"
+        class="trip-type-btn colon-chip text-xs px-3 py-1.5 rounded-full transition font-medium">
+        Adultos mayores
+      </button>
       <button onclick="filterTripType('petfriendly')" data-trip-type="petfriendly"
         class="trip-type-btn colon-chip text-xs px-3 py-1.5 rounded-full transition font-medium">
         🐾 Petfriendly
@@ -632,6 +636,7 @@ function showPOI(poi) {
     'familiar':       '\u{1F468}\u200D\u{1F469}\u200D\u{1F467}\u200D\u{1F466} Familiar',
     'amigos':         '\u{1F9D1}\u200D\u{1F91D}\u200D\u{1F9D1} Amigos',
     'pareja':         '\u{1F491} Pareja',
+    'adultos_mayores':'Adultos mayores',
     'petfriendly':    '\u{1F43E} Petfriendly',
   };
 

@@ -147,6 +147,7 @@ require APP_PATH . '/views/layout/head.php';
             'familiar'       => '👨‍👩‍👧‍👦 Familiar',
             'amigos'         => '🧑‍🤝‍🧑 Amigos',
             'pareja'         => '💑 Pareja',
+            'adultos_mayores'=> 'Adultos mayores',
             'petfriendly'    => '🐾 Petfriendly',
           ];
           $isotipoLabel = $isotipoMap[$business['isotipo']] ?? e($business['isotipo']);
@@ -164,6 +165,7 @@ require APP_PATH . '/views/layout/head.php';
               'familiar'       => '👨‍👩‍👧‍👦 Familiar',
               'amigos'         => '🧑‍🤝‍🧑 Amigos',
               'pareja'         => '💑 Pareja',
+              'adultos_mayores'=> 'Adultos mayores',
               'petfriendly'    => '🐾 Petfriendly',
             ];
             foreach ($tripTypes as $tt):

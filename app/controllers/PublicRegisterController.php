@@ -182,7 +182,8 @@ class PublicRegisterController extends Controller
             return;
         }
 
-        if (!in_array($user['role'], ['prestador', 'colaborador_admin', 'superadmin'])) {
+        $role = $this->normalizeRole($user['role']);
+        if (!in_array($role, ['prestador', 'colaborador_admin', 'superadmin'])) {
             $this->flash('error', 'Esta cuenta no es de tipo prestador.');
             $this->redirect('registro/prestador');
             return;
@@ -192,11 +193,11 @@ class PublicRegisterController extends Controller
             'id'    => $user['id'],
             'name'  => $user['name'],
             'email' => $user['email'],
-            'role'  => $user['role'],
+            'role'  => $role,
         ];
 
         $this->logAction('prestador_login', 'users', $user['id']);
-        $redirect = match ($user['role']) {
+        $redirect = match ($role) {
             'superadmin' => 'superadmin',
             'colaborador_admin' => 'colaborador',
             'prestador' => 'admin/crm',

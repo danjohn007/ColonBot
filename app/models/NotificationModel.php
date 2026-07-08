@@ -16,7 +16,6 @@ class NotificationModel extends Model
                 [$userId]
             );
         } catch (PDOException $e) {
-            error_log('Notification event relation skipped: ' . $e->getMessage());
             return $this->query(
                 'SELECT n.*, b.name AS business_name, NULL AS event_title
                  FROM notifications n
@@ -74,7 +73,6 @@ class NotificationModel extends Model
                     [$userId, $businessId, $eventId, $type, $title, $message]
                 );
             } catch (PDOException $e) {
-                error_log('Notification event relation skipped: ' . $e->getMessage());
                 $this->execute(
                     'INSERT INTO notifications (user_id, business_id, type, title, message) VALUES (?,?,?,?,?)',
                     [$userId, $businessId, $type, $title, $message]

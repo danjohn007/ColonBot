@@ -115,10 +115,9 @@ class ContactModel extends Model
         );
 
         // Check if should upgrade based on purchase count
-        $purchaseCount = (int)$this->db->query(
-            'SELECT COUNT(*) FROM contact_purchases WHERE contact_id = ?',
-            [$contactId]
-        )->fetchColumn();
+        $stmt = $this->db->prepare('SELECT COUNT(*) FROM contact_purchases WHERE contact_id = ?');
+        $stmt->execute([$contactId]);
+        $purchaseCount = (int)$stmt->fetchColumn();
 
         $contact = $this->find($contactId);
         if ($contact) {
@@ -146,7 +145,9 @@ class ContactModel extends Model
     {
         $db = Database::getInstance();
         // Obtener visitantes de la tabla businesses (columna visits)
-        $business = $db->query('SELECT visits FROM businesses WHERE id = ?', [$businessId])->fetch();
+        $stmt = $db->prepare('SELECT visits FROM businesses WHERE id = ?');
+        $stmt->execute([$businessId]);
+        $business = $stmt->fetch();
 
         $visits = $business ? (int)$business['visits'] : 0;
 
@@ -163,10 +164,9 @@ class ContactModel extends Model
         if ($visits > 0) {
             // Check if there are purchases
             if ($existing) {
-                $purchaseCount = (int)$db->query(
-                    'SELECT COUNT(*) FROM contact_purchases WHERE contact_id = ?',
-                    [$existing['id']]
-                )->fetchColumn();
+                $stmt = $db->prepare('SELECT COUNT(*) FROM contact_purchases WHERE contact_id = ?');
+                $stmt->execute([$existing['id']]);
+                $purchaseCount = (int)$stmt->fetchColumn();
 
                 if ($purchaseCount >= 3) {
                     $category = 'lovemark';
@@ -214,11 +214,12 @@ class ContactModel extends Model
         // 1) Procesar contactos existentes que tienen wa_id - clasificar según sus sesiones
         foreach ($existingContacts as $contact) {
             $waId = $contact['wa_id'];
-            $session = $db->query(
+            $stmt = $db->prepare(
                 "SELECT session_count, purchase_count, has_purchased, category
-                 FROM chatbot_sessions WHERE wa_id = ? LIMIT 1",
-                [$waId]
-            )->fetch();
+                 FROM chatbot_sessions WHERE wa_id = ? LIMIT 1"
+            );
+            $stmt->execute([$waId]);
+            $session = $stmt->fetch();
 
             if ($session) {
                 $newCategory = $this->determineCategoryFromSession($session);
@@ -263,7 +264,7 @@ class ContactModel extends Model
         }
 
         // 2) Obtener sesiones de chatbot sin contacto asociado (nuevos prospectos)
-        $chatbotOnlySessions = $db->query(
+        $stmt = $db->prepare(
             "SELECT cs.id, cs.wa_id, cs.last_message AS notes,
                     cs.category AS session_category,
                     cs.session_count, cs.purchase_count, cs.has_purchased,
@@ -276,9 +277,10 @@ class ContactModel extends Model
                 SELECT COALESCE(c.phone, '') FROM contacts c WHERE c.business_id = ?
              )
              ORDER BY cs.updated_at DESC
-             LIMIT 50",
-            [(int)$businessId, (int)$businessId]
-        )->fetchAll();
+             LIMIT 50"
+        );
+        $stmt->execute([(int)$businessId, (int)$businessId]);
+        $chatbotOnlySessions = $stmt->fetchAll();
 
         foreach ($chatbotOnlySessions as $session) {
             $newCategory = $this->determineCategoryFromSession($session);

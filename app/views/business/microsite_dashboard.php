@@ -37,11 +37,11 @@ require APP_PATH . '/views/layout/head.php';
     </div>
     <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
       <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">🧭 Indicaciones</p>
-      <p class="text-2xl font-bold text-orange-600 mt-1"><?php $dbDir = Database::getInstance(); echo (int)$dbDir->query("SELECT COUNT(*) FROM analytics WHERE business_id = ? AND event = 'directions_click'", [(int)$business['id']])->fetchColumn(); ?></p>
+      <p class="text-2xl font-bold text-orange-600 mt-1"><?= (int)$directionsClicks ?></p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
       <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">🤖 Sesiones Chatbot</p>
-      <p class="text-2xl font-bold text-purple-600 mt-1"><?php $dbBot = Database::getInstance(); echo (int)$dbBot->query("SELECT COUNT(*) FROM chatbot_sessions cs LEFT JOIN contacts c ON c.wa_id = cs.wa_id WHERE c.business_id = ?", [(int)$business['id']])->fetchColumn(); ?></p>
+      <p class="text-2xl font-bold text-purple-600 mt-1"><?= (int)$chatbotSessions ?></p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
       <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">🎉 Total eventos</p>
@@ -88,7 +88,7 @@ require APP_PATH . '/views/layout/head.php';
       </div>
       <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mt-2">
         <span class="text-sm font-medium text-gray-700">Indicaciones</span>
-        <span class="text-lg font-bold text-orange-600"><?php $dbDir2 = Database::getInstance(); echo (int)$dbDir2->query("SELECT COUNT(*) FROM analytics WHERE business_id = ? AND event = 'directions_click'", [(int)$business['id']])->fetchColumn(); ?></span>
+        <span class="text-lg font-bold text-orange-600"><?= (int)$directionsClicks ?></span>
       </div>
     </div>
   </div>
