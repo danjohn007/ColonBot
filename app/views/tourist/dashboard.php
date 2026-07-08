@@ -37,10 +37,6 @@ $dateStatus = static function (array $promo): array {
     return ['Disponible', 'bg-emerald-50 text-emerald-700 border-emerald-100'];
 };
 
-$jsString = static function (string $value): string {
-    return json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
-};
-
 require APP_PATH . '/views/layout/head.php';
 ?>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
@@ -63,13 +59,18 @@ require APP_PATH . '/views/layout/head.php';
   }
   .media-tile.place { background: linear-gradient(135deg, #ecfeff, #fff7ed); color: #0f766e; }
   .media-tile.event { background: linear-gradient(135deg, #eef2ff, #fff7ed); color: #4f46e5; }
-  .star-picker { direction: rtl; display: inline-flex; gap: .15rem; }
-  .star-picker input { position: absolute; opacity: 0; pointer-events: none; }
-  .star-picker label { cursor: pointer; color: #d1d5db; font-size: 2rem; line-height: 1; transition: color .15s ease, transform .15s ease; }
-  .star-picker label:hover,
-  .star-picker label:hover ~ label,
-  .star-picker input:checked ~ label { color: #f59e0b; }
-  .star-picker label:hover { transform: translateY(-1px); }
+  .rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    background: #111827;
+    color: #fff;
+    font-weight: 800;
+    font-size: .8rem;
+  }
 </style>
 
 <script>
@@ -214,7 +215,7 @@ function swapImageFallback(img) {
         </a>
         <div class="flex items-center justify-between gap-2 mt-3 pt-3 border-t border-gray-100">
           <span class="text-xs text-gray-400"><?= e(date('d/m/Y', strtotime($b['last_visited_at']))) ?></span>
-          <button type="button" class="px-3 py-2 rounded-lg bg-orange-600 text-white text-xs font-bold hover:bg-orange-700 transition" onclick="openReviewModal(<?= (int)$b['id'] ?>, <?= $jsString((string)$b['name']) ?>)">Calificar</button>
+          <a href="<?= url($prefix . 'lugar/' . $b['slug']) ?>#valoraciones" class="px-3 py-2 rounded-lg bg-orange-600 text-white text-xs font-bold hover:bg-orange-700 transition">Calificar</a>
         </div>
       </article>
       <?php endforeach; ?>
@@ -226,8 +227,8 @@ function swapImageFallback(img) {
     <section class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
       <h2 class="font-bold text-gray-900 text-lg mb-4">Lugares mas visitados</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <?php foreach (array_slice($topVisited, 0, 8) as $b): ?>
-        <article class="flex gap-3 p-3 border border-gray-100 rounded-xl hover:border-orange-200 transition">
+        <?php foreach (array_slice($topVisited, 0, 8) as $index => $b): ?>
+        <article class="flex items-center gap-3 p-3 border border-gray-100 rounded-xl hover:border-orange-200 transition">
           <a href="<?= url($prefix . 'lugar/' . $b['slug']) ?>" class="contents">
             <?php if (!empty($b['cover_image'])): ?>
             <img src="<?= imageUrl($b['cover_image']) ?>" alt="" class="w-16 h-16 object-cover rounded-lg shrink-0" data-fallback="<?= e($iconForPlace($b)) ?>" data-fallback-class="media-tile place w-16 h-16 rounded-lg shrink-0" onerror="swapImageFallback(this)">
@@ -239,8 +240,8 @@ function swapImageFallback(img) {
               <p class="text-xs text-gray-500"><?= e($b['category_name']) ?></p>
               <p class="text-xs text-amber-600 mt-1"><?= number_format((float)$b['rating'], 1) ?>/5</p>
             </div>
+            <span class="rank-badge shrink-0">#<?= (int)$index + 1 ?></span>
           </a>
-          <button type="button" class="self-end px-3 py-2 rounded-lg bg-gray-900 text-white text-xs font-bold hover:bg-gray-700 transition" onclick="openReviewModal(<?= (int)$b['id'] ?>, <?= $jsString((string)$b['name']) ?>)">Calificar</button>
         </article>
         <?php endforeach; ?>
       </div>
@@ -271,67 +272,10 @@ function swapImageFallback(img) {
   </div>
 </main>
 
-<div id="review-modal" class="fixed inset-0 z-[80] hidden">
-  <div class="absolute inset-0 bg-gray-950/55" onclick="closeReviewModal()"></div>
-  <div class="relative mx-auto mt-20 w-[calc(100%-2rem)] max-w-lg rounded-2xl bg-white shadow-2xl border border-gray-100 overflow-hidden">
-    <div class="p-5 border-b border-gray-100 flex items-start justify-between gap-4">
-      <div>
-        <p class="text-xs font-bold uppercase tracking-wide text-orange-600">Calificar lugar</p>
-        <h3 id="review-business-name" class="text-xl font-extrabold text-gray-900 mt-1">Lugar</h3>
-      </div>
-      <button type="button" onclick="closeReviewModal()" class="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">x</button>
-    </div>
-    <form method="POST" action="<?= url($prefix . 'turista/valorar') ?>" class="p-5 space-y-5">
-      <input type="hidden" name="_csrf" value="<?= e($csrf ?? '') ?>">
-      <input type="hidden" name="business_id" id="review-business-id" value="">
-      <div>
-        <span class="text-sm font-bold text-gray-700 block mb-2">Selecciona tu calificacion</span>
-        <div class="star-picker" aria-label="Calificacion">
-          <input type="radio" id="star5" name="rating" value="5" checked><label for="star5">&#9733;</label>
-          <input type="radio" id="star4" name="rating" value="4"><label for="star4">&#9733;</label>
-          <input type="radio" id="star3" name="rating" value="3"><label for="star3">&#9733;</label>
-          <input type="radio" id="star2" name="rating" value="2"><label for="star2">&#9733;</label>
-          <input type="radio" id="star1" name="rating" value="1"><label for="star1">&#9733;</label>
-        </div>
-      </div>
-      <label class="block">
-        <span class="text-sm font-bold text-gray-700 block mb-2">Opinion</span>
-        <textarea name="comment" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Cuentanos como fue tu experiencia..."></textarea>
-      </label>
-      <div class="flex flex-col sm:flex-row gap-2 sm:justify-end">
-        <button type="button" onclick="closeReviewModal()" class="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-700 text-sm font-bold hover:bg-gray-200 transition">Cancelar</button>
-        <button type="submit" class="px-5 py-2.5 rounded-xl bg-orange-600 text-white text-sm font-bold hover:bg-orange-700 transition">Guardar opinion</button>
-      </div>
-    </form>
-  </div>
-</div>
-
 <script>
 function toggleProfileForm() {
   document.getElementById('profile-form')?.classList.toggle('hidden');
 }
-
-function openReviewModal(id, name) {
-  const modal = document.getElementById('review-modal');
-  const input = document.getElementById('review-business-id');
-  const title = document.getElementById('review-business-name');
-  if (!modal || !input || !title) return;
-  input.value = id;
-  title.textContent = name || 'Lugar';
-  modal.classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeReviewModal() {
-  const modal = document.getElementById('review-modal');
-  if (!modal) return;
-  modal.classList.add('hidden');
-  document.body.style.overflow = '';
-}
-
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') closeReviewModal();
-});
 </script>
 
 <?php require APP_PATH . '/views/layout/bottom_nav.php'; ?>
