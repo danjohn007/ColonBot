@@ -88,7 +88,7 @@ class PromotionController extends Controller
             'price' => $_POST['price'] !== '' ? (float)$_POST['price'] : null,
             'presale_price' => $_POST['presale_price'] !== '' ? (float)$_POST['presale_price'] : null,
             'conditions' => trim($_POST['conditions'] ?? ''),
-            'public_url' => BASE_URL . '/promocion/' . $id,
+            'public_url' => null,
             'type' => in_array($_POST['type'] ?? '', ['promocion', 'evento']) ? $_POST['type'] : 'promocion',
             'target_segment' => implode(',', $_POST['target_segment'] ?? ['todos']),
             'status' => 'pending',
@@ -268,7 +268,7 @@ class PromotionController extends Controller
     public function publicView(string $id): void
     {
         $promo = $this->promotions->find((int)$id);
-        if (!$promo || $promo['status'] !== 'active') {
+        if (!$promo || !in_array($promo['status'], ['active', 'approved'], true)) {
             http_response_code(404);
             require APP_PATH . '/views/errors/404.php';
             return;
@@ -315,11 +315,7 @@ class PromotionController extends Controller
      */
     public function publicEvents(): void
     {
-        $events = $this->promotions->query(
-            "SELECT * FROM promotions WHERE type = 'evento' AND status = 'active'
-             AND (start_date IS NULL OR start_date >= NOW())
-             ORDER BY start_date ASC"
-        );
+        $events = $this->promotions->publicEvents();
         $this->view('promotions.public_events', compact('events'));
     }
 
@@ -329,7 +325,7 @@ class PromotionController extends Controller
     public function publicEventView(string $id): void
     {
         $promo = $this->promotions->find((int)$id);
-        if (!$promo || $promo['status'] !== 'active') {
+        if (!$promo || !in_array($promo['status'], ['active', 'approved'], true)) {
             http_response_code(404);
             require APP_PATH . '/views/errors/404.php';
             return;

@@ -15,7 +15,8 @@ class NotificationController extends Controller
         $notifications = $this->notifications->forUser((int)$user['id']);
         $unread        = $this->notifications->unreadCount((int)$user['id']);
         $csrf          = $this->csrf();
-        $this->view('notifications.index', compact('notifications', 'user', 'unread', 'csrf'));
+        $routePrefix   = $this->pathForCurrentPrefix('');
+        $this->view('notifications.index', compact('notifications', 'user', 'unread', 'csrf', 'routePrefix'));
     }
 
     public function markRead(string $id): void
@@ -33,6 +34,6 @@ class NotificationController extends Controller
         $this->verifyCsrf();
         $user = currentUser();
         $this->notifications->markAllRead((int)$user['id']);
-        $this->redirect('admin/notificaciones');
+        $this->redirectForCurrentPrefix('admin/notificaciones');
     }
 }

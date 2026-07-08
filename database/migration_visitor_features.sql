@@ -53,3 +53,7 @@ CREATE TABLE IF NOT EXISTS visitor_place_visits (
   CONSTRAINT fk_visitor_visits_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT fk_visitor_visits_business FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Las promociones/eventos aprobados deben ser visibles para visitantes.
+UPDATE promotions SET status = 'active' WHERE status = 'approved';
+UPDATE events SET status = 'active' WHERE status = 'approved';

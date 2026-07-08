@@ -60,7 +60,7 @@ class EventModel extends Model
     public function approve(int $id, int $approvedBy): void
     {
         $this->update($id, [
-            'status' => 'approved',
+            'status' => 'active',
             'approved_by' => $approvedBy,
         ]);
     }
@@ -82,7 +82,7 @@ class EventModel extends Model
                     b.google_maps_link, b.name AS business_name_full
              FROM events e
              LEFT JOIN businesses b ON b.id = e.business_id
-             WHERE e.status = 'active' 
+             WHERE e.status IN ('active', 'approved')
              AND (e.end_date IS NULL OR e.end_date >= NOW())
              ORDER BY e.start_date ASC"
         );

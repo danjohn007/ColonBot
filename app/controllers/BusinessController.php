@@ -423,7 +423,7 @@ class BusinessController extends Controller
 
     public function saveEvent(string $id): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth('prestador');
         $this->verifyCsrf();
 
         $business = $this->businesses->find((int)$id);
@@ -461,6 +461,7 @@ class BusinessController extends Controller
                 'status' => 'active',
                 'start_date' => $date,
             ]);
+            $this->notifyVisitorsForBusinessEvent((int)$id, $name);
         }
 
         $events = $this->businesses->allEvents((int)$id);
@@ -469,7 +470,7 @@ class BusinessController extends Controller
 
     public function deleteEvent(string $id, string $eid): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth('prestador');
         $this->verifyCsrf();
 
         $business = $this->businesses->find((int)$id);
@@ -542,6 +543,22 @@ class BusinessController extends Controller
         if ($user['role'] !== 'superadmin' && (int)$business['user_id'] !== (int)$user['id']) {
             http_response_code(403);
             die('No tienes permiso para editar este negocio.');
+        }
+    }
+
+    private function notifyVisitorsForBusinessEvent(int $businessId, string $title): void
+    {
+        $users = new UserModel();
+        $notifications = new NotificationModel();
+
+        foreach ($users->visitors() as $visitor) {
+            $notifications->create([
+                'user_id' => (int)$visitor['id'],
+                'business_id' => $businessId,
+                'type' => 'system',
+                'title' => 'Nuevo evento disponible',
+                'message' => "Ya puedes consultar el evento \"{$title}\" en tu panel de visitante.",
+            ]);
         }
     }
 

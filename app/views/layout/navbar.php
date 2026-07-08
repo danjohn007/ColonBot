@@ -1,6 +1,7 @@
 <?php
 $user = currentUser();
 $flash = flash();
+$navPrefix = routePrefix();
 ?>
 <!-- Top Navigation Bar (slim - only logo + hamburger) -->
 <nav class="shadow-sm sticky top-0 z-50 bg-white">
@@ -51,7 +52,6 @@ $flash = flash();
     }
   ?>
   transition-transform duration-300 ease-in-out">
-REPLACE
   <div class="p-4">
     <!-- Sidebar header -->
     <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
@@ -75,7 +75,7 @@ REPLACE
     <div class="space-y-1 text-sm font-medium text-gray-700">
 
       <!-- Map - always visible -->
-      <a href="<?= url('mapa') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+      <a href="<?= url($navPrefix . 'mapa') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
         <span class="text-lg">🗺️</span> Mapa Turístico
       </a>
 
@@ -171,10 +171,10 @@ REPLACE
 
         <!-- VISITOR (strict) - merged from turista -->
         <?php if ($role === 'visitor'): ?>
-        <a href="<?= url('turista') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+        <a href="<?= url($navPrefix . 'turista') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">👤</span> Mi Perfil Visitante
         </a>
-        <a href="<?= url('admin/notificaciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+        <a href="<?= url($navPrefix . 'admin/notificaciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">🔔</span> Notificaciones
         </a>
         <?php endif; ?>

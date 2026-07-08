@@ -5,15 +5,27 @@ class NotificationModel extends Model
 
     public function forUser(int $userId): array
     {
-        return $this->query(
-            'SELECT n.*, b.name AS business_name, e.title AS event_title
-             FROM notifications n
-             LEFT JOIN businesses b ON b.id = n.business_id
-             LEFT JOIN events e ON e.id = n.event_id
-             WHERE n.user_id = ?
-             ORDER BY n.created_at DESC',
-            [$userId]
-        );
+        try {
+            return $this->query(
+                'SELECT n.*, b.name AS business_name, e.title AS event_title
+                 FROM notifications n
+                 LEFT JOIN businesses b ON b.id = n.business_id
+                 LEFT JOIN events e ON e.id = n.event_id
+                 WHERE n.user_id = ?
+                 ORDER BY n.created_at DESC',
+                [$userId]
+            );
+        } catch (PDOException $e) {
+            error_log('Notification event relation skipped: ' . $e->getMessage());
+            return $this->query(
+                'SELECT n.*, b.name AS business_name, NULL AS event_title
+                 FROM notifications n
+                 LEFT JOIN businesses b ON b.id = n.business_id
+                 WHERE n.user_id = ?
+                 ORDER BY n.created_at DESC',
+                [$userId]
+            );
+        }
     }
 
     public function unreadCount(int $userId): int
@@ -56,10 +68,18 @@ class NotificationModel extends Model
             $businessId = $params['business_id'] ?? null;
             $eventId = $params['event_id'] ?? null;
             
-            $this->execute(
-                'INSERT INTO notifications (user_id, business_id, event_id, type, title, message) VALUES (?,?,?,?,?,?)',
-                [$userId, $businessId, $eventId, $type, $title, $message]
-            );
+            try {
+                $this->execute(
+                    'INSERT INTO notifications (user_id, business_id, event_id, type, title, message) VALUES (?,?,?,?,?,?)',
+                    [$userId, $businessId, $eventId, $type, $title, $message]
+                );
+            } catch (PDOException $e) {
+                error_log('Notification event relation skipped: ' . $e->getMessage());
+                $this->execute(
+                    'INSERT INTO notifications (user_id, business_id, type, title, message) VALUES (?,?,?,?,?)',
+                    [$userId, $businessId, $type, $title, $message]
+                );
+            }
         } else {
             // Individual parameters format (backward compatible)
             $userId = $params;

@@ -7,7 +7,7 @@ require APP_PATH . '/views/layout/head.php';
 <main class="max-w-4xl mx-auto px-4 py-8 mb-24">
   <div class="flex items-center justify-between mb-6">
     <div class="flex items-center gap-3">
-      <a href="<?= url(($user['role'] ?? '') === 'visitor' ? 'turista' : 'admin') ?>" class="text-gray-500 hover:text-blue-600 transition">
+      <a href="<?= url(($routePrefix ?? '') . (($user['role'] ?? '') === 'visitor' ? 'turista' : 'admin')) ?>" class="text-gray-500 hover:text-blue-600 transition">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
@@ -18,7 +18,7 @@ require APP_PATH . '/views/layout/head.php';
       <?php endif; ?>
     </div>
     <?php if ($unread > 0): ?>
-    <form method="POST" action="<?= url('admin/notificaciones/leer-todas') ?>">
+    <form method="POST" action="<?= url(($routePrefix ?? '') . 'admin/notificaciones/leer-todas') ?>">
       <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
       <button type="submit"
         class="text-sm text-blue-600 hover:text-blue-800 font-medium transition">
@@ -89,7 +89,7 @@ require APP_PATH . '/views/layout/head.php';
 const csrf = '<?= e($csrf) ?>';
 
 function markRead(id) {
-  fetch('<?= url('admin/notificaciones') ?>/' + id + '/leer', {
+  fetch('<?= url(($routePrefix ?? '') . 'admin/notificaciones') ?>/' + id + '/leer', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: '_csrf=' + encodeURIComponent(csrf)

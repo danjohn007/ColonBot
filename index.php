@@ -34,6 +34,7 @@ $router->get('mapa',                    'MapController',       'index');
 $router->get('mapa/poi',                'MapController',       'poi');
 $router->get('mapa/{id}',              'MapController',       'index');
 $router->get('landing/mapa',            'MapController',       'index');
+$router->get('landing/mapa/poi',        'MapController',       'poi');
 $router->get('landing/mapa/{id}',       'MapController',       'index');
 $router->get('lugar/{slug}',            'MapController',       'detail');
 $router->post('lugar/{slug}/contactar', 'MapController',       'contact');
@@ -149,6 +150,9 @@ $router->post('registro/reenviar-codigo',       'PublicRegisterController', 'res
 $router->get('landing/registro/visitante',              'PublicRegisterController', 'visitorForm');
 $router->post('landing/registro/visitante/guardar',     'PublicRegisterController', 'visitorRegister');
 $router->post('landing/registro/visitante/iniciar-sesion', 'PublicRegisterController', 'visitorLogin');
+$router->get('landing/registro/prestador',              'PublicRegisterController', 'prestadorForm');
+$router->post('landing/registro/prestador/guardar',     'PublicRegisterController', 'prestadorRegister');
+$router->post('landing/registro/prestador/iniciar-sesion', 'PublicRegisterController', 'prestadorLogin');
 $router->get('landing/registro/verificar',              'PublicRegisterController', 'verifyForm');
 $router->post('landing/registro/verificar/codigo',      'PublicRegisterController', 'verifyCode');
 $router->post('landing/registro/reenviar-codigo',       'PublicRegisterController', 'resendCode');

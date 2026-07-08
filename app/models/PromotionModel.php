@@ -43,7 +43,7 @@ class PromotionModel extends Model
     public function approve(int $id, int $approvedBy): void
     {
         $this->update($id, [
-            'status' => 'approved',
+            'status' => 'active',
             'approved_by' => $approvedBy,
         ]);
     }
@@ -54,9 +54,36 @@ class PromotionModel extends Model
             "SELECT p.*, b.name AS business_name, b.slug AS business_slug
              FROM promotions p
              LEFT JOIN businesses b ON b.id = p.business_id
-             WHERE p.status = 'active' 
+             WHERE p.type = 'promocion'
+             AND p.status IN ('active', 'approved')
              AND (p.start_date IS NULL OR p.start_date <= NOW())
              AND (p.end_date IS NULL OR p.end_date >= NOW())"
+        );
+    }
+
+    public function activeEvents(): array
+    {
+        return $this->query(
+            "SELECT p.*, b.name AS business_name, b.slug AS business_slug,
+                    b.address, b.whatsapp, b.phone, b.lat, b.lng,
+                    b.google_maps_link, b.name AS business_name_full
+             FROM promotions p
+             LEFT JOIN businesses b ON b.id = p.business_id
+             WHERE p.type = 'evento'
+             AND p.status IN ('active', 'approved')
+             AND (p.end_date IS NULL OR p.end_date >= NOW())
+             ORDER BY p.start_date ASC"
+        );
+    }
+
+    public function publicEvents(): array
+    {
+        return $this->query(
+            "SELECT * FROM promotions
+             WHERE type = 'evento'
+             AND status IN ('active', 'approved')
+             AND (start_date IS NULL OR start_date >= NOW())
+             ORDER BY start_date ASC"
         );
     }
 

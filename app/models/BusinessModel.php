@@ -118,6 +118,11 @@ class BusinessModel extends Model
         );
     }
 
+    public function activeAmenities(): array
+    {
+        return $this->query('SELECT * FROM amenities WHERE active = 1 ORDER BY name');
+    }
+
     public function businessCategories(int $businessId): array
     {
         return $this->query(
@@ -239,7 +244,37 @@ class BusinessModel extends Model
 
     public function allEvents(int $businessId): array
     {
-        return $this->query('SELECT * FROM events WHERE business_id = ? ORDER BY date, id', [$businessId]);
+        return $this->query(
+            "SELECT p.*, p.title AS name, p.start_date AS date
+             FROM promotions p
+             WHERE p.business_id = ? AND p.type = 'evento'
+             ORDER BY p.start_date, p.id",
+            [$businessId]
+        );
+    }
+
+    public function publicEvents(int $businessId): array
+    {
+        return $this->query(
+            "SELECT e.id, e.title AS name, e.title, e.description, e.price,
+                    e.start_date AS date, e.start_date, e.end_date, e.image,
+                    e.public_url, e.status, 'events' AS source
+             FROM events e
+             WHERE e.business_id = ?
+               AND e.status IN ('active', 'approved')
+               AND (e.end_date IS NULL OR e.end_date >= NOW())
+             UNION ALL
+             SELECT p.id, p.title AS name, p.title, p.description, p.price,
+                    p.start_date AS date, p.start_date, p.end_date, p.image,
+                    p.public_url, p.status, 'promotions' AS source
+             FROM promotions p
+             WHERE p.business_id = ?
+               AND p.type = 'evento'
+               AND p.status IN ('active', 'approved')
+               AND (p.end_date IS NULL OR p.end_date >= NOW())
+             ORDER BY date, id",
+            [$businessId, $businessId]
+        );
     }
 
     public function reviews(int $businessId): array

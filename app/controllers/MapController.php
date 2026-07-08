@@ -21,20 +21,22 @@ class MapController extends Controller
 
         // Cargar el límite de Colón desde OSM (server-side para evitar CORS)
         $boundaryData = $this->fetchColonBoundary();
+        $routePrefix = $this->pathForCurrentPrefix('');
 
-        $this->view('map.index', compact('categories', 'preloadId', 'preloadCat', 'boundaryData'));
+        $this->view('map.index', compact('categories', 'preloadId', 'preloadCat', 'boundaryData', 'routePrefix'));
     }
 
     /** API: devuelve POIs en JSON para el mapa */
     public function poi(): void
     {
+        $routePrefix = $this->pathForCurrentPrefix('');
         $filters    = [
             'category' => $_GET['category'] ?? '',
             'search'   => $_GET['q'] ?? '',
         ];
         $businesses = $this->businesses->withFilters($filters);
 
-        $pois = array_map(function($b) {
+        $pois = array_map(function($b) use ($routePrefix) {
             $tripTypes = array_column($this->businesses->tripTypes((int)$b['id']), 'trip_type');
             return [
                 'id'             => $b['id'],
@@ -48,7 +50,7 @@ class MapController extends Controller
                 'category_icon'  => $b['category_icon'],
                 'rating'         => (float)$b['rating'],
                 'cover'          => $b['cover_image'] ? imageUrl($b['cover_image']) : asset('img/placeholder.svg'),
-                'url'            => url('lugar/' . $b['slug']),
+                'url'            => url($routePrefix . 'lugar/' . $b['slug']),
                 'isotipo'        => $b['isotipo'] ?? '',
                 'trip_types'     => $tripTypes,
             ];
@@ -74,13 +76,15 @@ class MapController extends Controller
 
         $images    = $this->businesses->images($business['id']);
         $amenities = $this->businesses->amenities($business['id']);
+        $allAmenities = $this->businesses->activeAmenities();
         $services  = $this->businesses->services($business['id']);
         $products  = $this->businesses->products($business['id']);
-        $events    = $this->businesses->allEvents($business['id']);
+        $events    = $this->businesses->publicEvents((int)$business['id']);
         $tripTypes = array_column($this->businesses->tripTypes((int)$business['id']), 'trip_type');
         $reviews   = $this->businesses->reviews((int)$business['id']);
+        $routePrefix = $this->pathForCurrentPrefix('');
 
-        $this->view('map.detail', compact('business', 'images', 'amenities', 'services', 'products', 'events', 'tripTypes', 'reviews'));
+        $this->view('map.detail', compact('business', 'images', 'amenities', 'allAmenities', 'services', 'products', 'events', 'tripTypes', 'reviews', 'routePrefix'));
     }
 
     public function contact(string $slug): void

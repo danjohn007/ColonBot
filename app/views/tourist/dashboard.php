@@ -14,8 +14,8 @@ require APP_PATH . '/views/layout/head.php';
         <p class="text-orange-50 mt-2 max-w-2xl">Explora lugares, guarda tu historial de visitas, comenta negocios y revisa promociones o eventos disponibles.</p>
       </div>
       <div class="flex flex-wrap gap-2">
-        <a href="<?= url('mapa') ?>" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-white text-orange-700 text-sm font-semibold hover:bg-orange-50 transition">Ver mapa</a>
-        <a href="<?= url('admin/notificaciones') ?>" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-orange-700/40 text-white text-sm font-semibold hover:bg-orange-700 transition">Notificaciones</a>
+        <a href="<?= url(($routePrefix ?? '') . 'mapa') ?>" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-white text-orange-700 text-sm font-semibold hover:bg-orange-50 transition">Ver mapa</a>
+        <a href="<?= url(($routePrefix ?? '') . 'admin/notificaciones') ?>" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-orange-700/40 text-white text-sm font-semibold hover:bg-orange-700 transition">Notificaciones</a>
       </div>
     </div>
   </section>
@@ -72,7 +72,10 @@ require APP_PATH . '/views/layout/head.php';
         <p class="text-sm text-gray-500">Aún no hay eventos publicados.</p>
         <?php endif; ?>
         <?php foreach (array_slice($activeEvents, 0, 6) as $event): ?>
-        <a href="<?= url('evento/' . (int)$event['id'] . '/' . slugify($event['title'])) ?>" class="flex gap-3 p-3 border border-gray-100 rounded-xl hover:bg-orange-50 transition">
+        <?php $eventHref = ($event['type'] ?? '') === 'evento'
+            ? ($event['public_url'] ?: url('promocion/' . (int)$event['id']))
+            : url('evento/' . (int)$event['id'] . '/' . slugify($event['title'])); ?>
+        <a href="<?= e($eventHref) ?>" class="flex gap-3 p-3 border border-gray-100 rounded-xl hover:bg-orange-50 transition">
           <img src="<?= $event['image'] ? imageUrl($event['image']) : asset('img/placeholder.svg') ?>" alt="" class="w-16 h-16 object-cover rounded-lg shrink-0">
           <div class="min-w-0">
             <p class="font-semibold text-gray-900 text-sm truncate"><?= e($event['title']) ?></p>
@@ -92,7 +95,8 @@ require APP_PATH . '/views/layout/head.php';
     <?php else: ?>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       <?php foreach ($visitedPlaces as $b): ?>
-      <a href="<?= url('lugar/' . $b['slug']) ?>" class="p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition">
+      <div class="p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition">
+        <a href="<?= url(($routePrefix ?? '') . 'lugar/' . $b['slug']) ?>" class="block">
         <div class="flex items-center gap-3">
           <img src="<?= $b['cover_image'] ? imageUrl($b['cover_image']) : asset('img/placeholder.svg') ?>" alt="" class="w-14 h-14 object-cover rounded-lg shrink-0">
           <div class="min-w-0">
@@ -101,7 +105,24 @@ require APP_PATH . '/views/layout/head.php';
           </div>
         </div>
         <p class="text-xs text-orange-600 mt-3">Última visita: <?= e(date('d/m/Y H:i', strtotime($b['last_visited_at']))) ?></p>
-      </a>
+        </a>
+        <form method="POST" action="<?= url(($routePrefix ?? '') . 'turista/valorar') ?>" class="mt-3 pt-3 border-t border-gray-100 space-y-2">
+          <input type="hidden" name="_csrf" value="<?= e($csrf ?? '') ?>">
+          <input type="hidden" name="business_id" value="<?= (int)$b['id'] ?>">
+          <div class="flex items-center gap-2">
+            <label class="text-xs font-semibold text-gray-600 shrink-0">Calificar</label>
+            <select name="rating" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-orange-500">
+              <option value="5">5 estrellas</option>
+              <option value="4">4 estrellas</option>
+              <option value="3">3 estrellas</option>
+              <option value="2">2 estrellas</option>
+              <option value="1">1 estrella</option>
+            </select>
+          </div>
+          <textarea name="comment" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Escribe tu reseña..."></textarea>
+          <button type="submit" class="w-full bg-orange-600 text-white px-3 py-2 rounded-lg text-xs font-semibold hover:bg-orange-700 transition">Enviar reseña</button>
+        </form>
+      </div>
       <?php endforeach; ?>
     </div>
     <?php endif; ?>
@@ -114,7 +135,7 @@ require APP_PATH . '/views/layout/head.php';
     <?php else: ?>
     <div class="space-y-3">
       <?php foreach ($myReviews as $review): ?>
-      <a href="<?= url('lugar/' . $review['business_slug']) ?>#valoraciones" class="block p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition">
+      <a href="<?= url(($routePrefix ?? '') . 'lugar/' . $review['business_slug']) ?>#valoraciones" class="block p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition">
         <div class="flex items-center justify-between gap-3">
           <p class="font-semibold text-gray-900 text-sm"><?= e($review['business_name']) ?></p>
           <span class="text-yellow-400 text-sm"><?= str_repeat('★', (int)$review['rating']) . str_repeat('☆', 5 - (int)$review['rating']) ?></span>
@@ -131,7 +152,7 @@ require APP_PATH . '/views/layout/head.php';
     <h2 class="font-bold text-gray-900 text-lg mb-4">Lugares más visitados</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       <?php foreach (array_slice($topVisited, 0, 6) as $b): ?>
-      <a href="<?= url('lugar/' . $b['slug']) ?>" class="flex items-center gap-3 p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition">
+      <a href="<?= url(($routePrefix ?? '') . 'lugar/' . $b['slug']) ?>" class="flex items-center gap-3 p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition">
         <img src="<?= $b['cover_image'] ? imageUrl($b['cover_image']) : asset('img/placeholder.svg') ?>" alt="" class="w-14 h-14 object-cover rounded-lg shrink-0">
         <div class="min-w-0">
           <p class="font-semibold text-gray-900 text-sm truncate"><?= e($b['name']) ?></p>

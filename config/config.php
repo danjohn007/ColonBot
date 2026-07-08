@@ -51,6 +51,11 @@ define('APP_NAME',    'Plataforma Turística – Colón');
 define('APP_VERSION', '1.0.0');
 define('APP_ENV',     getenv('APP_ENV') ?: 'production'); // development | production
 
+ini_set('default_charset', 'UTF-8');
+if (PHP_SAPI !== 'cli' && !headers_sent()) {
+    header('Content-Type: text/html; charset=UTF-8');
+}
+
 // ─── Registro explícito de errores para diagnosticar HTTP 500 ─────────────
 ini_set('log_errors', '1');
 set_error_handler(function (int $severity, string $message, string $file, int $line): bool {

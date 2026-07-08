@@ -8,6 +8,7 @@ class ApiController extends Controller
     private AnalyticsModel $analytics;
     private IotModel       $iot;
     private SettingModel   $settings;
+    private NotificationModel $notifications;
 
     public function __construct()
     {
@@ -15,6 +16,7 @@ class ApiController extends Controller
         $this->analytics  = new AnalyticsModel();
         $this->iot        = new IotModel();
         $this->settings   = new SettingModel();
+        $this->notifications = new NotificationModel();
     }
 
     public function businesses(): void
@@ -56,6 +58,16 @@ class ApiController extends Controller
 
         $this->businesses->addReview($businessId, $user['name'], $comment, $rating, (int)$user['id']);
         $this->businesses->updateRating($businessId);
+        $business = $this->businesses->find($businessId);
+        if ($business && !empty($business['user_id'])) {
+            $this->notifications->create([
+                'user_id' => (int)$business['user_id'],
+                'business_id' => $businessId,
+                'type' => 'review',
+                'title' => 'Nueva valoracion de visitante',
+                'message' => "{$user['name']} califico tu negocio con {$rating}/5.",
+            ]);
+        }
         $this->json(['ok' => true]);
     }
 

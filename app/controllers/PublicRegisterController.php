@@ -17,12 +17,17 @@ class PublicRegisterController extends Controller
      */
     public function visitorForm(): void
     {
+        $returnTo = $this->rememberVisitorReturnTo();
         if (isLoggedIn()) {
             $user = currentUser();
+            if (($user['role'] ?? '') === 'visitor' && $returnTo !== '') {
+                unset($_SESSION['visitor_return_to']);
+                $this->redirect($returnTo);
+            }
             $this->redirectForCurrentPrefix(($user['role'] ?? '') === 'visitor' ? 'turista' : 'mapa');
         }
         $routePrefix = $this->pathForCurrentPrefix('');
-        $this->view('public.register_visitor', ['csrf' => $this->csrf(), 'routePrefix' => $routePrefix]);
+        $this->view('public.register_visitor', ['csrf' => $this->csrf(), 'routePrefix' => $routePrefix, 'returnTo' => $returnTo]);
     }
 
     /**
@@ -34,29 +39,30 @@ class PublicRegisterController extends Controller
 
         $email    = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
+        $returnTo = $this->rememberVisitorReturnTo();
 
         if (!$email || !$password) {
             $this->flash('error', 'Ingresa correo y contraseña.');
-            $this->redirectForCurrentPrefix('registro/visitante');
+            $this->redirectToVisitorForm();
             return;
         }
 
         $user = $this->users->findByEmail($email);
         if (!$user || !$this->users->verifyPassword($password, $user['password'])) {
             $this->flash('error', 'Credenciales incorrectas.');
-            $this->redirectForCurrentPrefix('registro/visitante');
+            $this->redirectToVisitorForm();
             return;
         }
 
         if (!$user['active']) {
             $this->flash('error', 'Tu cuenta está desactivada.');
-            $this->redirectForCurrentPrefix('registro/visitante');
+            $this->redirectToVisitorForm();
             return;
         }
 
         if ($user['role'] !== 'visitor') {
             $this->flash('error', 'Esta cuenta no es de tipo visitante.');
-            $this->redirectForCurrentPrefix('registro/visitante');
+            $this->redirectToVisitorForm();
             return;
         }
 
@@ -68,6 +74,10 @@ class PublicRegisterController extends Controller
         ];
 
         $this->logAction('visitor_login', 'users', $user['id']);
+        unset($_SESSION['visitor_return_to']);
+        if ($returnTo !== '') {
+            $this->redirect($returnTo);
+        }
         $this->redirectForCurrentPrefix('turista'); // Redirigir al dashboard del visitante
     }
 
@@ -82,22 +92,23 @@ class PublicRegisterController extends Controller
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
         $passwordConfirm = $_POST['password_confirm'] ?? '';
+        $returnTo = $this->rememberVisitorReturnTo();
 
         if (!$name || !$email || !$password || !$passwordConfirm) {
             $this->flash('error', 'Nombre, email y contrasena son requeridos.');
-            $this->redirectForCurrentPrefix('registro/visitante');
+            $this->redirectToVisitorForm();
             return;
         }
 
         if (strlen($password) < 8) {
             $this->flash('error', 'La contrasena debe tener al menos 8 caracteres.');
-            $this->redirectForCurrentPrefix('registro/visitante');
+            $this->redirectToVisitorForm();
             return;
         }
 
         if ($password !== $passwordConfirm) {
             $this->flash('error', 'Las contrasenas no coinciden.');
-            $this->redirectForCurrentPrefix('registro/visitante');
+            $this->redirectToVisitorForm();
             return;
         }
 
@@ -105,7 +116,7 @@ class PublicRegisterController extends Controller
         $existing = $this->users->findByEmail($email);
         if ($existing) {
             $this->flash('error', 'El email ya está registrado.');
-            $this->redirectForCurrentPrefix('registro/visitante');
+            $this->redirectToVisitorForm();
             return;
         }
 
@@ -120,6 +131,7 @@ class PublicRegisterController extends Controller
             'phone'      => '',
             'password_hash' => $this->users->hashPassword($password),
             'email_code' => $emailCode,
+            'return_to' => $returnTo,
             'created_at' => time(),
         ];
 
@@ -191,6 +203,46 @@ class PublicRegisterController extends Controller
             default => 'admin/crm',
         };
         $this->redirect($redirect);
+    }
+
+    private function rememberVisitorReturnTo(): string
+    {
+        $returnTo = $this->sanitizeReturnTo((string)($_POST['return_to'] ?? $_GET['return_to'] ?? $_SESSION['visitor_return_to'] ?? ''));
+        if ($returnTo !== '') {
+            $_SESSION['visitor_return_to'] = $returnTo;
+        }
+        return $returnTo;
+    }
+
+    private function redirectToVisitorForm(): void
+    {
+        $path = 'registro/visitante';
+        $returnTo = (string)($_SESSION['visitor_return_to'] ?? '');
+        if ($returnTo !== '') {
+            $path .= '?return_to=' . rawurlencode($returnTo);
+        }
+        $this->redirectForCurrentPrefix($path);
+    }
+
+    private function sanitizeReturnTo(string $returnTo): string
+    {
+        $returnTo = trim(str_replace('\\', '/', $returnTo));
+        $basePath = trim((string)(parse_url(BASE_URL, PHP_URL_PATH) ?? ''), '/');
+
+        if ($returnTo === '' || strpos($returnTo, '//') === 0 || preg_match('/^[a-z][a-z0-9+.-]*:/i', $returnTo)) {
+            return '';
+        }
+
+        $returnTo = ltrim($returnTo, '/');
+        if ($basePath !== '' && ($returnTo === $basePath || strpos($returnTo, $basePath . '/') === 0)) {
+            $returnTo = trim(substr($returnTo, strlen($basePath)), '/');
+        }
+
+        if (strpos($returnTo, '..') !== false) {
+            return '';
+        }
+
+        return preg_match('/^(landing\/)?(lugar\/[A-Za-z0-9._~%-]+|mapa(\/[A-Za-z0-9._~%-]+)?|turista)(#[A-Za-z0-9_-]+|\?.*)?$/', $returnTo) ? $returnTo : '';
     }
 
     /**
@@ -334,7 +386,10 @@ class PublicRegisterController extends Controller
 
         $this->logAction('public_register', 'users', $userId, "Registro público como $role");
 
-        $redirect = $role === 'prestador' ? 'admin' : $this->pathForCurrentPrefix('turista');
+        $returnTo = $this->sanitizeReturnTo((string)($pending['return_to'] ?? $_SESSION['visitor_return_to'] ?? ''));
+        unset($_SESSION['visitor_return_to']);
+
+        $redirect = $role === 'prestador' ? 'admin' : ($returnTo ?: $this->pathForCurrentPrefix('turista'));
         $this->flash('success', 'Registro completado exitosamente. Bienvenido a CristobalBot.');
         $this->redirect($redirect);
     }

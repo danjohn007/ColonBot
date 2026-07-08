@@ -5,6 +5,7 @@ class TouristController extends Controller
     private PromotionModel $promotions;
     private EventModel $events;
     private UserModel $users;
+    private NotificationModel $notifications;
 
     public function __construct()
     {
@@ -12,6 +13,7 @@ class TouristController extends Controller
         $this->promotions = new PromotionModel();
         $this->events = new EventModel();
         $this->users = new UserModel();
+        $this->notifications = new NotificationModel();
     }
 
     public function dashboard(): void
@@ -39,7 +41,7 @@ class TouristController extends Controller
         }
 
         try {
-            $activeEvents = $this->events->active();
+            $activeEvents = array_merge($this->events->active(), $this->promotions->activeEvents());
         } catch (Throwable $e) {
             error_log('Visitor dashboard events error: ' . $e->getMessage());
         }
@@ -108,8 +110,19 @@ class TouristController extends Controller
             $this->redirectForCurrentPrefix('turista');
         }
 
-        $this->businesses->addReview($businessId, $user['name'], $comment, min(5, max(1, $rating)), (int)$user['id']);
+        $rating = min(5, max(1, $rating));
+        $this->businesses->addReview($businessId, $user['name'], $comment, $rating, (int)$user['id']);
         $this->businesses->updateRating($businessId);
+
+        if (!empty($business['user_id'])) {
+            $this->notifications->create([
+                'user_id' => (int)$business['user_id'],
+                'business_id' => $businessId,
+                'type' => 'review',
+                'title' => 'Nueva valoracion de visitante',
+                'message' => "{$user['name']} califico tu negocio con {$rating}/5.",
+            ]);
+        }
 
         $this->flash('success', '¡Gracias por tu valoración!');
         $this->redirectForCurrentPrefix('turista');

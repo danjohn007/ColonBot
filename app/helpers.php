@@ -8,6 +8,18 @@ function url(string $path = ''): string
     return BASE_URL . '/' . ltrim($path, '/');
 }
 
+function routePrefix(string $prefix = 'landing'): string
+{
+    $requestPath = trim((string)(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? ''), '/');
+    $basePath = trim((string)(parse_url(BASE_URL, PHP_URL_PATH) ?? ''), '/');
+
+    if ($basePath !== '' && ($requestPath === $basePath || strpos($requestPath, $basePath . '/') === 0)) {
+        $requestPath = trim(substr($requestPath, strlen($basePath)), '/');
+    }
+
+    return ($requestPath === $prefix || strpos($requestPath, $prefix . '/') === 0) ? $prefix . '/' : '';
+}
+
 function asset(string $path): string
 {
     return BASE_URL . '/assets/' . ltrim($path, '/');

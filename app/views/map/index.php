@@ -4,6 +4,7 @@ $extraHead = '<link rel="preconnect" href="https://fonts.googleapis.com">' . PHP
   . '  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . PHP_EOL
   . '  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">' . PHP_EOL
   . '  <link rel="stylesheet" href="' . asset('css/landing-map.css') . '">';
+$viewer = currentUser();
 $landingProfiles = [
   'turismo-de-experiencias' => [
     'eyebrow' => 'Turismo de experiencias',
@@ -422,7 +423,7 @@ require APP_PATH . '/views/layout/head.php';
 <!-- Banners de registro público entre mapa y footer -->
 <section class="colon-public-band" aria-label="Registro público">
   <div class="colon-public-grid">
-    <a href="<?= url('registro/visitante') ?>" class="colon-public-banner">
+    <a href="<?= url(($routePrefix ?? '') . 'registro/visitante') ?>" class="colon-public-banner">
       <img src="<?= asset('img/cristo-bot-nino.png') ?>" alt="Visitante de Colón">
       <span class="colon-public-overlay" aria-hidden="true"></span>
       <div class="colon-public-banner-content">
@@ -431,7 +432,7 @@ require APP_PATH . '/views/layout/head.php';
         <p>Califica y deja comentarios de nuestros atractivos turísticos.</p>
       </div>
     </a>
-    <a href="<?= url('registro/prestador') ?>" class="colon-public-banner">
+    <a href="<?= url(($routePrefix ?? '') . 'registro/prestador') ?>" class="colon-public-banner">
       <img src="<?= asset('img/landing/noche-restaurante.jpeg') ?>" alt="Negocio turístico en Colón">
       <span class="colon-public-overlay" aria-hidden="true"></span>
       <div class="colon-public-banner-content">
@@ -446,6 +447,11 @@ require APP_PATH . '/views/layout/head.php';
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const BASE_URL = '<?= BASE_URL ?>';
+const ROUTE_PREFIX = '<?= e($routePrefix ?? '') ?>';
+const ROUTE_BASE = `${BASE_URL}/${ROUTE_PREFIX}`.replace(/\/$/, '');
+const IS_LOGGED_IN = <?= $viewer ? 'true' : 'false' ?>;
+const CAN_REVIEW = <?= ($viewer && ($viewer['role'] ?? '') === 'visitor') ? 'true' : 'false' ?>;
+const VISITOR_LOGIN_URL = '<?= url(($routePrefix ?? '') . 'registro/visitante') ?>';
 const MAP_LAT  = <?= setting('map_lat','20.2862') ?>;
 const MAP_LNG  = <?= setting('map_lng','-99.7242') ?>;
 const MAP_ZOOM = <?= setting('map_zoom','13') ?>;
@@ -574,7 +580,7 @@ function createIcon(color, emoji) {
 
 function loadPOIs() {
   const params = new URLSearchParams({ category: currentCat, q: currentSearch });
-  fetch(`${BASE_URL}/mapa/poi?${params}`)
+  fetch(`${ROUTE_BASE}/mapa/poi?${params}`)
     .then(r => r.json())
     .then(pois => {
       // Separate regular POIs from reference points
@@ -612,7 +618,7 @@ function loadPOIs() {
 }
 
 function showPOI(poi) {
-  history.pushState({ poiId: poi.id }, '', `${BASE_URL}/mapa/${poi.id}`);
+  history.pushState({ poiId: poi.id }, '', `${ROUTE_BASE}/mapa/${poi.id}`);
 
   // Track event
   fetch(`${BASE_URL}/api/analitica`, {
@@ -664,6 +670,15 @@ function showPOI(poi) {
   const isotipoBadge = isotipoLabel
     ? `<span class="inline-block text-xs px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 border border-orange-200 font-medium">${isotipoLabel}</span>`
     : '';
+  const reviewReturnTo = `${ROUTE_PREFIX}lugar/${poi.slug}#valoraciones`;
+  const visitorReviewUrl = `${VISITOR_LOGIN_URL}?return_to=${encodeURIComponent(reviewReturnTo)}`;
+  const reviewCta = !isPuntoReferencia
+    ? (CAN_REVIEW
+      ? `<a href="${poi.url}#valoraciones" class="block mb-3 rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-sm font-semibold text-orange-700 hover:bg-orange-100 transition">Calificar y escribir reseña</a>`
+      : (IS_LOGGED_IN
+        ? `<div class="mb-3 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-600">Solo las cuentas de visitante pueden opinar sobre los lugares.</div>`
+        : `<a href="${VISITOR_LOGIN_URL}" class="block mb-3 rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-sm font-semibold text-orange-700 hover:bg-orange-100 transition">Inicia sesión como visitante para opinar</a>`))
+    : '';
 
   const html = `
     <img src="${poi.cover}" class="w-full h-40 object-cover rounded-xl mb-3" onerror="this.src='/assets/img/placeholder.svg'">
@@ -688,10 +703,11 @@ function showPOI(poi) {
     ` : ''}
     ${!isPuntoReferencia && isotipoBadge ? `<div class="flex items-center gap-2 mb-3">${isotipoBadge}</div>` : ''}
     ${!isPuntoReferencia && tripTypeBadges ? `<div class="flex flex-wrap gap-1 mb-3">${tripTypeBadges}</div>` : ''}
+    ${reviewCta}
     <div class="grid grid-cols-2 gap-2">
       ${!isPuntoReferencia ? `
-      <a href="${poi.url}" class="col-span-2 flex items-center justify-center gap-2 bg-orange-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-orange-700 transition">
-        Ver detalle
+      <a href="${poi.url}#valoraciones" class="col-span-2 flex items-center justify-center gap-2 bg-orange-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-orange-700 transition">
+        Ver detalle y calificar
       </a>
       ` : ''}
       ${!isPuntoReferencia ? (CHATBOT_ACTIVE && CHATBOT_WA_NUMBER
@@ -727,14 +743,16 @@ function showPOI(poi) {
     </div>
   `;
 
+  const renderedHtml = html.replace(VISITOR_LOGIN_URL, visitorReviewUrl);
+
   // Desktop panel
   const panel = document.getElementById('poi-panel');
   document.getElementById('panel-title').textContent = poi.name;
-  document.getElementById('panel-content').innerHTML = html;
+  document.getElementById('panel-content').innerHTML = renderedHtml;
   panel.classList.remove('translate-x-full');
 
   // Mobile bottom sheet
-  document.getElementById('bottom-sheet-content').innerHTML = html;
+  document.getElementById('bottom-sheet-content').innerHTML = renderedHtml;
   document.getElementById('bottom-sheet').classList.remove('translate-y-full');
   document.getElementById('bottom-sheet-overlay').classList.remove('hidden');
 
@@ -742,7 +760,7 @@ function showPOI(poi) {
 }
 
 function resetMapUrl() {
-  const url = currentCat ? `${BASE_URL}/mapa/${currentCat}` : `${BASE_URL}/mapa`;
+  const url = currentCat ? `${ROUTE_BASE}/mapa/${currentCat}` : `${ROUTE_BASE}/mapa`;
   history.pushState({ poiId: null }, '', url);
 }
 
@@ -769,7 +787,7 @@ function setActiveCatButton(cat) {
 
 function filterCat(cat) {
   currentCat = cat;
-  const url = cat ? `${BASE_URL}/mapa/${cat}` : `${BASE_URL}/mapa`;
+  const url = cat ? `${ROUTE_BASE}/mapa/${cat}` : `${ROUTE_BASE}/mapa`;
   history.pushState({ cat }, '', url);
   setActiveCatButton(cat);
   loadPOIs();

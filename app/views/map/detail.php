@@ -2,6 +2,7 @@
 $pageTitle = e($business['name']) . ' – ' . APP_NAME;
 $viewer = currentUser();
 $isVisitor = $viewer && ($viewer['role'] ?? '') === 'visitor';
+$reviewReturnTo = ($routePrefix ?? '') . 'lugar/' . $business['slug'] . '#valoraciones';
 require APP_PATH . '/views/layout/head.php';
 ?>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
@@ -9,7 +10,7 @@ require APP_PATH . '/views/layout/head.php';
 <main class="max-w-5xl mx-auto px-4 py-8 mb-20">
   <!-- Breadcrumb -->
   <nav class="text-sm text-gray-500 mb-4">
-    <a href="<?= url('mapa') ?>" class="hover:text-blue-600">← Regresar al mapa</a>
+    <a href="<?= url(($routePrefix ?? '') . 'mapa') ?>" class="hover:text-blue-600">← Regresar al mapa</a>
   </nav>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -96,7 +97,6 @@ require APP_PATH . '/views/layout/head.php';
           <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">🔣 Leyenda de íconos</h3>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">
             <?php
-            $allAmenities = (new BusinessModel())->query('SELECT * FROM amenities WHERE active = 1 ORDER BY name');
             foreach ($allAmenities as $a):
             ?>
             <div class="flex items-center gap-2 text-xs text-gray-600">
@@ -277,7 +277,7 @@ require APP_PATH . '/views/layout/head.php';
         <div class="mb-6 p-4 bg-orange-50 rounded-xl border border-orange-100">
           <h3 class="text-sm font-semibold text-orange-900 mb-1">Inicia sesión para comentar</h3>
           <p class="text-sm text-orange-800 mb-3">Puedes leer las reseñas libremente, pero las nuevas valoraciones se guardan con una cuenta de visitante.</p>
-          <a href="<?= url('registro/visitante') ?>" class="inline-flex items-center justify-center bg-orange-600 text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-orange-700 transition">
+          <a href="<?= url(($routePrefix ?? '') . 'registro/visitante?return_to=' . rawurlencode($reviewReturnTo)) ?>" class="inline-flex items-center justify-center bg-orange-600 text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-orange-700 transition">
             Entrar como visitante
           </a>
         </div>
@@ -327,7 +327,7 @@ require APP_PATH . '/views/layout/head.php';
           comment: comment
         });
 
-        fetch('<?= BASE_URL ?>/api/review', {
+        fetch('<?= url(($routePrefix ?? '') . 'api/review') ?>', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: body.toString()
