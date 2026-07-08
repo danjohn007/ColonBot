@@ -100,6 +100,14 @@ $router->post('admin/promociones/{id}/toggle','PromotionController', 'toggleStat
 $router->post('admin/promociones/{id}/enviar','PromotionController', 'send');
 $router->get('admin/promociones/{id}/historial','PromotionController', 'sendHistory');
 $router->post('admin/promociones/{id}/aprobar','PromotionController', 'approve');
+$router->get('landing/admin/promociones',             'PromotionController', 'index');
+$router->get('landing/admin/promociones/{id}/list',   'PromotionController', 'list');
+$router->post('landing/admin/promociones/crear',      'PromotionController', 'create');
+$router->post('landing/admin/promociones/{id}/editar','PromotionController', 'update');
+$router->post('landing/admin/promociones/{id}/toggle','PromotionController', 'toggleStatus');
+$router->post('landing/admin/promociones/{id}/enviar','PromotionController', 'send');
+$router->get('landing/admin/promociones/{id}/historial','PromotionController', 'sendHistory');
+$router->post('landing/admin/promociones/{id}/aprobar','PromotionController', 'approve');
 
 // ─── Eventos ──────────────────────────────────────────────────────
 $router->get('admin/eventos',                'EventController', 'index');
@@ -127,6 +135,13 @@ $router->post('colaborador/eventos/{id}/aprobar','ColaboradorController', 'appro
 $router->post('colaborador/negocios/{id}/reestablecer-valoraciones', 'ColaboradorController', 'resetRatings');
 $router->get('colaborador/negocios/{id}/contactar', 'ColaboradorController', 'contactProvider');
 $router->get('colaborador/metricas',           'ColaboradorController', 'metrics');
+$router->get('landing/colaborador',                    'ColaboradorController', 'dashboard');
+$router->get('landing/colaborador/eventos',            'ColaboradorController', 'events');
+$router->post('landing/colaborador/eventos/crear',     'ColaboradorController', 'createGlobalEvent');
+$router->post('landing/colaborador/eventos/{id}/aprobar','ColaboradorController', 'approvePromotion');
+$router->post('landing/colaborador/negocios/{id}/reestablecer-valoraciones', 'ColaboradorController', 'resetRatings');
+$router->get('landing/colaborador/negocios/{id}/contactar', 'ColaboradorController', 'contactProvider');
+$router->get('landing/colaborador/metricas',           'ColaboradorController', 'metrics');
 
 // ─── Perfil ────────────────────────────────────────────────────────
 $router->get('mi-perfil',                   'ProfileController',   'index');

@@ -28,6 +28,7 @@ $tripLabel = function($type) {
 };
 ?>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
+<?php $routePrefix = routePrefix(); ?>
 
 <main class="max-w-7xl mx-auto px-4 py-8 mb-24">
   <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
@@ -37,7 +38,7 @@ $tripLabel = function($type) {
     </div>
     <div class="flex gap-2">
       <?php foreach ([20, 50, 100] as $limit): ?>
-      <a href="<?= url('colaborador/metricas?top=' . $limit) ?>" class="px-3 py-2 rounded-lg text-sm font-semibold <?= $topLimit === $limit ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-blue-50' ?>">
+      <a href="<?= url($routePrefix . 'colaborador/metricas?top=' . $limit) ?>" class="px-3 py-2 rounded-lg text-sm font-semibold <?= $topLimit === $limit ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-blue-50' ?>">
         Top <?= $limit ?>
       </a>
       <?php endforeach; ?>

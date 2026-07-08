@@ -27,7 +27,7 @@ require APP_PATH . '/views/layout/head.php';
         <h2>Iniciar sesion</h2>
         <p class="text-sm mb-6">Ya tienes una cuenta para administrar tu negocio.</p>
 
-        <form method="POST" action="<?= url('registro/prestador/iniciar-sesion') ?>" class="space-y-4">
+        <form method="POST" action="<?= url(($routePrefix ?? '') . 'registro/prestador/iniciar-sesion') ?>" class="space-y-4">
           <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
@@ -35,7 +35,15 @@ require APP_PATH . '/views/layout/head.php';
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Contrasena</label>
-            <input type="password" name="password" required class="colon-public-input w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none transition">
+            <div class="relative">
+              <input type="password" name="password" id="provider-login-password" required autocomplete="current-password" class="colon-public-input w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl text-sm focus:outline-none transition">
+              <button type="button" onclick="toggleProviderPassword('provider-login-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-700 transition" aria-label="Mostrar u ocultar contrasena">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+              </button>
+            </div>
           </div>
           <button type="submit" class="colon-public-btn w-full">
             Iniciar sesion
@@ -49,7 +57,7 @@ require APP_PATH . '/views/layout/head.php';
         <h2>Registro para prestadores</h2>
         <p class="text-sm mb-6">Da de alta tu negocio en la plataforma turística de Colón.</p>
 
-        <form method="POST" action="<?= url('registro/prestador/guardar') ?>" class="space-y-4">
+        <form method="POST" action="<?= url(($routePrefix ?? '') . 'registro/prestador/guardar') ?>" class="space-y-4">
           <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre completo *</label>
@@ -65,6 +73,31 @@ require APP_PATH . '/views/layout/head.php';
             <input type="email" name="email" required class="colon-public-input w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none transition">
             <p class="text-xs text-gray-400 mt-1">Te enviaremos un codigo de confirmacion.</p>
           </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Contrasena *</label>
+            <div class="relative">
+              <input type="password" name="password" id="provider-register-password" required minlength="8" autocomplete="new-password" class="colon-public-input w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl text-sm focus:outline-none transition">
+              <button type="button" onclick="toggleProviderPassword('provider-register-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-700 transition" aria-label="Mostrar u ocultar contrasena">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+              </button>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">Minimo 8 caracteres.</p>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Confirmar contrasena *</label>
+            <div class="relative">
+              <input type="password" name="password_confirm" id="provider-register-password-confirm" required minlength="8" autocomplete="new-password" class="colon-public-input w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl text-sm focus:outline-none transition">
+              <button type="button" onclick="toggleProviderPassword('provider-register-password-confirm')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-700 transition" aria-label="Mostrar u ocultar contrasena">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
           <button type="submit" class="colon-public-btn w-full">
             Registrarse
           </button>
@@ -73,5 +106,13 @@ require APP_PATH . '/views/layout/head.php';
     </section>
   </div>
 </main>
+
+<script>
+function toggleProviderPassword(id) {
+  const input = document.getElementById(id);
+  if (!input) return;
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+</script>
 
 <?php require APP_PATH . '/views/layout/footer.php'; ?>

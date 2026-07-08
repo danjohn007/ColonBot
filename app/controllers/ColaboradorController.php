@@ -119,9 +119,10 @@ class ColaboradorController extends Controller
         $pendingPromos = $this->promotions->pendingForApproval();
         $pendingEvents = $this->eventModel->pendingForApproval();
         $pendingBotEvents = $this->eventModel->pendingBotAuthorization();
-        $activePromos = array_merge($this->promotions->active(), $this->promotions->activeEvents());
+        $activePromos = array_merge($this->eventModel->active(), $this->promotions->active(), $this->promotions->activeEvents());
+        $routePrefix = $this->pathForCurrentPrefix('');
 
-        $this->view('colaborador.events', compact('pendingPromos', 'pendingEvents', 'pendingBotEvents', 'activePromos') + ['csrf' => $this->csrf()]);
+        $this->view('colaborador.events', compact('pendingPromos', 'pendingEvents', 'pendingBotEvents', 'activePromos', 'routePrefix') + ['csrf' => $this->csrf()]);
     }
 
     public function approvePromotion(string $id): void
@@ -140,9 +141,64 @@ class ColaboradorController extends Controller
         $this->verifyCsrf();
 
         $title = trim($_POST['title'] ?? '');
+        if (!$title) {
+            $this->flash('error', 'El titulo es requerido');
+            $this->redirectForCurrentPrefix('colaborador/eventos');
+            return;
+        }
+
+        $image = null;
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            $image = $this->saveUpload($_FILES['image']);
+        }
+
+        $user = currentUser();
+        $id = $this->eventModel->insert([
+            'business_id' => null,
+            'user_id' => (int)$user['id'],
+            'title' => $title,
+            'description' => trim($_POST['description'] ?? ''),
+            'image' => $image ?: null,
+            'price' => $_POST['price'] !== '' ? (float)$_POST['price'] : null,
+            'presale_price' => $_POST['presale_price'] !== '' ? (float)$_POST['presale_price'] : null,
+            'capacity' => $_POST['capacity'] !== '' ? (int)$_POST['capacity'] : null,
+            'location' => trim($_POST['location'] ?? ''),
+            'validity' => trim($_POST['validity'] ?? ''),
+            'conditions' => trim($_POST['conditions'] ?? ''),
+            'event_type' => 'publico',
+            'target_segment' => 'todos',
+            'status' => 'active',
+            'approved_by' => (int)$user['id'],
+            'bot_authorized' => 1,
+            'bot_authorized_by' => (int)$user['id'],
+            'bot_authorized_at' => date('Y-m-d H:i:s'),
+            'start_date' => $this->dateTimeOrNull($_POST['start_date'] ?? null),
+            'end_date' => $this->dateTimeOrNull($_POST['end_date'] ?? null),
+            'presale_start' => $this->dateTimeOrNull($_POST['presale_start'] ?? null),
+            'presale_end' => $this->dateTimeOrNull($_POST['presale_end'] ?? null),
+        ]);
+
+        $publicUrl = $this->eventModel->generatePublicUrl($id);
+        $this->eventModel->update($id, ['public_url' => $publicUrl]);
+
+        foreach ($this->users->visitors() as $visitor) {
+            $this->notifications->create([
+                'user_id' => (int)$visitor['id'],
+                'event_id' => $id,
+                'type' => 'system',
+                'title' => 'Nuevo evento disponible',
+                'message' => "Ya puedes consultar el evento \"{$title}\": {$publicUrl}",
+            ]);
+        }
+
+        $this->logAction('create_public_event', 'events', $id, $title);
+        $this->flash('success', 'Evento publico creado y autorizado para chatbot.');
+        $this->redirectForCurrentPrefix('colaborador/eventos');
+        return;
+        /*
         if (!$title) { $this->flash('error', 'El título es requerido'); $this->redirect('colaborador/eventos'); }
 
-        $image = '';
+        $image = null;
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
             $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
             if (in_array($ext, ALLOWED_IMG_EXT, true) && $_FILES['image']['size'] <= MAX_FILE_SIZE) {
@@ -154,7 +210,7 @@ class ColaboradorController extends Controller
         }
 
         $publicUrl = trim($_POST['public_url'] ?? '');
-        $id = $this->promotions->insert([
+        $id = $this->eventModel->insert([
             'business_id' => null,
             'user_id' => currentUser()['id'],
             'title' => $title,
@@ -186,6 +242,7 @@ class ColaboradorController extends Controller
 
         $this->flash('success', 'Evento público creado exitosamente.');
         $this->redirect('colaborador/eventos');
+        */
     }
 
     public function resetRatings(string $businessId): void
@@ -417,6 +474,33 @@ class ColaboradorController extends Controller
     private function metricRows(string $sql, string $label): array
     {
         return $this->safeRows($sql, "Colaborador metric {$label}");
+    }
+
+    private function dateTimeOrNull(?string $value): ?string
+    {
+        $value = trim((string)$value);
+        if ($value === '') {
+            return null;
+        }
+
+        return str_replace('T', ' ', $value);
+    }
+
+    private function saveUpload(array $file): ?string
+    {
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        if (!in_array($ext, ALLOWED_IMG_EXT, true) || $file['size'] > MAX_FILE_SIZE) {
+            return null;
+        }
+
+        if (!is_dir(UPLOAD_PATH)) {
+            mkdir(UPLOAD_PATH, 0755, true);
+        }
+
+        $filename = bin2hex(random_bytes(16)) . '.' . $ext;
+        $dest = UPLOAD_PATH . '/' . $filename;
+
+        return move_uploaded_file($file['tmp_name'], $dest) ? $filename : null;
     }
 
     private function safeRows(string $sql, string $label): array

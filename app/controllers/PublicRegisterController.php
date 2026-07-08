@@ -148,9 +148,11 @@ class PublicRegisterController extends Controller
     public function prestadorForm(): void
     {
         if (isLoggedIn()) {
-            $this->redirect('admin');
+            $role = $this->normalizeRole(currentUser()['role'] ?? '');
+            $this->redirect($role === 'prestador' ? 'admin/crm' : 'admin');
         }
-        $this->view('public.register_prestador', ['csrf' => $this->csrf()]);
+        $routePrefix = $this->pathForCurrentPrefix('');
+        $this->view('public.register_prestador', ['csrf' => $this->csrf(), 'routePrefix' => $routePrefix]);
     }
 
     /**
@@ -165,27 +167,27 @@ class PublicRegisterController extends Controller
 
         if (!$email || !$password) {
             $this->flash('error', 'Ingresa correo y contraseña.');
-            $this->redirect('registro/prestador');
+            $this->redirectForCurrentPrefix('registro/prestador');
             return;
         }
 
         $user = $this->users->findByEmail($email);
         if (!$user || !$this->users->verifyPassword($password, $user['password'])) {
             $this->flash('error', 'Credenciales incorrectas.');
-            $this->redirect('registro/prestador');
+            $this->redirectForCurrentPrefix('registro/prestador');
             return;
         }
 
         if (!$user['active']) {
             $this->flash('error', 'Tu cuenta está desactivada.');
-            $this->redirect('registro/prestador');
+            $this->redirectForCurrentPrefix('registro/prestador');
             return;
         }
 
         $role = $this->normalizeRole($user['role']);
         if (!in_array($role, ['prestador', 'colaborador_admin', 'superadmin'])) {
             $this->flash('error', 'Esta cuenta no es de tipo prestador.');
-            $this->redirect('registro/prestador');
+            $this->redirectForCurrentPrefix('registro/prestador');
             return;
         }
 
@@ -256,10 +258,24 @@ class PublicRegisterController extends Controller
         $name     = trim($_POST['name'] ?? '');
         $email    = trim($_POST['email'] ?? '');
         $negocio  = trim($_POST['business_name'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $passwordConfirm = $_POST['password_confirm'] ?? '';
 
-        if (!$name || !$email) {
-            $this->flash('error', 'Nombre y email son requeridos.');
-            $this->redirect('registro/prestador');
+        if (!$name || !$email || !$password || !$passwordConfirm) {
+            $this->flash('error', 'Nombre, email y contrasena son requeridos.');
+            $this->redirectForCurrentPrefix('registro/prestador');
+            return;
+        }
+
+        if (strlen($password) < 8) {
+            $this->flash('error', 'La contrasena debe tener al menos 8 caracteres.');
+            $this->redirectForCurrentPrefix('registro/prestador');
+            return;
+        }
+
+        if ($password !== $passwordConfirm) {
+            $this->flash('error', 'Las contrasenas no coinciden.');
+            $this->redirectForCurrentPrefix('registro/prestador');
             return;
         }
 
@@ -267,7 +283,7 @@ class PublicRegisterController extends Controller
         $existing = $this->users->findByEmail($email);
         if ($existing) {
             $this->flash('error', 'El email ya está registrado.');
-            $this->redirect('registro/prestador');
+            $this->redirectForCurrentPrefix('registro/prestador');
             return;
         }
 
@@ -281,6 +297,7 @@ class PublicRegisterController extends Controller
             'email'         => $email,
             'phone'         => '',
             'business_name' => $negocio,
+            'password_hash' => $this->users->hashPassword($password),
             'email_code'    => $emailCode,
             'created_at'    => time(),
         ];
@@ -289,7 +306,7 @@ class PublicRegisterController extends Controller
         $this->sendVerificationEmail($email, $emailCode, $name);
 
         $this->flash('success', 'Te hemos enviado un código de verificación a tu email.');
-        $this->redirect('registro/verificar');
+        $this->redirectForCurrentPrefix('registro/verificar');
     }
 
     /**
@@ -390,7 +407,7 @@ class PublicRegisterController extends Controller
         $returnTo = $this->sanitizeReturnTo((string)($pending['return_to'] ?? $_SESSION['visitor_return_to'] ?? ''));
         unset($_SESSION['visitor_return_to']);
 
-        $redirect = $role === 'prestador' ? 'admin' : ($returnTo ?: $this->pathForCurrentPrefix('turista'));
+        $redirect = $role === 'prestador' ? 'admin/crm' : ($returnTo ?: $this->pathForCurrentPrefix('turista'));
         $this->flash('success', 'Registro completado exitosamente. Bienvenido a CristobalBot.');
         $this->redirect($redirect);
     }

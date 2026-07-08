@@ -3,6 +3,7 @@ $pageTitle = 'Panel Colaborador – ' . APP_NAME;
 require APP_PATH . '/views/layout/head.php';
 ?>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
+<?php $routePrefix = routePrefix(); ?>
 
 <main class="max-w-7xl mx-auto px-4 py-8 mb-24">
   <h1 class="text-2xl font-bold text-gray-900 mb-6">📊 Panel de Secretaría de Turismo</h1>
@@ -29,12 +30,12 @@ require APP_PATH . '/views/layout/head.php';
 
   <!-- Quick links -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-    <a href="<?= url('colaborador/eventos') ?>" class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition text-center">
+    <a href="<?= url($routePrefix . 'colaborador/eventos') ?>" class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition text-center">
       <span class="text-3xl">🎉</span>
       <h3 class="font-semibold text-gray-900 mt-2">Eventos y Promociones</h3>
       <p class="text-xs text-gray-400 mt-1">Gestiona eventos públicos y autoriza promociones</p>
     </a>
-    <a href="<?= url('colaborador/metricas') ?>" class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition text-center">
+    <a href="<?= url($routePrefix . 'colaborador/metricas') ?>" class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition text-center">
       <span class="text-3xl">📈</span>
       <h3 class="font-semibold text-gray-900 mt-2">Métricas avanzadas</h3>
       <p class="text-xs text-gray-400 mt-1">Top rankeados, rutas, estacionalidad</p>
@@ -163,7 +164,7 @@ require APP_PATH . '/views/layout/head.php';
 const COLABORADOR_CSRF = '<?= e($csrf ?? '') ?>';
 
 function logProviderContact(id, channel) {
-  fetch(`<?= url('colaborador/negocios/') ?>${id}/contactar?channel=${encodeURIComponent(channel)}`)
+  fetch(`<?= url($routePrefix . 'colaborador/negocios/') ?>${id}/contactar?channel=${encodeURIComponent(channel)}`)
     .catch(() => {});
 }
 
@@ -171,7 +172,7 @@ function resetProviderRatings(id) {
   if (!confirm('Esto eliminara todas las reseñas y pondra la calificacion del prestador en 0. ¿Continuar?')) return;
 
   const body = new URLSearchParams({ _csrf: COLABORADOR_CSRF });
-  fetch(`<?= url('colaborador/negocios/') ?>${id}/reestablecer-valoraciones`, {
+  fetch(`<?= url($routePrefix . 'colaborador/negocios/') ?>${id}/reestablecer-valoraciones`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),

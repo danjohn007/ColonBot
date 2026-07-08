@@ -2,6 +2,28 @@
 class EventModel extends Model
 {
     protected string $table = 'events';
+    private ?array $columns = null;
+
+    public function find(int $id): ?array
+    {
+        $row = parent::find($id);
+        return $row ? $this->normalizeRow($row) : null;
+    }
+
+    public function insert(array $data): int
+    {
+        return parent::insert($this->filterWritableData($data));
+    }
+
+    public function update(int $id, array $data): bool
+    {
+        $data = $this->filterWritableData($data);
+        if (empty($data)) {
+            return true;
+        }
+
+        return parent::update($id, $data);
+    }
 
     public function byBusiness(int $businessId): array
     {
@@ -153,7 +175,10 @@ class EventModel extends Model
             return $this->query(
                 "SELECT e.*, e.name AS title, e.date AS start_date, e.date AS date,
                         NULL AS end_date, NULL AS image, NULL AS public_url,
-                        'active' AS status, NULL AS creator_name, NULL AS approver_name,
+                        NULL AS presale_price, NULL AS capacity, NULL AS location,
+                        NULL AS validity, NULL AS conditions, 'privado' AS event_type,
+                        0 AS bot_authorized, 'active' AS status,
+                        NULL AS creator_name, NULL AS approver_name,
                         b.name AS business_name
                  FROM events e
                  LEFT JOIN businesses b ON b.id = e.business_id
@@ -174,7 +199,10 @@ class EventModel extends Model
                 "SELECT e.*, e.name AS title, e.name,
                         e.date AS start_date, e.date AS date,
                         NULL AS end_date, NULL AS image, NULL AS public_url,
-                        'active' AS status, b.name AS business_name, b.slug AS business_slug,
+                        NULL AS presale_price, NULL AS capacity, NULL AS location,
+                        NULL AS validity, NULL AS conditions, 'privado' AS event_type,
+                        0 AS bot_authorized, 'active' AS status,
+                        b.name AS business_name, b.slug AS business_slug,
                         b.address, b.whatsapp, b.phone, b.lat, b.lng,
                         b.google_maps_link, b.name AS business_name_full
                  FROM events e
@@ -186,5 +214,61 @@ class EventModel extends Model
             error_log('Legacy events skipped: ' . $e->getMessage());
             return [];
         }
+    }
+
+    private function filterWritableData(array $data): array
+    {
+        if ($this->hasColumn('name') && !isset($data['name']) && isset($data['title'])) {
+            $data['name'] = $data['title'];
+        }
+
+        if ($this->hasColumn('date') && !isset($data['date']) && array_key_exists('start_date', $data)) {
+            $data['date'] = $data['start_date'];
+        }
+
+        return array_intersect_key($data, array_flip($this->columns()));
+    }
+
+    private function normalizeRow(array $row): array
+    {
+        $row['title'] = $row['title'] ?? $row['name'] ?? '';
+        $row['name'] = $row['name'] ?? $row['title'];
+        $row['start_date'] = $row['start_date'] ?? $row['date'] ?? null;
+        $row['date'] = $row['date'] ?? $row['start_date'];
+        $row['end_date'] = $row['end_date'] ?? null;
+        $row['image'] = $row['image'] ?? null;
+        $row['public_url'] = $row['public_url'] ?? null;
+        $row['presale_price'] = $row['presale_price'] ?? null;
+        $row['capacity'] = $row['capacity'] ?? null;
+        $row['location'] = $row['location'] ?? null;
+        $row['validity'] = $row['validity'] ?? null;
+        $row['conditions'] = $row['conditions'] ?? null;
+        $row['event_type'] = $row['event_type'] ?? 'privado';
+        $row['bot_authorized'] = $row['bot_authorized'] ?? 0;
+        $row['status'] = $row['status'] ?? 'active';
+
+        return $row;
+    }
+
+    private function hasColumn(string $column): bool
+    {
+        return in_array($column, $this->columns(), true);
+    }
+
+    private function columns(): array
+    {
+        if ($this->columns !== null) {
+            return $this->columns;
+        }
+
+        try {
+            $rows = $this->query('SHOW COLUMNS FROM `events`');
+            $this->columns = array_column($rows, 'Field');
+        } catch (PDOException $e) {
+            error_log('Events column lookup failed: ' . $e->getMessage());
+            $this->columns = [];
+        }
+
+        return $this->columns;
     }
 }

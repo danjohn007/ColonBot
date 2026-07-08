@@ -128,7 +128,7 @@ $navPrefix = routePrefix();
         <a href="<?= url('admin/notificaciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">🔔</span> Notificaciones
         </a>
-        <a href="<?= url('colaborador') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+        <a href="<?= url($navPrefix . 'colaborador') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">📊</span> Turismo
         </a>
         <a href="<?= url('mi-perfil') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
@@ -159,13 +159,13 @@ $navPrefix = routePrefix();
         <!-- COLABORADOR (strict) - kept for backward compatibility but same as colaborador_admin -->
         <?php if ($role === 'colaborador'): ?>
         <div class="pt-3 pb-1 text-xs uppercase tracking-wide text-gray-400 font-semibold px-3">Turismo</div>
-        <a href="<?= url('colaborador') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+        <a href="<?= url($navPrefix . 'colaborador') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">📊</span> Dashboard Turismo
         </a>
-        <a href="<?= url('colaborador/eventos') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+        <a href="<?= url($navPrefix . 'colaborador/eventos') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">🎉</span> Eventos
         </a>
-        <a href="<?= url('colaborador/metricas') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+        <a href="<?= url($navPrefix . 'colaborador/metricas') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">📈</span> Métricas
         </a>
         <a href="<?= url('mi-perfil') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">

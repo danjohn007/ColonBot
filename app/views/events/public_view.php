@@ -25,6 +25,23 @@ require APP_PATH . '/views/layout/head.php';
       <?php if ($event['price']): ?>
       <p class="text-2xl font-bold text-blue-600 mb-4">$<?= number_format((float)$event['price'], 2) ?></p>
       <?php endif; ?>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600 mb-4">
+        <?php if (!empty($event['presale_price'])): ?>
+        <p><strong>Preventa:</strong> $<?= number_format((float)$event['presale_price'], 2) ?></p>
+        <?php endif; ?>
+        <?php if (!empty($event['validity'])): ?>
+        <p><strong>Vigencia:</strong> <?= e($event['validity']) ?></p>
+        <?php endif; ?>
+        <?php if (!empty($event['location'])): ?>
+        <p><strong>Ubicacion:</strong> <?= e($event['location']) ?></p>
+        <?php endif; ?>
+        <?php if (!empty($event['capacity'])): ?>
+        <p><strong>Aforo:</strong> <?= (int)$event['capacity'] ?></p>
+        <?php endif; ?>
+        <?php if (!empty($event['end_date'])): ?>
+        <p><strong>Fecha fin:</strong> <?= date('d/m/Y H:i', strtotime($event['end_date'])) ?></p>
+        <?php endif; ?>
+      </div>
       <?php if ($event['conditions']): ?>
       <div class="bg-gray-50 rounded-xl p-4 mb-4">
         <h3 class="font-semibold text-gray-900 text-sm mb-2">📋 Restricciones del Evento</h3>
@@ -51,6 +68,12 @@ require APP_PATH . '/views/layout/head.php';
           <?php if ($business['lat'] && $business['lng']): ?>
           <p><strong>Ubicación:</strong> 
             <a href="https://www.google.com/maps/dir/?api=1&destination=<?= $business['lat'] ?>,<?= $business['lng'] ?>" target="_blank" class="text-blue-600 hover:underline">
+              Ver en Google Maps
+            </a>
+          </p>
+          <?php elseif (!empty($business['google_maps_link'])): ?>
+          <p><strong>Ubicacion:</strong>
+            <a href="<?= e($business['google_maps_link']) ?>" target="_blank" class="text-blue-600 hover:underline">
               Ver en Google Maps
             </a>
           </p>
