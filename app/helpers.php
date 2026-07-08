@@ -28,7 +28,14 @@ function asset(string $path): string
 function imageUrl(string $filename): string
 {
     if (empty($filename)) return '';
-    return UPLOAD_URL . '/' . ltrim($filename, '/');
+    if (preg_match('#^https?://#i', $filename)) {
+        return $filename;
+    }
+    $filename = ltrim($filename, '/');
+    if (str_starts_with($filename, 'images/')) {
+        $filename = substr($filename, 7);
+    }
+    return UPLOAD_URL . '/' . $filename;
 }
 
 function e(mixed $val): string

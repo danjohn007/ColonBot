@@ -68,9 +68,15 @@ $router->post('admin/negocio/{id}/evento', 'BusinessController', 'saveEvent');
 $router->post('admin/negocio/{id}/evento/{eid}/eliminar', 'BusinessController', 'deleteEvent');
 
 // Notificaciones
+$router->get('notificaciones',    'NotificationController', 'index');
+$router->post('notificaciones/{id}/leer', 'NotificationController', 'markRead');
+$router->post('notificaciones/leer-todas', 'NotificationController', 'markAllRead');
 $router->get('admin/notificaciones',    'NotificationController', 'index');
 $router->post('admin/notificaciones/{id}/leer', 'NotificationController', 'markRead');
 $router->post('admin/notificaciones/leer-todas', 'NotificationController', 'markAllRead');
+$router->get('landing/notificaciones',    'NotificationController', 'index');
+$router->post('landing/notificaciones/{id}/leer', 'NotificationController', 'markRead');
+$router->post('landing/notificaciones/leer-todas', 'NotificationController', 'markAllRead');
 $router->get('landing/admin/notificaciones',    'NotificationController', 'index');
 $router->post('landing/admin/notificaciones/{id}/leer', 'NotificationController', 'markRead');
 $router->post('landing/admin/notificaciones/leer-todas', 'NotificationController', 'markAllRead');
@@ -229,6 +235,7 @@ $router->post('chatbot/webhook',        'ChatbotController',   'receive');
 $router->get('api/negocios',            'ApiController',       'businesses');
 $router->get('api/negocios/{id}',       'ApiController',       'business');
 $router->post('api/analitica',          'ApiController',       'trackEvent');
+$router->post('landing/api/analitica',  'ApiController',       'trackEvent');
 $router->post('api/review',             'ApiController',       'submitReview');
 $router->post('landing/api/review',     'ApiController',       'submitReview');
 $router->get('api/hikvision/{id}/stream', 'ApiController',     'hikStream');

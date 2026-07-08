@@ -176,7 +176,7 @@ class EventModel extends Model
                 "SELECT e.*, e.name AS title, e.date AS start_date, e.date AS date,
                         NULL AS end_date, NULL AS image, NULL AS public_url,
                         NULL AS presale_price, NULL AS capacity, NULL AS location,
-                        NULL AS validity, NULL AS conditions, 'privado' AS event_type,
+                        NULL AS whatsapp, NULL AS validity, NULL AS conditions, 'privado' AS event_type,
                         0 AS bot_authorized, 'active' AS status,
                         NULL AS creator_name, NULL AS approver_name,
                         b.name AS business_name
@@ -200,7 +200,7 @@ class EventModel extends Model
                         e.date AS start_date, e.date AS date,
                         NULL AS end_date, NULL AS image, NULL AS public_url,
                         NULL AS presale_price, NULL AS capacity, NULL AS location,
-                        NULL AS validity, NULL AS conditions, 'privado' AS event_type,
+                        NULL AS whatsapp, NULL AS validity, NULL AS conditions, 'privado' AS event_type,
                         0 AS bot_authorized, 'active' AS status,
                         b.name AS business_name, b.slug AS business_slug,
                         b.address, b.whatsapp, b.phone, b.lat, b.lng,
@@ -241,6 +241,7 @@ class EventModel extends Model
         $row['presale_price'] = $row['presale_price'] ?? null;
         $row['capacity'] = $row['capacity'] ?? null;
         $row['location'] = $row['location'] ?? null;
+        $row['whatsapp'] = $row['whatsapp'] ?? null;
         $row['validity'] = $row['validity'] ?? null;
         $row['conditions'] = $row['conditions'] ?? null;
         $row['event_type'] = $row['event_type'] ?? 'privado';

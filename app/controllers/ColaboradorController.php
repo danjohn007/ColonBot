@@ -56,24 +56,27 @@ class ColaboradorController extends Controller
 
         // Top visited this month
         $topByCategory = $this->safeRows(
-            'SELECT ranked.category, ranked.name, ranked.rating, ranked.visits, ranked.rn
-             FROM (
-                SELECT c.name AS category, b.name, b.rating, b.visits,
-                       @rn := IF(@cat = c.name, @rn + 1, 1) AS rn,
-                       @cat := c.name
-                FROM businesses b
-                JOIN categories c ON c.id = b.category_id
-                CROSS JOIN (SELECT @rn := 0, @cat := "") vars
-                WHERE b.status = "published"
-                ORDER BY c.name, b.rating DESC
-             ) ranked
-             ORDER BY ranked.category, ranked.rn',
+            'SELECT c.name AS category, b.name, b.rating, b.visits,
+                    (
+                      SELECT COUNT(*)
+                      FROM businesses b2
+                      WHERE b2.category_id = b.category_id
+                        AND b2.status = "published"
+                        AND (
+                          b2.rating > b.rating
+                          OR (b2.rating = b.rating AND b2.id <= b.id)
+                        )
+                    ) AS rn
+             FROM businesses b
+             JOIN categories c ON c.id = b.category_id
+             WHERE b.status = "published"
+             ORDER BY c.name, rn',
             'dashboard_top_by_category'
         );
 
         // New providers this month
         $newProviders = $this->safeRows(
-            "SELECT b.*, u.name AS owner_name FROM businesses b
+            "SELECT b.*, u.name AS owner_name, u.email AS owner_email FROM businesses b
              JOIN users u ON u.id = b.user_id
              WHERE b.created_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
              ORDER BY b.created_at DESC",
@@ -163,6 +166,7 @@ class ColaboradorController extends Controller
             'presale_price' => $_POST['presale_price'] !== '' ? (float)$_POST['presale_price'] : null,
             'capacity' => $_POST['capacity'] !== '' ? (int)$_POST['capacity'] : null,
             'location' => trim($_POST['location'] ?? ''),
+            'whatsapp' => trim($_POST['whatsapp'] ?? ''),
             'validity' => trim($_POST['validity'] ?? ''),
             'conditions' => trim($_POST['conditions'] ?? ''),
             'event_type' => 'publico',
@@ -274,6 +278,8 @@ class ColaboradorController extends Controller
         $business = $this->businesses->find((int)$businessId);
         if (!$business) { $this->json(['error' => 'not found'], 404); }
 
+        $owner = !empty($business['user_id']) ? $this->users->find((int)$business['user_id']) : null;
+        $email = ($business['email'] ?? '') ?: ($owner['email'] ?? '');
         $channel = in_array($_GET['channel'] ?? '', ['whatsapp', 'email'], true) ? $_GET['channel'] : 'contact';
         $message = trim($_GET['message'] ?? 'Contacto directo con prestador desde panel colaborador.');
         $this->logAction('contact_provider_' . $channel, 'businesses', (int)$businessId, $message . ' - ' . $business['name']);
@@ -282,10 +288,10 @@ class ColaboradorController extends Controller
             'ok' => true,
             'business' => [
                 'name' => $business['name'],
-                'whatsapp' => $business['whatsapp'] ? waLink($business['whatsapp']) : null,
-                'email' => $business['email'],
-                'phone' => $business['phone'],
-                'email_url' => $business['email'] ? 'mailto:' . $business['email'] . '?subject=' . rawurlencode('Contacto de Direccion de Turismo') : null,
+                'whatsapp' => !empty($business['whatsapp']) ? waLink($business['whatsapp']) : null,
+                'email' => $email ?: null,
+                'phone' => $business['phone'] ?? null,
+                'email_url' => $email ? 'mailto:' . $email . '?subject=' . rawurlencode('Contacto de Direccion de Turismo') : null,
             ]
         ]);
     }
@@ -309,12 +315,20 @@ class ColaboradorController extends Controller
 
         $topByCategory = $this->metricRows(
             'SELECT c.name AS category, b.name, b.rating, b.visits, b.slug,
-                    @rn := IF(@cat = c.name, @rn + 1, 1) AS rn,
-                    @cat := c.name
+                    (
+                      SELECT COUNT(*)
+                      FROM businesses b2
+                      WHERE b2.category_id = b.category_id
+                        AND b2.status = "published"
+                        AND (
+                          b2.rating > b.rating
+                          OR (b2.rating = b.rating AND b2.id <= b.id)
+                        )
+                    ) AS rn
              FROM businesses b
-             JOIN categories c ON c.id = b.category_id, (SELECT @rn := 0, @cat := "") AS vars
+             JOIN categories c ON c.id = b.category_id
              WHERE b.status = "published"
-             ORDER BY c.name, b.rating DESC',
+             ORDER BY c.name, rn',
             'top_by_category'
         );
 

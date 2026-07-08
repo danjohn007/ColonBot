@@ -18,7 +18,7 @@ require APP_PATH . '/views/layout/head.php';
       <?php endif; ?>
     </div>
     <?php if ($unread > 0): ?>
-    <form method="POST" action="<?= url(($routePrefix ?? '') . 'admin/notificaciones/leer-todas') ?>">
+    <form method="POST" action="<?= url(($routePrefix ?? '') . 'notificaciones/leer-todas') ?>">
       <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
       <button type="submit"
         class="text-sm text-blue-600 hover:text-blue-800 font-medium transition">
@@ -89,7 +89,7 @@ require APP_PATH . '/views/layout/head.php';
 const csrf = '<?= e($csrf) ?>';
 
 function markRead(id) {
-  fetch('<?= url(($routePrefix ?? '') . 'admin/notificaciones') ?>/' + id + '/leer', {
+  fetch('<?= url(($routePrefix ?? '') . 'notificaciones') ?>/' + id + '/leer', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: '_csrf=' + encodeURIComponent(csrf)

@@ -92,7 +92,7 @@ function swapImageFallback(img) {
       </div>
       <div class="flex flex-wrap gap-2">
         <a href="<?= url($prefix . 'mapa') ?>" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-white text-orange-700 text-sm font-bold hover:bg-orange-50 transition">Ver mapa</a>
-        <a href="<?= url($prefix . 'admin/notificaciones') ?>" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-orange-700/55 text-white text-sm font-bold hover:bg-orange-700 transition">Notificaciones</a>
+        <a href="<?= url($prefix . 'notificaciones') ?>" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-orange-700/55 text-white text-sm font-bold hover:bg-orange-700 transition">Notificaciones</a>
       </div>
     </div>
   </section>

@@ -83,6 +83,15 @@ PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 SET @sql := (
   SELECT IF(COUNT(*) = 0,
+    'ALTER TABLE `events` ADD COLUMN `whatsapp` VARCHAR(30) DEFAULT NULL AFTER `location`',
+    'SELECT "events.whatsapp already exists" AS status')
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = @db_name AND TABLE_NAME = 'events' AND COLUMN_NAME = 'whatsapp'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql := (
+  SELECT IF(COUNT(*) = 0,
     'ALTER TABLE `events` ADD COLUMN `conditions` TEXT DEFAULT NULL AFTER `validity`',
     'SELECT "events.conditions already exists" AS status')
   FROM INFORMATION_SCHEMA.COLUMNS

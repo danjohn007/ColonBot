@@ -58,6 +58,7 @@ require APP_PATH . '/views/layout/head.php';
         <thead><tr class="text-left text-xs text-gray-500 uppercase tracking-wide border-b"><th class="pb-2 pr-4">Nombre</th><th class="pb-2 pr-4">Dueño</th><th class="pb-2 pr-4">Fecha</th><th class="pb-2">Acción</th></tr></thead>
         <tbody>
           <?php foreach ($newProviders as $nb): ?>
+          <?php $nbEmail = ($nb['email'] ?? '') ?: ($nb['owner_email'] ?? ''); ?>
           <tr class="border-b last:border-0">
             <td class="py-2 pr-4 font-medium"><?= e($nb['name']) ?></td>
             <td class="py-2 pr-4 text-gray-500"><?= e($nb['owner_name'] ?? '') ?></td>
@@ -68,8 +69,8 @@ require APP_PATH . '/views/layout/head.php';
                 <?php if (!empty($nb['whatsapp'])): ?>
                 <a href="<?= e(waLink($nb['whatsapp'], 'Hola, te contactamos desde la Direccion de Turismo de Colon.')) ?>" target="_blank" onclick="logProviderContact(<?= (int)$nb['id'] ?>, 'whatsapp')" class="text-green-600 hover:underline text-xs">WhatsApp</a>
                 <?php endif; ?>
-                <?php if (!empty($nb['email'])): ?>
-                <a href="mailto:<?= e($nb['email']) ?>?subject=<?= rawurlencode('Contacto de Direccion de Turismo') ?>" onclick="logProviderContact(<?= (int)$nb['id'] ?>, 'email')" class="text-purple-600 hover:underline text-xs">Email</a>
+                <?php if ($nbEmail): ?>
+                <a href="mailto:<?= e($nbEmail) ?>?subject=<?= rawurlencode('Contacto de Direccion de Turismo') ?>" onclick="logProviderContact(<?= (int)$nb['id'] ?>, 'email')" class="text-purple-600 hover:underline text-xs">Correo</a>
                 <?php endif; ?>
               </div>
             </td>
@@ -101,7 +102,7 @@ require APP_PATH . '/views/layout/head.php';
         </thead>
         <tbody>
           <?php foreach ($providers as $provider): ?>
-          <?php $providerEmail = $provider['email'] ?: ($provider['owner_email'] ?? ''); ?>
+          <?php $providerEmail = ($provider['email'] ?? '') ?: ($provider['owner_email'] ?? ''); ?>
           <tr class="border-b last:border-0">
             <td class="py-2 pr-4">
               <p class="font-medium"><?= e($provider['name']) ?></p>
@@ -113,7 +114,7 @@ require APP_PATH . '/views/layout/head.php';
               <p>WhatsApp: <?= e($provider['whatsapp']) ?></p>
               <?php endif; ?>
               <?php if ($providerEmail): ?>
-              <p>Email: <?= e($providerEmail) ?></p>
+              <p>Correo: <?= e($providerEmail) ?></p>
               <?php endif; ?>
               <?php if (empty($provider['whatsapp']) && !$providerEmail): ?>
               <span class="text-gray-400">Sin contacto</span>
@@ -125,7 +126,7 @@ require APP_PATH . '/views/layout/head.php';
                 <a href="<?= e(waLink($provider['whatsapp'], 'Hola, te contactamos desde la Direccion de Turismo de Colon.')) ?>" target="_blank" onclick="logProviderContact(<?= (int)$provider['id'] ?>, 'whatsapp')" class="text-green-600 hover:underline text-xs">WhatsApp</a>
                 <?php endif; ?>
                 <?php if ($providerEmail): ?>
-                <a href="mailto:<?= e($providerEmail) ?>?subject=<?= rawurlencode('Contacto de Direccion de Turismo') ?>" onclick="logProviderContact(<?= (int)$provider['id'] ?>, 'email')" class="text-purple-600 hover:underline text-xs">Email</a>
+                <a href="mailto:<?= e($providerEmail) ?>?subject=<?= rawurlencode('Contacto de Direccion de Turismo') ?>" onclick="logProviderContact(<?= (int)$provider['id'] ?>, 'email')" class="text-purple-600 hover:underline text-xs">Correo</a>
                 <?php endif; ?>
                 <button type="button" onclick="resetProviderRatings(<?= (int)$provider['id'] ?>)" class="text-red-600 hover:underline text-xs">
                   Reestablecer valoraciones

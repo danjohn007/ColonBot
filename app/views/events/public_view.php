@@ -35,6 +35,13 @@ require APP_PATH . '/views/layout/head.php';
         <?php if (!empty($event['location'])): ?>
         <p><strong>Ubicacion:</strong> <?= e($event['location']) ?></p>
         <?php endif; ?>
+        <?php if (!empty($event['whatsapp'])): ?>
+        <p><strong>WhatsApp info:</strong>
+          <a href="<?= e(waLink($event['whatsapp'], 'Hola, me interesa el evento: ' . $event['title'])) ?>" target="_blank" class="text-green-600 hover:underline">
+            <?= e($event['whatsapp']) ?>
+          </a>
+        </p>
+        <?php endif; ?>
         <?php if (!empty($event['capacity'])): ?>
         <p><strong>Aforo:</strong> <?= (int)$event['capacity'] ?></p>
         <?php endif; ?>
@@ -79,12 +86,20 @@ require APP_PATH . '/views/layout/head.php';
           </p>
           <?php endif; ?>
         </div>
-        <?php if ($business['whatsapp']): ?>
-        <a href="https://wa.me/<?= e(preg_replace('/\D/', '', $business['whatsapp'])) ?>?text=<?= urlencode('Hola, me interesa el evento: ' . $event['title']) ?>" target="_blank"
+        <?php $eventWhatsapp = $event['whatsapp'] ?: ($business['whatsapp'] ?? ''); ?>
+        <?php if ($eventWhatsapp): ?>
+        <a href="<?= e(waLink($eventWhatsapp, 'Hola, me interesa el evento: ' . $event['title'])) ?>" target="_blank"
           class="mt-4 inline-flex items-center gap-2 bg-green-500 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-green-600 transition">
           💬 Contactar por WhatsApp
         </a>
         <?php endif; ?>
+      </div>
+      <?php elseif (!empty($event['whatsapp'])): ?>
+      <div class="border-t pt-4 mt-4">
+        <a href="<?= e(waLink($event['whatsapp'], 'Hola, me interesa el evento: ' . $event['title'])) ?>" target="_blank"
+          class="inline-flex items-center gap-2 bg-green-500 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-green-600 transition">
+          💬 Contactar por WhatsApp
+        </a>
       </div>
       <?php endif; ?>
     </div>

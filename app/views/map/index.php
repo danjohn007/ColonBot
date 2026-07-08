@@ -686,7 +686,7 @@ function showPOI(poi) {
     : '';
 
   const html = `
-    <img src="${poi.cover}" class="w-full h-40 object-cover rounded-xl mb-3" onerror="this.src='/assets/img/placeholder.svg'">
+    <img src="${poi.cover}" class="w-full h-40 object-cover rounded-xl mb-3" onerror="this.src='<?= asset('img/placeholder.svg') ?>'">
     <div class="flex items-start justify-between gap-2 mb-2">
       <h3 class="font-bold text-gray-900 text-base leading-tight">${poi.name}</h3>
       <div class="flex items-center gap-1 shrink-0">
@@ -958,7 +958,7 @@ function openFavoritos() {
       const categoryEmoji = iconToEmoji(poi.category_icon);
       return `
       <div class="flex items-center gap-3 p-3 border border-gray-100 rounded-xl hover:bg-gray-50 cursor-pointer fav-item" data-poi-id="${poi.id}">
-        <img src="${poi.cover}" class="w-14 h-14 object-cover rounded-lg shrink-0" onerror="this.src='/assets/img/placeholder.svg'">
+        <img src="${poi.cover}" class="w-14 h-14 object-cover rounded-lg shrink-0" onerror="this.src='<?= asset('img/placeholder.svg') ?>'">
         <div class="flex-1 min-w-0">
           <p class="font-semibold text-gray-900 text-sm truncate">${poi.name}</p>
           <span class="text-xs px-2 py-0.5 rounded-full text-white font-medium bg-orange-600">${categoryEmoji} ${poi.category}</span>

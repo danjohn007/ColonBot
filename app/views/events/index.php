@@ -46,6 +46,7 @@ require APP_PATH . '/views/layout/head.php';
             <?php if ($p['presale_price']): ?><span>🏷️ Preventa: $<?= number_format((float)$p['presale_price'], 2) ?></span><?php endif; ?>
             <?php if ($p['capacity']): ?><span>👥 Aforo: <?= (int)$p['capacity'] ?></span><?php endif; ?>
             <?php if ($p['location']): ?><span>📍 <?= e($p['location']) ?></span><?php endif; ?>
+            <?php if (!empty($p['whatsapp'])): ?><span>💬 WhatsApp: <?= e($p['whatsapp']) ?></span><?php endif; ?>
             <?php if ($p['validity']): ?><span>⏳ Vigencia: <?= e($p['validity']) ?></span><?php endif; ?>
             <?php if ($p['start_date']): ?><span>📅 Inicio: <?= date('d/m/Y', strtotime($p['start_date'])) ?></span><?php endif; ?>
             <?php if ($p['end_date']): ?><span>⏰ Fin: <?= date('d/m/Y', strtotime($p['end_date'])) ?></span><?php endif; ?>
@@ -125,6 +126,10 @@ require APP_PATH . '/views/layout/head.php';
           <label class="label block text-sm font-medium text-gray-700 mb-1">Ubicación del evento</label>
           <input type="text" id="event-location" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
         </div>
+        <div class="col-span-2">
+          <label class="label block text-sm font-medium text-gray-700 mb-1">WhatsApp para mayor información</label>
+          <input type="tel" id="event-whatsapp" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="5214421000000">
+        </div>
         <div>
           <label class="label block text-sm font-medium text-gray-700 mb-1">Vigencia</label>
           <input type="text" id="event-validity" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="Ej: 30 días">
@@ -191,6 +196,7 @@ function openCreateModal() {
   document.getElementById('event-presale-price').value = '';
   document.getElementById('event-capacity').value = '';
   document.getElementById('event-location').value = '';
+  document.getElementById('event-whatsapp').value = '';
   document.getElementById('event-validity').value = '';
   document.getElementById('event-start').value = '';
   document.getElementById('event-end').value = '';
@@ -217,6 +223,7 @@ function editEvent(p) {
   document.getElementById('event-presale-price').value = p.presale_price || '';
   document.getElementById('event-capacity').value = p.capacity || '';
   document.getElementById('event-location').value = p.location || '';
+  document.getElementById('event-whatsapp').value = p.whatsapp || '';
   document.getElementById('event-validity').value = p.validity || '';
   document.getElementById('event-start').value = p.start_date ? p.start_date.replace(' ', 'T').substring(0, 16) : '';
   document.getElementById('event-end').value = p.end_date ? p.end_date.replace(' ', 'T').substring(0, 16) : '';
@@ -253,6 +260,7 @@ function saveEvent(e) {
   fd.append('presale_price', document.getElementById('event-presale-price').value);
   fd.append('capacity', document.getElementById('event-capacity').value);
   fd.append('location', document.getElementById('event-location').value.trim());
+  fd.append('whatsapp', document.getElementById('event-whatsapp').value.trim());
   fd.append('validity', document.getElementById('event-validity').value.trim());
   fd.append('start_date', document.getElementById('event-start').value);
   fd.append('end_date', document.getElementById('event-end').value);

@@ -10,7 +10,7 @@ class NotificationController extends Controller
 
     public function index(): void
     {
-        $this->requireAuth(); // Permite cualquier usuario loggeado (visitante, prestador, colaborador_admin, superadmin)
+        $this->requireAuth('any'); // Permite cualquier usuario loggeado (visitante, prestador, colaborador_admin, superadmin)
         $user          = currentUser();
         $notifications = $this->notifications->forUser((int)$user['id']);
         $unread        = $this->notifications->unreadCount((int)$user['id']);
@@ -21,7 +21,7 @@ class NotificationController extends Controller
 
     public function markRead(string $id): void
     {
-        $this->requireAuth();
+        $this->requireAuth('any');
         $this->verifyCsrf();
         $user = currentUser();
         $this->notifications->markRead((int)$id, (int)$user['id']);
@@ -30,10 +30,10 @@ class NotificationController extends Controller
 
     public function markAllRead(): void
     {
-        $this->requireAuth();
+        $this->requireAuth('any');
         $this->verifyCsrf();
         $user = currentUser();
         $this->notifications->markAllRead((int)$user['id']);
-        $this->redirectForCurrentPrefix('admin/notificaciones');
+        $this->redirectForCurrentPrefix('notificaciones');
     }
 }

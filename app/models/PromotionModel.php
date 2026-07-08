@@ -6,10 +6,22 @@ class PromotionModel extends Model
     public function byBusiness(int $businessId): array
     {
         return $this->query(
-            'SELECT p.*, u.name AS creator_name, a.name AS approver_name 
+            'SELECT p.*, u.name AS creator_name, a.name AS approver_name,
+                    COALESCE(pv.view_count, 0) AS view_count,
+                    COALESCE(pi.inquiry_count, 0) AS inquiry_count
              FROM promotions p 
              LEFT JOIN users u ON u.id = p.user_id 
              LEFT JOIN users a ON a.id = p.approved_by 
+             LEFT JOIN (
+                SELECT promotion_id, COUNT(*) AS view_count
+                FROM promotion_views
+                GROUP BY promotion_id
+             ) pv ON pv.promotion_id = p.id
+             LEFT JOIN (
+                SELECT promotion_id, COUNT(*) AS inquiry_count
+                FROM promotion_inquiries
+                GROUP BY promotion_id
+             ) pi ON pi.promotion_id = p.id
              WHERE p.business_id = ? 
              ORDER BY p.created_at DESC',
             [$businessId]

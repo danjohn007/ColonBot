@@ -233,7 +233,6 @@ class BusinessController extends Controller
         $images             = $this->businesses->images((int)$id);
         $services           = $this->businesses->allServices((int)$id);
         $products           = $this->businesses->allProducts((int)$id);
-        $events             = $this->businesses->allEvents((int)$id);
 
         $this->view('business.form', [
             'business'           => $business,
@@ -245,7 +244,6 @@ class BusinessController extends Controller
             'images'             => $images,
             'services'           => $services,
             'products'           => $products,
-            'events'             => $events,
             'csrf'               => $this->csrf(),
         ]);
     }
@@ -513,6 +511,9 @@ class BusinessController extends Controller
             'website'     => trim($_POST['website'] ?? ''),
             'facebook'    => trim($_POST['facebook'] ?? ''),
             'instagram'   => trim($_POST['instagram'] ?? ''),
+            'is_open'     => isset($_POST['is_open']) ? (int)$_POST['is_open'] : 0,
+            'open_for_messaging' => in_array($_POST['open_for_messaging'] ?? '24hrs', ['24hrs', 'schedule'], true)
+                ? $_POST['open_for_messaging'] : '24hrs',
         ];
 
         // Only superadmin can change business status

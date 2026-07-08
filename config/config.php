@@ -27,16 +27,16 @@ if (!defined('PUBLIC_PATH')) {
 // ─── Detección de carpeta compartida de imágenes ──────────────────────────
 // Si estamos en /sistema/2/ o /sistema/1/, usar /sistema/images/
 // Si estamos en /sistema/ directamente, usar /sistema/images/
-$imageBasePath = dirname(ROOT_PATH); // Sube un nivel (de /2/ a /sistema/)
-$imageBaseUrl  = $protocol . '://' . $host . '/' . trim(dirname(dirname($script)), '/\\');
-if (basename(ROOT_PATH) !== 'sistema') {
-    // Estamos en una subcarpeta (1, 2, etc.)
-    define('IMAGES_ROOT', $imageBasePath);
-    define('IMAGES_URL',  rtrim($imageBaseUrl, '/'));
-} else {
-    // Estamos directamente en /sistema/
+$currentImagesRoot = ROOT_PATH . '/images';
+$parentImagesRoot  = dirname(ROOT_PATH) . '/images';
+if (basename(ROOT_PATH) === 'landing' || is_dir($currentImagesRoot) || !is_dir($parentImagesRoot)) {
     define('IMAGES_ROOT', ROOT_PATH);
-    define('IMAGES_URL',  rtrim($protocol . '://' . $host . '/' . trim(dirname($script), '/\\'), '/'));
+    define('IMAGES_URL',  rtrim(BASE_URL, '/'));
+} else {
+    $parentBasePath = rtrim(dirname((string)(parse_url(BASE_URL, PHP_URL_PATH) ?? '')), '/\\');
+    $parentBaseUrl  = $protocol . '://' . $host . ($parentBasePath !== '' && $parentBasePath !== '.' ? '/' . trim($parentBasePath, '/\\') : '');
+    define('IMAGES_ROOT', dirname(ROOT_PATH));
+    define('IMAGES_URL',  rtrim($parentBaseUrl, '/'));
 }
 
 // ─── Base de datos ─────────────────────────────────────────────────────────

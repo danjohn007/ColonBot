@@ -2,17 +2,21 @@
 $user = currentUser();
 $flash = flash();
 $navPrefix = routePrefix();
+$showSidebar = $user !== null;
+$loginUrl = url($navPrefix . 'login');
 ?>
 <!-- Top Navigation Bar (slim - only logo + hamburger) -->
 <nav class="shadow-sm sticky top-0 z-50 bg-white">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
       <!-- Hamburger button (always visible on desktop too now) -->
+      <?php if ($showSidebar): ?>
       <button id="sidebar-toggle" class="p-2 rounded-lg hover:bg-gray-100 transition text-gray-700 focus:outline-none">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
         </svg>
       </button>
+      <?php endif; ?>
 
       <!-- Logo -->
       <a href="https://colon.click/sistema/mapa" class="flex items-center gap-3 font-bold text-lg">
@@ -27,13 +31,19 @@ $navPrefix = routePrefix();
         <?php if ($user): ?>
           <a href="<?= url('logout') ?>" class="text-xs text-red-600 hover:text-red-700 transition hidden sm:inline">Salir</a>
         <?php else: ?>
-          <a href="<?= url('login') ?>" class="bg-orange-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-orange-700 transition">Ingresar</a>
+          <a href="<?= e($loginUrl) ?>" class="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/>
+            </svg>
+            <span>Ingresar / Registrarse</span>
+          </a>
         <?php endif; ?>
       </div>
     </div>
   </div>
 </nav>
 
+<?php if ($showSidebar): ?>
 <!-- Left Sidebar Overlay -->
 <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-40 hidden"></div>
 
@@ -178,7 +188,7 @@ $navPrefix = routePrefix();
         <a href="<?= url($navPrefix . 'turista') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">👤</span> Mi Perfil Visitante
         </a>
-        <a href="<?= url($navPrefix . 'admin/notificaciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+        <a href="<?= url($navPrefix . 'notificaciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">🔔</span> Notificaciones
         </a>
         <?php endif; ?>
@@ -242,8 +252,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function toggleSidebar() {
-    if (isSuperAdmin) return; // No toggle on superadmin
-
     const currentlyPinned = document.cookie.split('; ').find(row => row.startsWith('sidebar_pinned='));
     const isCurrentlyPinned = currentlyPinned ? currentlyPinned.split('=')[1] === 'true' : false;
 
@@ -261,14 +269,11 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function closeSidebar() {
-    if (isSuperAdmin) return;
-    const currentlyPinned = document.cookie.split('; ').find(row => row.startsWith('sidebar_pinned='));
-    const isCurrentlyPinned = currentlyPinned ? currentlyPinned.split('=')[1] === 'true' : false;
-    if (!isCurrentlyPinned) {
-      sidebar.classList.add('-translate-x-full');
-      overlay.classList.add('hidden');
-      document.body.style.marginLeft = '';
-    }
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.add('hidden');
+    document.body.style.marginLeft = '';
+    document.cookie = 'sidebar_pinned=false; path=/; max-age=' + (60*60*24*365);
+    if (toggleBtn) toggleBtn.style.display = '';
   }
 
   if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
@@ -276,6 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (overlay) overlay.addEventListener('click', closeSidebar);
 });
 </script>
+<?php endif; ?>
 
 <!-- Flash Messages -->
 <?php if ($flash): ?>

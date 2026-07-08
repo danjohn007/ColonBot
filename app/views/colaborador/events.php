@@ -35,6 +35,10 @@ require APP_PATH . '/views/layout/head.php';
           <label class="label block text-sm font-medium text-gray-700 mb-1">Ubicacion del evento</label>
           <input type="text" name="location" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
         </div>
+        <div>
+          <label class="label block text-sm font-medium text-gray-700 mb-1">WhatsApp para mayor informacion</label>
+          <input type="tel" name="whatsapp" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="5214421000000">
+        </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="label block text-sm font-medium text-gray-700 mb-1">Fecha inicio</label>
