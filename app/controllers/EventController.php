@@ -106,10 +106,10 @@ class EventController extends Controller
             'bot_authorized' => $isAdminEvent ? 1 : 0,
             'bot_authorized_by' => $isAdminEvent ? (int)$user['id'] : null,
             'bot_authorized_at' => $isAdminEvent ? date('Y-m-d H:i:s') : null,
-            'start_date' => $_POST['start_date'] ?? null,
-            'end_date' => $_POST['end_date'] ?? null,
-            'presale_start' => $_POST['presale_start'] ?? null,
-            'presale_end' => $_POST['presale_end'] ?? null,
+            'start_date' => $this->dateTimeOrNull($_POST['start_date'] ?? null),
+            'end_date' => $this->dateTimeOrNull($_POST['end_date'] ?? null),
+            'presale_start' => $this->dateTimeOrNull($_POST['presale_start'] ?? null),
+            'presale_end' => $this->dateTimeOrNull($_POST['presale_end'] ?? null),
         ]);
 
         // Generate public URL
@@ -150,10 +150,10 @@ class EventController extends Controller
             'validity' => trim($_POST['validity'] ?? ''),
             'conditions' => trim($_POST['conditions'] ?? ''),
             'target_segment' => implode(',', $_POST['target_segment'] ?? explode(',', $event['target_segment'])),
-            'start_date' => $_POST['start_date'] ?? $event['start_date'],
-            'end_date' => $_POST['end_date'] ?? $event['end_date'],
-            'presale_start' => $_POST['presale_start'] ?? $event['presale_start'],
-            'presale_end' => $_POST['presale_end'] ?? $event['presale_end'],
+            'start_date' => $this->dateTimeOrNull($_POST['start_date'] ?? $event['start_date']),
+            'end_date' => $this->dateTimeOrNull($_POST['end_date'] ?? $event['end_date']),
+            'presale_start' => $this->dateTimeOrNull($_POST['presale_start'] ?? $event['presale_start']),
+            'presale_end' => $this->dateTimeOrNull($_POST['presale_end'] ?? $event['presale_end']),
         ];
 
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
@@ -298,6 +298,16 @@ class EventController extends Controller
             return $filename;
         }
         return null;
+    }
+
+    private function dateTimeOrNull(?string $value): ?string
+    {
+        $value = trim((string)$value);
+        if ($value === '') {
+            return null;
+        }
+
+        return str_replace('T', ' ', $value);
     }
 
     private function ownerOrAdmin(array $business): void

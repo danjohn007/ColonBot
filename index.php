@@ -109,6 +109,13 @@ $router->post('admin/eventos/{id}/editar',   'EventController', 'update');
 $router->post('admin/eventos/{id}/toggle',   'EventController', 'toggleStatus');
 $router->post('admin/eventos/{id}/aprobar',  'EventController', 'approve');
 $router->post('admin/eventos/{id}/autorizar-bot', 'EventController', 'authorizeBot');
+$router->get('landing/admin/eventos',                'EventController', 'index');
+$router->get('landing/admin/eventos/{id}/list',      'EventController', 'list');
+$router->post('landing/admin/eventos/crear',         'EventController', 'create');
+$router->post('landing/admin/eventos/{id}/editar',   'EventController', 'update');
+$router->post('landing/admin/eventos/{id}/toggle',   'EventController', 'toggleStatus');
+$router->post('landing/admin/eventos/{id}/aprobar',  'EventController', 'approve');
+$router->post('landing/admin/eventos/{id}/autorizar-bot', 'EventController', 'authorizeBot');
 $router->get('evento/{id}',                  'EventController', 'publicView');
 $router->get('evento/{id}/{slug}',           'EventController', 'publicView');
 

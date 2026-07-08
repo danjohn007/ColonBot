@@ -160,6 +160,27 @@ require APP_PATH . '/views/layout/head.php';
 <script>
 const CSRF = '<?= e($csrf) ?>';
 const BASE_URL = '<?= BASE_URL ?>';
+const ROUTE_PREFIX = '<?= routePrefix() ?>';
+const APP_URL = `${BASE_URL}/${ROUTE_PREFIX}`.replace(/\/$/, '');
+
+async function postForm(url, body, options = {}) {
+  const response = await fetch(url, { method: 'POST', body, ...options });
+  const text = await response.text();
+  let data = {};
+
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (error) {
+    const message = text ? text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() : 'Respuesta inválida del servidor';
+    throw new Error(message || 'Respuesta inválida del servidor');
+  }
+
+  if (!response.ok || data.error) {
+    throw new Error(data.error || `Error HTTP ${response.status}`);
+  }
+
+  return data;
+}
 
 function openCreateModal() {
   document.getElementById('modal-title').textContent = 'Eventos';
@@ -242,9 +263,8 @@ function saveEvent(e) {
   const img = document.getElementById('event-image');
   if (img.files[0]) fd.append('image', img.files[0]);
 
-  const url = isEdit ? `${BASE_URL}/admin/eventos/${id}/editar` : `${BASE_URL}/admin/eventos/crear`;
-  fetch(url, { method: 'POST', body: fd })
-    .then(r => r.json())
+  const url = isEdit ? `${APP_URL}/admin/eventos/${id}/editar` : `${APP_URL}/admin/eventos/crear`;
+  postForm(url, fd)
     .then(d => {
       if (d.ok) {
         closeModal();
@@ -252,43 +272,49 @@ function saveEvent(e) {
       } else {
         alert(d.error || 'Error al guardar');
       }
+    })
+    .catch(error => {
+      alert(error.message || 'Error al guardar');
     });
 }
 
 function toggleStatus(id, status) {
   if (!confirm('¿Cambiar estado?')) return;
   const body = new URLSearchParams({ _csrf: CSRF, status });
-  fetch(`${BASE_URL}/admin/eventos/${id}/toggle`, {
+  fetch(`${APP_URL}/admin/eventos/${id}/toggle`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),
   })
   .then(r => r.json())
-  .then(d => { if (d.ok) location.reload(); });
+  .then(d => { if (d.ok) location.reload(); })
+  .catch(error => alert(error.message || 'Error al cambiar estado'));
 }
 
 function approveEvent(id) {
   if (!confirm('¿Aprobar este evento?')) return;
   const body = new URLSearchParams({ _csrf: CSRF });
-  fetch(`${BASE_URL}/admin/eventos/${id}/aprobar`, {
+  fetch(`${APP_URL}/admin/eventos/${id}/aprobar`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),
   })
   .then(r => r.json())
-  .then(d => { if (d.ok) location.reload(); });
+  .then(d => { if (d.ok) location.reload(); })
+  .catch(error => alert(error.message || 'Error al aprobar'));
 }
 
 function authorizeBot(id) {
   if (!confirm('¿Autorizar la publicación de este evento en el chatbot? Esta acción enviará el evento al chatbot.')) return;
   const body = new URLSearchParams({ _csrf: CSRF });
-  fetch(`${BASE_URL}/admin/eventos/${id}/autorizar-bot`, {
+  fetch(`${APP_URL}/admin/eventos/${id}/autorizar-bot`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),
   })
   .then(r => r.json())
-  .then(d => { if (d.ok) location.reload(); });
+  .then(d => { if (d.ok) location.reload(); })
+  .catch(error => alert(error.message || 'Error al autorizar bot'));
 }
 </script>
 
