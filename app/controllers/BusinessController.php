@@ -14,7 +14,7 @@ class BusinessController extends Controller
 
     public function dashboard(): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth('prestador');
         $user      = currentUser();
         $businesses = $user['role'] === 'superadmin'
             ? $this->businesses->allWithCategory()
@@ -155,7 +155,7 @@ class BusinessController extends Controller
 
     public function index(): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth('prestador');
         $user      = currentUser();
         $businesses = $user['role'] === 'superadmin'
             ? $this->businesses->allWithCategory()
@@ -165,7 +165,7 @@ class BusinessController extends Controller
 
     public function create(): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth('prestador');
         $categories = $this->categories->active();
         $amenities  = $this->amenities->active();
         $this->view('business.form', [
@@ -178,7 +178,7 @@ class BusinessController extends Controller
 
     public function store(): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth('prestador');
         $this->verifyCsrf();
 
         $categoryIds = array_map('intval', $_POST['categories'] ?? []);
@@ -219,7 +219,7 @@ class BusinessController extends Controller
 
     public function edit(string $id): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth('prestador');
         $business = $this->businesses->find((int)$id);
         if (!$business) { http_response_code(404); return; }
 
@@ -250,7 +250,7 @@ class BusinessController extends Controller
 
     public function update(string $id): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth('prestador');
         $this->verifyCsrf();
 
         $business = $this->businesses->find((int)$id);
@@ -288,7 +288,7 @@ class BusinessController extends Controller
 
     public function destroy(string $id): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth('prestador');
         $this->verifyCsrf();
 
         $business = $this->businesses->find((int)$id);
@@ -304,7 +304,7 @@ class BusinessController extends Controller
 
     public function deleteImage(string $id): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth('prestador');
         $this->verifyCsrf();
 
         $image = $this->businesses->findImage((int)$id);
@@ -326,7 +326,7 @@ class BusinessController extends Controller
 
     public function upload(): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth('prestador');
         $this->verifyCsrf();
 
         $businessId = (int)($_POST['business_id'] ?? 0);
@@ -350,7 +350,7 @@ class BusinessController extends Controller
 
     public function saveService(string $id): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth('prestador');
         $this->verifyCsrf();
 
         $business = $this->businesses->find((int)$id);
@@ -377,7 +377,7 @@ class BusinessController extends Controller
 
     public function deleteService(string $id, string $sid): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth('prestador');
         $this->verifyCsrf();
 
         $business = $this->businesses->find((int)$id);
@@ -391,7 +391,7 @@ class BusinessController extends Controller
 
     public function saveProduct(string $id): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth('prestador');
         $this->verifyCsrf();
 
         $business = $this->businesses->find((int)$id);
@@ -420,7 +420,7 @@ class BusinessController extends Controller
 
     public function deleteProduct(string $id, string $pid): void
     {
-        $this->requireAuth('admin');
+        $this->requireAuth('prestador');
         $this->verifyCsrf();
 
         $business = $this->businesses->find((int)$id);

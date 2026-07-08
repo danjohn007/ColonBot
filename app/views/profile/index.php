@@ -8,7 +8,7 @@ require APP_PATH . '/views/layout/head.php';
   <h1 class="text-2xl font-bold text-gray-900 mb-6">👤 Mi Perfil</h1>
 
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-    <form method="POST" action="<?= url('mi-perfil/actualizar') ?>" class="space-y-4">
+    <form method="POST" action="<?= url(($routePrefix ?? '') . 'mi-perfil/actualizar') ?>" class="space-y-4">
       <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -26,7 +26,7 @@ require APP_PATH . '/views/layout/head.php';
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Nueva contraseña</label>
-          <input type="password" name="password" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Dejar vacío para no cambiar">
+          <input type="password" name="password" autocomplete="new-password" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Dejar vacío para no cambiar">
         </div>
       </div>
 

@@ -1,5 +1,6 @@
 <?php
 $pageTitle = 'Iniciar Sesion - ' . APP_NAME;
+$publicLoginPrefix = $routePrefix ?? '';
 $extraHead = '<link rel="preconnect" href="https://fonts.googleapis.com">' . PHP_EOL
   . '  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . PHP_EOL
   . '  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">' . PHP_EOL
@@ -66,6 +67,28 @@ require APP_PATH . '/views/layout/head.php';
             Ingresar al panel
           </button>
         </form>
+
+        <div class="colon-user-login-banners" aria-label="Accesos para usuarios publicos">
+          <a href="<?= url($publicLoginPrefix . 'registro/visitante') ?>" class="colon-login-banner colon-login-banner--visitor">
+            <img src="<?= asset('img/cristo-bot-nino.png') ?>" alt="">
+            <span class="colon-login-banner-overlay"></span>
+            <span class="colon-login-banner-content">
+              <small>Visitantes</small>
+              <strong>Registrate como visitante y obten descuentos exclusivos</strong>
+              <span>Califica y deja comentarios de atractivos turisticos.</span>
+            </span>
+          </a>
+
+          <a href="<?= url($publicLoginPrefix . 'registro/prestador') ?>" class="colon-login-banner colon-login-banner--provider">
+            <img src="<?= asset('img/landing/noche-restaurante.jpeg') ?>" alt="">
+            <span class="colon-login-banner-overlay"></span>
+            <span class="colon-login-banner-content">
+              <small>Prestadores</small>
+              <strong>Eres prestador de servicio?</strong>
+              <span>Da de alta tu negocio y conecta con visitantes.</span>
+            </span>
+          </a>
+        </div>
 
         <div class="flex items-center justify-between gap-4 mt-5">
           <a href="<?= url('olvide-contrasena') ?>" class="text-xs colon-public-link hover:underline transition">

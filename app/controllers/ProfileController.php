@@ -11,8 +11,11 @@ class ProfileController extends Controller
     public function index(): void
     {
         $this->requireAuth('prestador');
-        $user = currentUser();
-        $this->view('profile.index', compact('user') + ['csrf' => $this->csrf()]);
+        $sessionUser = currentUser();
+        $user = $this->users->find((int)$sessionUser['id']) ?: $sessionUser;
+        $routePrefix = $this->pathForCurrentPrefix('');
+
+        $this->view('profile.index', compact('user', 'routePrefix') + ['csrf' => $this->csrf()]);
     }
 
     public function update(): void
@@ -36,8 +39,9 @@ class ProfileController extends Controller
         // Update session
         $_SESSION['user']['name'] = $data['name'];
         if (isset($data['email'])) $_SESSION['user']['email'] = $data['email'];
+        $_SESSION['user']['phone'] = $data['phone'];
 
         $this->flash('success', 'Perfil actualizado correctamente.');
-        $this->redirect('mi-perfil');
+        $this->redirectForCurrentPrefix('mi-perfil');
     }
 }
