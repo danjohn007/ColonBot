@@ -155,7 +155,7 @@ class SettingsController extends Controller
 
         $this->flash('error', 'Configuraciones globales solo esta disponible para SuperAdmin o Colaborador Admin.');
         $redirect = match ($role) {
-            'prestador' => 'admin/crm',
+            'prestador' => 'admin/inicio',
             'colaborador_admin' => 'colaborador',
             'visitor' => 'turista',
             default => 'login',

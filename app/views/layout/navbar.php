@@ -150,6 +150,9 @@ $loginUrl = url($navPrefix . 'login');
         <!-- COLABORADOR_ADMIN (strict) - merged admin + colaborador -->
         <?php if ($role === 'colaborador_admin'): ?>
         <div class="pt-3 pb-1 text-xs uppercase tracking-wide text-gray-400 font-semibold px-3">Gestión</div>
+        <a href="<?= url('admin/inicio') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">IN</span> Inicio
+        </a>
         <a href="<?= url('admin') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">🏢</span> Mis Negocios
         </a>
@@ -179,6 +182,9 @@ $loginUrl = url($navPrefix . 'login');
         <!-- PRESTADOR (strict) -->
         <?php if ($role === 'prestador'): ?>
         <div class="pt-3 pb-1 text-xs uppercase tracking-wide text-gray-400 font-semibold px-3">Gestión</div>
+        <a href="<?= url('admin/inicio') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">IN</span> Inicio
+        </a>
         <a href="<?= url('admin') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">🏢</span> Mis Negocios
         </a>

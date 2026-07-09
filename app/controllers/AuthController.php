@@ -17,7 +17,7 @@ class AuthController extends Controller
                 'visitor' => 'turista',
                 'superadmin' => 'superadmin',
                 'colaborador_admin' => 'colaborador',
-                'prestador' => 'admin/crm',
+                'prestador' => 'admin/inicio',
                 default => 'admin',
             };
             if ($role === 'visitor') {
@@ -82,7 +82,7 @@ class AuthController extends Controller
             'superadmin'        => 'superadmin',
             'colaborador_admin' => 'colaborador',
             'visitor'           => 'turista',
-            'prestador'         => 'admin/crm',
+            'prestador'         => 'admin/inicio',
             default             => 'admin',
         };
         if ($role === 'visitor') {

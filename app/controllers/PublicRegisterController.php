@@ -149,7 +149,7 @@ class PublicRegisterController extends Controller
     {
         if (isLoggedIn()) {
             $role = $this->normalizeRole(currentUser()['role'] ?? '');
-            $this->redirect($role === 'prestador' ? 'admin/crm' : 'admin');
+            $this->redirect($role === 'prestador' ? 'admin/inicio' : 'admin');
         }
         $routePrefix = $this->pathForCurrentPrefix('');
         $this->view('public.register_prestador', ['csrf' => $this->csrf(), 'routePrefix' => $routePrefix]);
@@ -203,8 +203,8 @@ class PublicRegisterController extends Controller
         $redirect = match ($role) {
             'superadmin' => 'superadmin',
             'colaborador_admin' => 'colaborador',
-            'prestador' => 'admin/crm',
-            default => 'admin/crm',
+            'prestador' => 'admin/inicio',
+            default => 'admin/inicio',
         };
         $this->redirect($redirect);
     }
@@ -408,7 +408,7 @@ class PublicRegisterController extends Controller
         $returnTo = $this->sanitizeReturnTo((string)($pending['return_to'] ?? $_SESSION['visitor_return_to'] ?? ''));
         unset($_SESSION['visitor_return_to']);
 
-        $redirect = $role === 'prestador' ? 'admin/crm' : ($returnTo ?: $this->pathForCurrentPrefix('turista'));
+        $redirect = $role === 'prestador' ? 'admin/inicio' : ($returnTo ?: $this->pathForCurrentPrefix('turista'));
         $this->flash('success', 'Registro completado exitosamente. Bienvenido a CristobalBot.');
         $this->redirect($redirect);
     }

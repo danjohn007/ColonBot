@@ -22,6 +22,20 @@ class BusinessController extends Controller
         $this->view('business.dashboard', compact('businesses', 'user'));
     }
 
+    public function home(): void
+    {
+        $this->requireAuth('prestador');
+        $user = currentUser();
+        $businesses = $user['role'] === 'superadmin'
+            ? $this->businesses->allWithCategory()
+            : $this->businesses->byUser((int)$user['id']);
+
+        $businessIds = array_map('intval', array_column($businesses, 'id'));
+        $summary = $this->providerHomeSummary($businessIds);
+
+        $this->view('business.home', compact('businesses', 'user', 'summary'));
+    }
+
     // ── Micrositio del Prestador ─────────────────────────────────────────
 
     public function microsite(): void
@@ -614,6 +628,234 @@ class BusinessController extends Controller
             return $filename;
         }
         return null;
+    }
+
+    private function providerHomeSummary(array $businessIds): array
+    {
+        $summary = [
+            'lead_count' => 0,
+            'converted_leads' => 0,
+            'conversion_rate' => 0,
+            'campaigns' => 0,
+            'campaign_views' => 0,
+            'campaign_inquiries' => 0,
+            'campaign_response_rate' => 0,
+            'top_lovemarks' => [],
+            'weekly_sales' => 0.0,
+            'monthly_sales' => 0.0,
+            'business_rows' => [],
+            'campaign_rows' => [],
+            'sales_by_week' => [],
+            'sales_by_month' => [],
+            'contacts_by_month' => [],
+        ];
+
+        if (empty($businessIds)) {
+            return $summary;
+        }
+
+        $placeholders = $this->placeholders($businessIds);
+        $db = Database::getInstance();
+
+        try {
+            $stmt = $db->prepare(
+                "SELECT COUNT(*) AS total,
+                        SUM(CASE WHEN category IN ('cliente', 'lovemark') THEN 1 ELSE 0 END) AS converted
+                 FROM contacts
+                 WHERE business_id IN ($placeholders)"
+            );
+            $stmt->execute($businessIds);
+            $row = $stmt->fetch() ?: [];
+            $summary['lead_count'] = (int)($row['total'] ?? 0);
+            $summary['converted_leads'] = (int)($row['converted'] ?? 0);
+            $summary['conversion_rate'] = $summary['lead_count'] > 0
+                ? round(($summary['converted_leads'] / $summary['lead_count']) * 100, 1)
+                : 0;
+        } catch (Throwable $e) {
+            error_log('Provider home leads skipped: ' . $e->getMessage());
+        }
+
+        try {
+            $stmt = $db->prepare(
+                "SELECT COUNT(DISTINCT p.id) AS campaigns,
+                        COUNT(DISTINCT pv.id) AS views,
+                        COUNT(DISTINCT pi.id) AS inquiries
+                 FROM promotions p
+                 LEFT JOIN promotion_views pv ON pv.promotion_id = p.id
+                 LEFT JOIN promotion_inquiries pi ON pi.promotion_id = p.id
+                 WHERE p.business_id IN ($placeholders)
+                   AND p.type IN ('promocion', 'evento')"
+            );
+            $stmt->execute($businessIds);
+            $row = $stmt->fetch() ?: [];
+            $summary['campaigns'] = (int)($row['campaigns'] ?? 0);
+            $summary['campaign_views'] = (int)($row['views'] ?? 0);
+            $summary['campaign_inquiries'] = (int)($row['inquiries'] ?? 0);
+            $summary['campaign_response_rate'] = $summary['campaign_views'] > 0
+                ? round(($summary['campaign_inquiries'] / $summary['campaign_views']) * 100, 1)
+                : 0;
+        } catch (Throwable $e) {
+            error_log('Provider home campaign response skipped: ' . $e->getMessage());
+        }
+
+        try {
+            $stmt = $db->prepare(
+                "SELECT c.name, c.phone, c.email, b.name AS business_name,
+                        COUNT(cp.id) AS purchases,
+                        COALESCE(SUM(cp.amount), 0) AS total_spent
+                 FROM contacts c
+                 JOIN businesses b ON b.id = c.business_id
+                 LEFT JOIN contact_purchases cp ON cp.contact_id = c.id
+                 WHERE c.business_id IN ($placeholders)
+                   AND c.category = 'lovemark'
+                 GROUP BY c.id, c.name, c.phone, c.email, b.name, c.updated_at
+                 ORDER BY total_spent DESC, purchases DESC, c.updated_at DESC
+                 LIMIT 10"
+            );
+            $stmt->execute($businessIds);
+            $summary['top_lovemarks'] = $stmt->fetchAll();
+        } catch (Throwable $e) {
+            error_log('Provider home lovemarks skipped: ' . $e->getMessage());
+        }
+
+        $summary['weekly_sales'] = $this->salesTotalForBusinesses($businessIds, 'week');
+        $summary['monthly_sales'] = $this->salesTotalForBusinesses($businessIds, 'month');
+
+        try {
+            $stmt = $db->prepare(
+                "SELECT b.id, b.name,
+                        COUNT(DISTINCT c.id) AS leads,
+                        COUNT(DISTINCT CASE WHEN c.category IN ('cliente', 'lovemark') THEN c.id END) AS converted,
+                        COALESCE((
+                            SELECT SUM(cp.amount)
+                            FROM contact_purchases cp
+                            WHERE cp.business_id = b.id
+                        ), 0) AS sales
+                 FROM businesses b
+                 LEFT JOIN contacts c ON c.business_id = b.id
+                 WHERE b.id IN ($placeholders)
+                 GROUP BY b.id, b.name
+                 ORDER BY leads DESC, converted DESC, b.name ASC"
+            );
+            $stmt->execute($businessIds);
+            $rows = $stmt->fetchAll();
+            foreach ($rows as &$row) {
+                $leads = (int)($row['leads'] ?? 0);
+                $converted = (int)($row['converted'] ?? 0);
+                $row['conversion_rate'] = $leads > 0 ? round(($converted / $leads) * 100, 1) : 0;
+            }
+            unset($row);
+            $summary['business_rows'] = $rows;
+        } catch (Throwable $e) {
+            error_log('Provider home business rows skipped: ' . $e->getMessage());
+        }
+
+        try {
+            $stmt = $db->prepare(
+                "SELECT p.title, p.type, p.status, b.name AS business_name,
+                        COUNT(DISTINCT pv.id) AS views,
+                        COUNT(DISTINCT pi.id) AS inquiries
+                 FROM promotions p
+                 JOIN businesses b ON b.id = p.business_id
+                 LEFT JOIN promotion_views pv ON pv.promotion_id = p.id
+                 LEFT JOIN promotion_inquiries pi ON pi.promotion_id = p.id
+                 WHERE p.business_id IN ($placeholders)
+                   AND p.type IN ('promocion', 'evento')
+                 GROUP BY p.id, p.title, p.type, p.status, b.name, p.created_at
+                 ORDER BY p.created_at DESC
+                 LIMIT 8"
+            );
+            $stmt->execute($businessIds);
+            $rows = $stmt->fetchAll();
+            foreach ($rows as &$row) {
+                $views = (int)($row['views'] ?? 0);
+                $inquiries = (int)($row['inquiries'] ?? 0);
+                $row['response_rate'] = $views > 0 ? round(($inquiries / $views) * 100, 1) : 0;
+            }
+            unset($row);
+            $summary['campaign_rows'] = $rows;
+        } catch (Throwable $e) {
+            error_log('Provider home campaign rows skipped: ' . $e->getMessage());
+        }
+
+        try {
+            $stmt = $db->prepare(
+                "SELECT YEARWEEK(purchase_date, 3) AS sort_key,
+                        CONCAT(YEAR(purchase_date), ' - Semana ', LPAD(WEEK(purchase_date, 3), 2, '0')) AS label,
+                        COALESCE(SUM(amount), 0) AS total
+                 FROM contact_purchases
+                 WHERE business_id IN ($placeholders)
+                   AND purchase_date >= DATE_SUB(CURDATE(), INTERVAL 8 WEEK)
+                 GROUP BY sort_key, label
+                 ORDER BY sort_key ASC"
+            );
+            $stmt->execute($businessIds);
+            $summary['sales_by_week'] = $stmt->fetchAll();
+        } catch (Throwable $e) {
+            error_log('Provider home weekly sales skipped: ' . $e->getMessage());
+        }
+
+        try {
+            $stmt = $db->prepare(
+                "SELECT DATE_FORMAT(purchase_date, '%Y-%m') AS label,
+                        COALESCE(SUM(amount), 0) AS total
+                 FROM contact_purchases
+                 WHERE business_id IN ($placeholders)
+                   AND purchase_date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+                 GROUP BY label
+                 ORDER BY label ASC"
+            );
+            $stmt->execute($businessIds);
+            $summary['sales_by_month'] = $stmt->fetchAll();
+        } catch (Throwable $e) {
+            error_log('Provider home monthly sales skipped: ' . $e->getMessage());
+        }
+
+        try {
+            $stmt = $db->prepare(
+                "SELECT DATE_FORMAT(created_at, '%Y-%m') AS label,
+                        COUNT(*) AS total,
+                        SUM(CASE WHEN category IN ('cliente', 'lovemark') THEN 1 ELSE 0 END) AS converted
+                 FROM contacts
+                 WHERE business_id IN ($placeholders)
+                   AND created_at >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+                 GROUP BY label
+                 ORDER BY label ASC"
+            );
+            $stmt->execute($businessIds);
+            $summary['contacts_by_month'] = $stmt->fetchAll();
+        } catch (Throwable $e) {
+            error_log('Provider home contacts chart skipped: ' . $e->getMessage());
+        }
+
+        return $summary;
+    }
+
+    private function placeholders(array $items): string
+    {
+        return implode(',', array_fill(0, count($items), '?'));
+    }
+
+    private function salesTotalForBusinesses(array $businessIds, string $period): float
+    {
+        if (empty($businessIds)) {
+            return 0.0;
+        }
+
+        $interval = $period === 'week' ? '7 DAY' : '1 MONTH';
+        try {
+            $stmt = Database::getInstance()->prepare(
+                "SELECT COALESCE(SUM(amount), 0)
+                 FROM contact_purchases
+                 WHERE business_id IN (" . $this->placeholders($businessIds) . ")
+                   AND purchase_date >= DATE_SUB(NOW(), INTERVAL {$interval})"
+            );
+            $stmt->execute($businessIds);
+            return (float)$stmt->fetchColumn();
+        } catch (Throwable $e) {
+            error_log("Provider aggregate sales {$period} skipped: " . $e->getMessage());
+            return 0.0;
+        }
     }
 
     private function campaignResponseMetrics(int $businessId): array

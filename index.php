@@ -51,6 +51,8 @@ $router->get('olvide-contrasena',       'AuthController',      'forgotPasswordFo
 $router->post('olvide-contrasena',      'AuthController',      'forgotPassword');
 
 // Admin de Negocio
+$router->get('admin/inicio',            'BusinessController',  'home');
+$router->get('landing/admin/inicio',    'BusinessController',  'home');
 $router->get('admin',                   'BusinessController',  'dashboard');
 $router->get('admin/negocio',           'BusinessController',  'index');
 $router->get('admin/negocio/crear',     'BusinessController',  'create');
