@@ -169,6 +169,7 @@ class BusinessController extends Controller
         $isOpen = isset($_POST['is_open']) ? (int)$_POST['is_open'] : (int)(!$business['is_open']);
         $this->businesses->update((int)$id, [
             'is_open' => $isOpen,
+            'estado'  => $isOpen ? 'activo' : 'inactivo',
             'open_for_messaging' => in_array($_POST['open_for_messaging'] ?? $business['open_for_messaging'], ['24hrs', 'schedule'])
                 ? $_POST['open_for_messaging'] : $business['open_for_messaging'],
         ]);
@@ -523,6 +524,7 @@ class BusinessController extends Controller
 
     private function buildData(): array
     {
+        $isOpen = isset($_POST['is_open']) ? (int)$_POST['is_open'] : 0;
         $data = [
             'name'        => trim($_POST['name'] ?? ''),
             'description' => trim($_POST['description'] ?? ''),
@@ -535,7 +537,8 @@ class BusinessController extends Controller
             'website'     => trim($_POST['website'] ?? ''),
             'facebook'    => trim($_POST['facebook'] ?? ''),
             'instagram'   => trim($_POST['instagram'] ?? ''),
-            'is_open'     => isset($_POST['is_open']) ? (int)$_POST['is_open'] : 0,
+            'is_open'     => $isOpen,
+            'estado'      => $isOpen ? 'activo' : 'inactivo',
             'open_for_messaging' => in_array($_POST['open_for_messaging'] ?? '24hrs', ['24hrs', 'schedule'], true)
                 ? $_POST['open_for_messaging'] : '24hrs',
         ];

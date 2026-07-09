@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS `businesses` (
   `visits`       INT UNSIGNED     NOT NULL DEFAULT 0,
   `rating`       DECIMAL(3,2)     NOT NULL DEFAULT 0.00,
   `created_at`   DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `estado`       ENUM('activo','inactivo') NOT NULL DEFAULT 'inactivo' COMMENT 'Sincronizado con is_open: activo = En línea en CristobalBot',
   `updated_at`   DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (`user_id`)     REFERENCES `users`(`id`)       ON DELETE CASCADE,
   FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON DELETE RESTRICT
