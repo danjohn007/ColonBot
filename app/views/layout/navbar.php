@@ -165,6 +165,9 @@ $loginUrl = url($navPrefix . 'login');
         <a href="<?= url('admin/notificaciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">🔔</span> Notificaciones
         </a>
+        <a href="<?= url($navPrefix . 'configuraciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">⚙️</span> Configuraciones
+        </a>
         <a href="<?= url($navPrefix . 'colaborador') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">📊</span> Turismo
         </a>
@@ -212,6 +215,9 @@ $loginUrl = url($navPrefix . 'login');
 
         <!-- VISITOR (strict) - merged from turista -->
         <?php if ($role === 'visitor'): ?>
+        <a href="<?= url($navPrefix . 'turista') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">🏠</span> Inicio
+        </a>
         <a href="<?= url($navPrefix . 'turista/perfil') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">👤</span> Mi Perfil Visitante
         </a>

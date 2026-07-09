@@ -28,7 +28,7 @@ class SettingsController extends Controller
         $this->settings->saveMany($_POST, $group);
         $this->logAction('update_settings', 'settings', 0, $group);
         $this->flash('success', 'Configuración guardada.');
-        $this->redirect('configuraciones');
+        $this->redirectForCurrentPrefix('configuraciones');
     }
 
     // ── HikVision ─────────────────────────────────────────────────────────
@@ -57,7 +57,7 @@ class SettingsController extends Controller
         ]);
         $this->logAction('create_hikvision_device');
         $this->flash('success', 'Dispositivo HikVision agregado.');
-        $this->redirect('configuraciones/hikvision');
+        $this->redirectForCurrentPrefix('configuraciones/hikvision');
     }
 
     public function deleteHikvision(string $id): void
@@ -67,7 +67,7 @@ class SettingsController extends Controller
         $this->iot->deleteHikvision((int)$id);
         $this->logAction('delete_hikvision_device', 'iot_hikvision', (int)$id);
         $this->flash('success', 'Dispositivo eliminado.');
-        $this->redirect('configuraciones/hikvision');
+        $this->redirectForCurrentPrefix('configuraciones/hikvision');
     }
 
     // ── Shelly ────────────────────────────────────────────────────────────
@@ -94,7 +94,7 @@ class SettingsController extends Controller
         ]);
         $this->logAction('create_shelly_device');
         $this->flash('success', 'Dispositivo Shelly agregado.');
-        $this->redirect('configuraciones/shelly');
+        $this->redirectForCurrentPrefix('configuraciones/shelly');
     }
 
     public function deleteShelly(string $id): void
@@ -104,7 +104,7 @@ class SettingsController extends Controller
         $this->iot->deleteShelly((int)$id);
         $this->logAction('delete_shelly_device', 'iot_shelly', (int)$id);
         $this->flash('success', 'Dispositivo Shelly eliminado.');
-        $this->redirect('configuraciones/shelly');
+        $this->redirectForCurrentPrefix('configuraciones/shelly');
     }
 
     // ── GPS ────────────────────────────────────────────────────────────────
@@ -129,7 +129,7 @@ class SettingsController extends Controller
         ]);
         $this->logAction('create_gps_tracker');
         $this->flash('success', 'GPS Tracker agregado.');
-        $this->redirect('configuraciones/gps');
+        $this->redirectForCurrentPrefix('configuraciones/gps');
     }
 
     public function deleteGps(string $id): void
@@ -139,7 +139,7 @@ class SettingsController extends Controller
         $this->iot->deleteGps((int)$id);
         $this->logAction('delete_gps_tracker', 'gps_trackers', (int)$id);
         $this->flash('success', 'GPS Tracker eliminado.');
-        $this->redirect('configuraciones/gps');
+        $this->redirectForCurrentPrefix('configuraciones/gps');
     }
 
     private function requireSuperadminSettings(): void
@@ -149,11 +149,11 @@ class SettingsController extends Controller
         }
 
         $role = $this->normalizeRole(currentUser()['role'] ?? '');
-        if ($role === 'superadmin') {
+        if (in_array($role, ['superadmin', 'colaborador_admin'], true)) {
             return;
         }
 
-        $this->flash('error', 'Configuraciones globales solo esta disponible para SuperAdmin.');
+        $this->flash('error', 'Configuraciones globales solo esta disponible para SuperAdmin o Colaborador Admin.');
         $redirect = match ($role) {
             'prestador' => 'admin/crm',
             'colaborador_admin' => 'colaborador',

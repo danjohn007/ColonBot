@@ -296,8 +296,8 @@ $providerActionBase = url(routePrefix() . 'colaborador/negocios');
             </td>
             <td class="py-2">
               <div class="admin-provider-actions">
-                <button type="button" data-provider-id="<?= (int)$provider['id'] ?>" data-channel="whatsapp" onclick="contactProviderFromDashboard(this)" class="provider-action provider-action-whatsapp" <?= $providerWhatsapp ? '' : 'disabled' ?>>WhatsApp</button>
-                <button type="button" data-provider-id="<?= (int)$provider['id'] ?>" data-channel="email" onclick="contactProviderFromDashboard(this)" class="provider-action provider-action-email" <?= $providerEmail ? '' : 'disabled' ?>>Correo</button>
+                <button type="button" data-provider-id="<?= (int)$provider['id'] ?>" data-channel="whatsapp" data-contact-url="<?= $providerWhatsapp ? e(waLink($providerWhatsapp)) : '' ?>" onclick="contactProviderFromDashboard(this)" class="provider-action provider-action-whatsapp" <?= $providerWhatsapp ? '' : 'disabled' ?>>WhatsApp</button>
+                <button type="button" data-provider-id="<?= (int)$provider['id'] ?>" data-channel="email" data-contact-email="<?= e($providerEmail) ?>" onclick="contactProviderFromDashboard(this)" class="provider-action provider-action-email" <?= $providerEmail ? '' : 'disabled' ?>>Correo</button>
                 <button type="button" data-provider-id="<?= (int)$provider['id'] ?>" onclick="resetProviderRatingFromDashboard(this)" class="provider-action provider-action-reset">Restablecer valoracion</button>
               </div>
             </td>
@@ -533,20 +533,34 @@ function contactProviderFromDashboard(button) {
   const channel = button?.dataset.channel || 'contact';
   if (!id) return;
 
-  setProviderButtonBusy(button, true);
+  if (channel === 'email') {
+    const email = button.dataset.contactEmail || '';
+    if (!email) {
+      alert('Este prestador no tiene correo registrado.');
+      return;
+    }
+    const subject = 'Contacto de Direccion de Turismo';
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${encodeURIComponent(subject)}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(email).catch(() => {});
+    }
+    window.open(gmailUrl, '_blank', 'noopener');
+    logProviderContact(id, channel);
+    return;
+  }
+
+  const link = button.dataset.contactUrl || '';
+  if (!link) {
+    alert('Este prestador no tiene WhatsApp registrado.');
+    return;
+  }
+  window.open(link, '_blank', 'noopener');
+  logProviderContact(id, channel);
+}
+
+function logProviderContact(id, channel) {
   fetch(`${PROVIDER_ACTION_BASE}/${id}/contactar?channel=${encodeURIComponent(channel)}`)
-    .then(response => response.json())
-    .then(data => {
-      if (!data.ok) throw new Error(data.error || 'No se pudo contactar al prestador.');
-      const link = channel === 'email' ? data.business.email_url : data.business.whatsapp;
-      if (!link) {
-        alert(channel === 'email' ? 'Este prestador no tiene correo registrado.' : 'Este prestador no tiene WhatsApp registrado.');
-        return;
-      }
-      window.open(link, '_blank', 'noopener');
-    })
-    .catch(error => alert(error.message || 'No se pudo contactar al prestador.'))
-    .finally(() => setProviderButtonBusy(button, false));
+    .catch(() => {});
 }
 
 function resetProviderRatingFromDashboard(button) {

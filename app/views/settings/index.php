@@ -1,5 +1,6 @@
 <?php
 $pageTitle = 'Configuraciones Globales';
+$settingsPrefix = routePrefix();
 require APP_PATH . '/views/layout/head.php';
 ?>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
@@ -31,20 +32,21 @@ require APP_PATH . '/views/layout/head.php';
         <?php endforeach; ?>
         <li><hr class="my-2 border-gray-100"></li>
         <li>
-          <a href="<?= url('configuraciones/hikvision') ?>" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
+          <a href="<?= url($settingsPrefix . 'configuraciones/hikvision') ?>" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
             📹 HikVision
           </a>
         </li>
         <li>
-          <a href="<?= url('configuraciones/shelly') ?>" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
+          <a href="<?= url($settingsPrefix . 'configuraciones/shelly') ?>" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
             💡 Shelly Cloud
           </a>
         </li>
         <li>
-          <a href="<?= url('configuraciones/gps') ?>" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
+          <a href="<?= url($settingsPrefix . 'configuraciones/gps') ?>" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
             📡 GPS Trackers
           </a>
         </li>
+        <?php if (hasRole('superadmin')): ?>
         <li>
           <a href="<?= url('superadmin/bitacora') ?>" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
             📋 Bitácora
@@ -55,6 +57,7 @@ require APP_PATH . '/views/layout/head.php';
             🚨 Errores
           </a>
         </li>
+        <?php endif; ?>
       </ul>
     </nav>
 
@@ -69,7 +72,7 @@ require APP_PATH . '/views/layout/head.php';
       <!-- General -->
       <section id="sec-general" class="bg-white rounded-2xl shadow-sm p-6">
         <h2 class="font-semibold text-gray-900 mb-4 border-b pb-2">🏠 General</h2>
-        <form method="POST" action="<?= url('configuraciones/guardar') ?>" enctype="multipart/form-data" class="space-y-4">
+        <form method="POST" action="<?= url($settingsPrefix . 'configuraciones/guardar') ?>" enctype="multipart/form-data" class="space-y-4">
           <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
           <input type="hidden" name="group" value="general">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -105,7 +108,7 @@ require APP_PATH . '/views/layout/head.php';
       <!-- Theme / Colors -->
       <section id="sec-theme" class="bg-white rounded-2xl shadow-sm p-6">
         <h2 class="font-semibold text-gray-900 mb-4 border-b pb-2">🎨 Colores del Sistema</h2>
-        <form method="POST" action="<?= url('configuraciones/guardar') ?>" class="space-y-4">
+        <form method="POST" action="<?= url($settingsPrefix . 'configuraciones/guardar') ?>" class="space-y-4">
           <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
           <input type="hidden" name="group" value="theme">
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -129,7 +132,7 @@ require APP_PATH . '/views/layout/head.php';
       <!-- Map -->
       <section id="sec-map" class="bg-white rounded-2xl shadow-sm p-6">
         <h2 class="font-semibold text-gray-900 mb-4 border-b pb-2">🗺️ Configuración del Mapa</h2>
-        <form method="POST" action="<?= url('configuraciones/guardar') ?>" class="space-y-4">
+        <form method="POST" action="<?= url($settingsPrefix . 'configuraciones/guardar') ?>" class="space-y-4">
           <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
           <input type="hidden" name="group" value="map">
           <div class="grid grid-cols-3 gap-4">
@@ -153,7 +156,7 @@ require APP_PATH . '/views/layout/head.php';
       <!-- ChatBot -->
       <section id="sec-chatbot" class="bg-white rounded-2xl shadow-sm p-6">
         <h2 class="font-semibold text-gray-900 mb-4 border-b pb-2">🤖 Configuración ChatBot WhatsApp</h2>
-        <form method="POST" action="<?= url('configuraciones/guardar') ?>" class="space-y-4">
+        <form method="POST" action="<?= url($settingsPrefix . 'configuraciones/guardar') ?>" class="space-y-4">
           <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
           <input type="hidden" name="group" value="chatbot">
           <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
@@ -179,7 +182,7 @@ require APP_PATH . '/views/layout/head.php';
       <!-- PayPal -->
       <section id="sec-payments" class="bg-white rounded-2xl shadow-sm p-6">
         <h2 class="font-semibold text-gray-900 mb-4 border-b pb-2">💳 PayPal</h2>
-        <form method="POST" action="<?= url('configuraciones/guardar') ?>" class="space-y-4">
+        <form method="POST" action="<?= url($settingsPrefix . 'configuraciones/guardar') ?>" class="space-y-4">
           <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
           <input type="hidden" name="group" value="payments">
           <div>
@@ -200,7 +203,7 @@ require APP_PATH . '/views/layout/head.php';
       <!-- QR API -->
       <section id="sec-qr" class="bg-white rounded-2xl shadow-sm p-6">
         <h2 class="font-semibold text-gray-900 mb-4 border-b pb-2">📱 API de QR Codes Masivos</h2>
-        <form method="POST" action="<?= url('configuraciones/guardar') ?>" class="space-y-4">
+        <form method="POST" action="<?= url($settingsPrefix . 'configuraciones/guardar') ?>" class="space-y-4">
           <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
           <input type="hidden" name="group" value="qr">
           <div>
@@ -215,7 +218,7 @@ require APP_PATH . '/views/layout/head.php';
       <!-- GPS -->
       <section id="sec-gps" class="bg-white rounded-2xl shadow-sm p-6">
         <h2 class="font-semibold text-gray-900 mb-4 border-b pb-2">📡 GPS Tracker API</h2>
-        <form method="POST" action="<?= url('configuraciones/guardar') ?>" class="space-y-4">
+        <form method="POST" action="<?= url($settingsPrefix . 'configuraciones/guardar') ?>" class="space-y-4">
           <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
           <input type="hidden" name="group" value="gps">
           <div>

@@ -1,11 +1,12 @@
 <?php
 $pageTitle = 'Dispositivos Shelly Cloud';
+$settingsPrefix = routePrefix();
 require APP_PATH . '/views/layout/head.php';
 ?>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
 <main class="max-w-5xl mx-auto px-4 py-8 mb-20">
   <div class="flex items-center gap-3 mb-6">
-    <a href="<?= url('configuraciones') ?>" class="text-gray-400 hover:text-blue-600">← Config</a>
+    <a href="<?= url($settingsPrefix . 'configuraciones') ?>" class="text-gray-400 hover:text-blue-600">← Config</a>
     <h1 class="text-2xl font-bold text-gray-900">💡 Dispositivos Shelly Cloud</h1>
   </div>
 
@@ -36,7 +37,7 @@ require APP_PATH . '/views/layout/head.php';
           class="text-xs bg-yellow-50 text-yellow-700 px-3 py-1.5 rounded-lg hover:bg-yellow-100 transition">
           ⚡ Toggle
         </button>
-        <form method="POST" action="<?= url('configuraciones/shelly/' . $d['id'] . '/eliminar') ?>" class="inline"
+        <form method="POST" action="<?= url($settingsPrefix . 'configuraciones/shelly/' . $d['id'] . '/eliminar') ?>" class="inline"
           onsubmit="return confirm('¿Eliminar dispositivo Shelly?')">
           <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
           <button type="submit" class="text-xs bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100 transition">Eliminar</button>
@@ -57,7 +58,7 @@ require APP_PATH . '/views/layout/head.php';
 <div id="modal-shelly" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
     <h2 class="text-lg font-bold mb-4">Agregar Dispositivo Shelly Cloud</h2>
-    <form method="POST" action="<?= url('configuraciones/shelly/crear') ?>" class="space-y-3">
+    <form method="POST" action="<?= url($settingsPrefix . 'configuraciones/shelly/crear') ?>" class="space-y-3">
       <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
       <input type="text" name="name" required placeholder="Nombre (ej. Luz Entrada)" class="w-full input">
       <input type="text" name="device_id" required placeholder="Device ID de Shelly Cloud" class="w-full input font-mono text-sm">

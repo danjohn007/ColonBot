@@ -230,6 +230,17 @@ $router->post('configuraciones/shelly/{id}/eliminar', 'SettingsController', 'del
 $router->get('configuraciones/gps',          'SettingsController', 'gps');
 $router->post('configuraciones/gps/crear',   'SettingsController', 'createGps');
 $router->post('configuraciones/gps/{id}/eliminar', 'SettingsController', 'deleteGps');
+$router->get('landing/configuraciones',         'SettingsController',  'index');
+$router->post('landing/configuraciones/guardar','SettingsController',  'save');
+$router->get('landing/configuraciones/hikvision',    'SettingsController', 'hikvision');
+$router->post('landing/configuraciones/hikvision/crear', 'SettingsController', 'createHikvision');
+$router->post('landing/configuraciones/hikvision/{id}/eliminar', 'SettingsController', 'deleteHikvision');
+$router->get('landing/configuraciones/shelly',       'SettingsController', 'shelly');
+$router->post('landing/configuraciones/shelly/crear','SettingsController', 'createShelly');
+$router->post('landing/configuraciones/shelly/{id}/eliminar', 'SettingsController', 'deleteShelly');
+$router->get('landing/configuraciones/gps',          'SettingsController', 'gps');
+$router->post('landing/configuraciones/gps/crear',   'SettingsController', 'createGps');
+$router->post('landing/configuraciones/gps/{id}/eliminar', 'SettingsController', 'deleteGps');
 
 // Chatbot – webhook WhatsApp
 $router->get('chatbot/webhook',         'ChatbotController',   'verify');
