@@ -6,8 +6,15 @@ require APP_PATH . '/views/layout/head.php';
 <main class="max-w-7xl mx-auto px-4 py-8 mb-20">
   <h1 class="text-2xl font-bold text-gray-900 mb-6">🏢 Gestión de Negocios</h1>
 
-  <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
-    <table class="w-full text-sm">
+  <div class="flex justify-end mb-4">
+    <a href="<?= url('admin/negocio/crear') ?>" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition">
+      + Nuevo negocio
+    </a>
+  </div>
+
+  <div class="admin-table-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="overflow-x-auto">
+    <table class="admin-readable-table w-full min-w-[920px] text-sm">
       <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
         <tr>
           <th class="px-4 py-3 text-left">Nombre</th>
@@ -18,7 +25,7 @@ require APP_PATH . '/views/layout/head.php';
           <th class="px-4 py-3 text-left">Acciones</th>
         </tr>
       </thead>
-      <tbody class="divide-y">
+      <tbody class="divide-y divide-gray-100">
         <?php foreach ($businesses as $b): ?>
         <tr class="hover:bg-gray-50 transition">
           <td class="px-4 py-3 font-medium text-gray-800">
@@ -39,7 +46,7 @@ require APP_PATH . '/views/layout/head.php';
           </td>
           <td class="px-4 py-3 text-gray-600"><?= number_format($b['visits']) ?></td>
           <td class="px-4 py-3">
-            <div class="flex gap-1.5 flex-wrap">
+            <div class="admin-table-actions flex gap-1.5 flex-wrap">
               <a href="<?= url('admin/negocio/' . $b['id']) ?>"
                 class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-lg hover:bg-blue-200 transition">✎ Editar</a>
               <?php if ($b['status'] !== 'published'): ?>
@@ -65,10 +72,41 @@ require APP_PATH . '/views/layout/head.php';
         <?php endforeach; ?>
       </tbody>
     </table>
+    </div>
     <?php if (empty($businesses)): ?>
     <div class="p-12 text-center text-gray-400">Sin negocios registrados aún.</div>
     <?php endif; ?>
   </div>
 </main>
+<style>
+.admin-readable-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.admin-readable-table th {
+  padding: .9rem 1rem;
+  font-weight: 800;
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+.admin-readable-table td {
+  padding: 1rem;
+  line-height: 1.45;
+  vertical-align: middle;
+}
+.admin-readable-table tbody tr:nth-child(even) {
+  background: #fcfcfd;
+}
+.admin-readable-table tbody tr:hover {
+  background: #eff6ff;
+}
+.admin-table-actions a,
+.admin-table-actions button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  white-space: nowrap;
+}
+</style>
 <?php require APP_PATH . '/views/layout/bottom_nav.php'; ?>
 <?php require APP_PATH . '/views/layout/footer.php'; ?>

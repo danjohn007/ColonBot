@@ -1,18 +1,35 @@
 <?php
 $isEdit     = $business !== null;
 $pageTitle  = ($isEdit ? 'Editar: ' . $business['name'] : 'Nuevo Negocio') . ' – ' . APP_NAME;
+$puntoReferenciaId = null;
+foreach ($categories ?? [] as $cat) {
+    if (($cat['slug'] ?? '') === 'punto-de-referencia') {
+        $puntoReferenciaId = (int)$cat['id'];
+        break;
+    }
+}
 require APP_PATH . '/views/layout/head.php';
 ?>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
 
-<main class="max-w-4xl mx-auto px-4 py-8 mb-24">
-  <div class="flex items-center gap-3 mb-6">
-    <a href="<?= url('admin/negocio') ?>" class="text-gray-500 hover:text-blue-600 transition">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-      </svg>
-    </a>
-    <h1 class="text-2xl font-bold text-gray-900"><?= $isEdit ? 'Editar Negocio' : 'Nuevo Negocio' ?></h1>
+<main class="business-form-page max-w-7xl mx-auto px-4 py-8 mb-24">
+  <div class="business-form-hero mb-6">
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div class="min-w-0">
+        <a href="<?= url('admin/negocio') ?>" class="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-900 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          Volver a mis negocios
+        </a>
+        <h1 class="mt-3 text-3xl font-extrabold text-gray-950"><?= $isEdit ? 'Editar negocio' : 'Nuevo negocio' ?></h1>
+        <p class="mt-2 text-sm text-gray-600 max-w-2xl">Completa la informacion que veran visitantes en el mapa, rutas turisticas y CristoBot.</p>
+      </div>
+      <div class="business-form-status">
+        <span>Estado</span>
+        <strong><?= e($business['status'] ?? 'Borrador') ?></strong>
+      </div>
+    </div>
   </div>
 
   <?php if ($isEdit): ?>
@@ -32,13 +49,27 @@ require APP_PATH . '/views/layout/head.php';
   <?php endif; ?>
 
   <!-- Tab: Información básica -->
-  <div id="tab-basic">
+  <div id="tab-basic" class="business-form-layout">
+    <aside class="business-form-aside">
+      <div class="business-form-guide">
+        <p>Checklist</p>
+        <a href="#section-basic">1. Informacion</a>
+        <a href="#section-location">2. Ubicacion</a>
+        <a href="#section-contact">3. Contacto</a>
+        <a href="#section-amenities">4. Amenidades</a>
+        <a href="#section-images">5. Imagenes</a>
+        <?php if ($isEdit): ?>
+        <a href="#section-services">6. Servicios</a>
+        <?php endif; ?>
+        <div class="business-form-tip">Los campos con * son necesarios para publicar correctamente el negocio.</div>
+      </div>
+    </aside>
     <form id="business-form" method="POST" action="<?= url($isEdit ? 'admin/negocio/' . $business['id'] : 'admin/negocio/crear') ?>"
-      enctype="multipart/form-data" class="space-y-6">
+      enctype="multipart/form-data" class="business-form-main space-y-6">
       <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
 
       <!-- Información básica -->
-      <div class="bg-white rounded-2xl shadow-sm p-6 space-y-4">
+      <div id="section-basic" class="business-form-card space-y-4">
         <h2 class="font-semibold text-gray-900 border-b pb-2">📋 Información básica</h2>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -50,9 +81,9 @@ require APP_PATH . '/views/layout/head.php';
 
           <div class="sm:col-span-2">
             <label class="label">Categoría(s) * <span class="text-xs text-gray-400">(selecciona al menos una)</span></label>
-            <div class="flex flex-wrap gap-3 mt-1">
+            <div class="business-choice-grid mt-2">
               <?php foreach ($categories as $cat): ?>
-              <label class="flex items-center gap-2 cursor-pointer select-none">
+              <label class="business-choice">
                 <input type="checkbox" name="categories[]" value="<?= $cat['id'] ?>"
                   <?= in_array($cat['id'], $businessCategoryIds ?? [], false) ? 'checked' : '' ?>
                   class="w-4 h-4 rounded text-blue-600 category-checkbox">
@@ -68,17 +99,17 @@ require APP_PATH . '/views/layout/head.php';
           <!-- Tipo de viaje -->
           <div class="sm:col-span-2">
             <label class="label">Tipo de viaje <span class="text-xs text-gray-400">(selecciona uno o varios)</span></label>
-            <div class="flex flex-wrap gap-3 mt-1" id="trip-types-container">
+            <div class="business-choice-grid mt-2" id="trip-types-container">
               <?php $tripTypeOptions = ['familiar'=>'👨‍👩‍👧‍👦 Familiar', 'amigos'=>'🧑‍🤝‍🧑 Viaje de amigos', 'pareja'=>'💑 Pareja', 'adultos_mayores'=>'Adultos mayores', 'petfriendly'=>'🐾 Petfriendly']; ?>
               <?php foreach ($tripTypeOptions as $val => $label): ?>
-              <label class="flex items-center gap-2 cursor-pointer select-none">
+              <label class="business-choice">
                 <input type="checkbox" name="trip_types[]" value="<?= $val ?>"
                   <?= in_array($val, $businessTripTypes ?? [], true) ? 'checked' : '' ?>
                   class="w-4 h-4 rounded text-blue-600 trip-type-checkbox">
                 <span class="text-sm text-gray-700"><?= $label ?></span>
               </label>
               <?php endforeach; ?>
-              <label class="flex items-center gap-2 cursor-pointer select-none border-t border-gray-200 pt-2 mt-1 w-full">
+              <label class="business-choice business-choice-all">
                 <input type="checkbox" id="trip-type-all" value="todos"
                   class="w-4 h-4 rounded text-blue-600">
                 <span class="text-sm font-medium text-blue-600">✅ Todos</span>
@@ -111,10 +142,10 @@ require APP_PATH . '/views/layout/head.php';
           <!-- Tipo de lugar -->
           <div class="sm:col-span-2">
             <label class="label">Tipo de lugar <span class="text-xs text-gray-400">(selecciona uno)</span></label>
-            <div class="flex flex-wrap gap-3 mt-1">
+            <div class="business-choice-grid business-choice-grid-wide mt-2">
 <?php $isotipoOptions = ['restaurante'=>'🍽️ Restaurante', 'lugares_historicos'=>'🏛️ Lugares hist&oacute;ricos', 'viniedo'=>'🍇 Vi&ntilde;edo', 'hotel'=>'🏨 Hotel', 'paisaje_cerro'=>'⭐ Paisaje/cerro', 'lago_presa'=>'🌊 Lago/presa', 'lugar_compras'=>'🛍️ Lugar de compras', 'pena_bernal'=>'🏔️ Pe&ntilde;a de Bernal', 'aeropuerto'=>'✈️ Aeropuerto', 'zoologico_wameru'=>'🦁 Zool&oacute;gico Wamer&uacute;', 'arcos_queretaro'=>'🌉 Los Arcos de Quer&eacute;taro', 'estacion_tren'=>'🚂 Estaci&oacute;n del tren M&eacute;xico-Quer&eacute;taro', 'lugar_religioso'=>'⛪ Lugar religioso', 'apicultura'=>'🐝 Apicultura']; ?>
               <?php foreach ($isotipoOptions as $val => $label): ?>
-              <label class="flex items-center gap-2 cursor-pointer select-none">
+              <label class="business-choice">
                 <input type="radio" name="isotipo" value="<?= $val ?>"
                   <?= ($business['isotipo'] ?? '') === $val ? 'checked' : '' ?>
                   class="w-4 h-4 text-blue-600">
@@ -141,7 +172,7 @@ require APP_PATH . '/views/layout/head.php';
       </div>
 
       <!-- Ubicación -->
-      <div class="bg-white rounded-2xl shadow-sm p-6 space-y-4">
+      <div id="section-location" class="business-form-card space-y-4">
         <h2 class="font-semibold text-gray-900 border-b pb-2">📍 Ubicación</h2>
         <div>
           <label class="label">Dirección</label>
@@ -158,11 +189,11 @@ require APP_PATH . '/views/layout/head.php';
           </div>
         </div>
         <p class="text-xs text-gray-400">Haz clic en el mapa para seleccionar la ubicación exacta</p>
-        <div id="edit-map" class="w-full h-48 rounded-xl border border-gray-200 overflow-hidden"></div>
+        <div id="edit-map" class="w-full h-80 rounded-xl border border-gray-200 overflow-hidden"></div>
       </div>
 
       <!-- Contacto -->
-      <div class="bg-white rounded-2xl shadow-sm p-6 space-y-4">
+      <div id="section-contact" class="business-form-card space-y-4">
         <h2 class="font-semibold text-gray-900 border-b pb-2">📞 Contacto</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -219,11 +250,11 @@ require APP_PATH . '/views/layout/head.php';
       </div>
 
       <!-- Amenidades -->
-      <div class="bg-white rounded-2xl shadow-sm p-6">
+      <div id="section-amenities" class="business-form-card">
         <h2 class="font-semibold text-gray-900 border-b pb-2 mb-4">🛎️ Amenidades</h2>
-        <div class="flex flex-wrap gap-3">
+        <div class="business-choice-grid mt-2" id="amenities-container">
           <?php foreach ($amenities as $a): ?>
-          <label class="flex items-center gap-2 cursor-pointer">
+          <label class="business-choice">
             <input type="checkbox" name="amenities[]" value="<?= $a['id'] ?>"
               <?= in_array($a['id'], $businessAmenIds ?? [], false) ? 'checked' : '' ?>
               class="w-4 h-4 text-blue-600 rounded">
@@ -234,7 +265,7 @@ require APP_PATH . '/views/layout/head.php';
       </div>
 
       <!-- Imágenes -->
-      <div class="bg-white rounded-2xl shadow-sm p-6 space-y-4">
+      <div id="section-images" class="business-form-card space-y-4">
         <h2 class="font-semibold text-gray-900 border-b pb-2">🖼️ Imágenes</h2>
         <div>
           <label class="label">Imagen de portada</label>
@@ -275,7 +306,7 @@ require APP_PATH . '/views/layout/head.php';
 
       <!-- Servicios -->
       <?php if ($isEdit): ?>
-      <div class="bg-white rounded-2xl shadow-sm p-6">
+      <div id="section-services" class="business-form-card">
         <h2 class="font-semibold text-gray-900 border-b pb-2 mb-4">📋 Servicios</h2>
         <div id="services-list" class="divide-y mb-4">
           <?php foreach ($services as $s): ?>
@@ -306,7 +337,7 @@ require APP_PATH . '/views/layout/head.php';
       </div>
       <?php endif; ?>
 
-      <div class="flex gap-3">
+      <div class="business-form-actions">
         <button type="submit" id="submit-btn"
           class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
           <?= $isEdit ? 'Guardar cambios' : 'Crear negocio' ?>
@@ -422,8 +453,198 @@ require APP_PATH . '/views/layout/head.php';
 </main>
 
 <style>
-  .label { @apply block text-sm font-medium text-gray-700 mb-1; }
-  .input  { @apply w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition; }
+  .business-form-page {
+    color: #111827;
+  }
+  .business-form-hero {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    padding: 1.25rem;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, .06);
+  }
+  .business-form-status {
+    min-width: 9rem;
+    padding: .9rem 1rem;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+  }
+  .business-form-status span {
+    display: block;
+    color: #6b7280;
+    font-size: .72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .business-form-status strong {
+    display: block;
+    margin-top: .2rem;
+    color: #1d4ed8;
+    font-size: .95rem;
+  }
+  .business-form-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+  .business-form-aside {
+    order: 2;
+  }
+  .business-form-main {
+    order: 1;
+    min-width: 0;
+  }
+  .business-form-guide {
+    position: sticky;
+    top: 5rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 1rem;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, .05);
+  }
+  .business-form-guide p {
+    color: #6b7280;
+    font-size: .72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: .75rem;
+  }
+  .business-form-guide a {
+    display: block;
+    padding: .65rem .75rem;
+    border-radius: 10px;
+    color: #374151;
+    font-size: .86rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .business-form-guide a:hover {
+    background: #eff6ff;
+    color: #1d4ed8;
+  }
+  .business-form-tip {
+    margin-top: 1rem;
+    padding: .8rem;
+    border-radius: 12px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e3a8a;
+    font-size: .78rem;
+    line-height: 1.4;
+  }
+  .business-form-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    padding: 1.25rem;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, .05);
+    scroll-margin-top: 6rem;
+  }
+  .business-form-card h2 {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    border-bottom: 1px solid #eef2f7;
+    padding-bottom: .8rem;
+    margin-bottom: 1rem;
+    color: #111827;
+  }
+  .label {
+    display: block;
+    margin-bottom: .35rem;
+    color: #374151;
+    font-size: .86rem;
+    font-weight: 800;
+  }
+  .input {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: .7rem .9rem;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    background: #fff;
+    color: #111827;
+    font-size: .92rem;
+    outline: none;
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+  }
+  textarea.input {
+    min-height: 7rem;
+    resize: vertical;
+  }
+  .input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .14);
+  }
+  .business-choice-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: .65rem;
+  }
+  .business-choice-grid-wide {
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  }
+  .business-choice {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    min-height: 3rem;
+    padding: .72rem .85rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
+  }
+  .business-choice:hover {
+    border-color: #93c5fd;
+    background: #f8fbff;
+  }
+  .business-choice:has(input:checked) {
+    border-color: #2563eb;
+    background: #eff6ff;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, .08);
+  }
+  .business-choice input {
+    flex: 0 0 auto;
+  }
+  .business-choice-all {
+    border-color: #bfdbfe;
+    background: #f8fbff;
+  }
+  .business-form-actions {
+    position: sticky;
+    bottom: 1rem;
+    z-index: 20;
+    display: flex;
+    gap: .75rem;
+    padding: .75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .94);
+    box-shadow: 0 18px 42px rgba(15, 23, 42, .16);
+    backdrop-filter: blur(8px);
+  }
+  #edit-map {
+    min-height: 20rem;
+  }
+  @media (min-width: 1024px) {
+    .business-form-layout {
+      grid-template-columns: minmax(0, 1fr) 18rem;
+      align-items: start;
+    }
+    .business-form-aside {
+      order: 2;
+    }
+    .business-form-main {
+      order: 1;
+    }
+  }
 </style>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -472,11 +693,11 @@ function updateCoords(latlng) {
 // ── Punto de referencia: bloquear Tipo de viaje y Amenidades ──────────────────
 document.addEventListener('DOMContentLoaded', function() {
   function togglePuntoReferencia() {
-    const puntoRef = document.querySelector('.category-checkbox[value="8"]');
+    const puntoReferenciaId = '<?= $puntoReferenciaId !== null ? (int)$puntoReferenciaId : '' ?>';
+    const puntoRef = puntoReferenciaId ? document.querySelector(`.category-checkbox[value="${puntoReferenciaId}"]`) : null;
     if (!puntoRef) return;
     
     const tripTypesContainer = document.getElementById('trip-types-container');
-    const amenitiesDiv = document.querySelector('.bg-white.rounded-2xl.shadow-sm.p-6 h2:contains("Amenidades")')?.closest('.bg-white');
     
     function updateDisabledState() {
       const isChecked = puntoRef.checked;
@@ -484,10 +705,8 @@ document.addEventListener('DOMContentLoaded', function() {
       // Bloquear/desbloquear Tipo de viaje
       if (tripTypesContainer) {
         tripTypesContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-          if (cb.id !== 'trip-type-all') {
-            cb.disabled = isChecked;
-            if (isChecked) cb.checked = false;
-          }
+          cb.disabled = isChecked;
+          if (isChecked) cb.checked = false;
         });
         tripTypesContainer.style.opacity = isChecked ? '0.5' : '1';
       }

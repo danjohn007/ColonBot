@@ -12,8 +12,9 @@ require APP_PATH . '/views/layout/head.php';
     </button>
   </div>
 
-  <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-    <table class="w-full text-sm">
+  <div class="admin-table-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="overflow-x-auto">
+    <table class="admin-readable-table w-full min-w-[860px] text-sm">
       <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
         <tr>
           <th class="px-5 py-3 text-left">Color</th>
@@ -25,7 +26,7 @@ require APP_PATH . '/views/layout/head.php';
           <th class="px-5 py-3 text-left">Acciones</th>
         </tr>
       </thead>
-      <tbody class="divide-y">
+      <tbody class="divide-y divide-gray-100">
         <?php foreach ($categories as $cat): ?>
         <tr class="hover:bg-gray-50 transition">
           <td class="px-5 py-3">
@@ -35,7 +36,7 @@ require APP_PATH . '/views/layout/head.php';
           <td class="px-5 py-3 text-gray-500 font-mono text-xs"><?= e($cat['slug']) ?></td>
           <td class="px-5 py-3 text-gray-600"><?= e($cat['icon']) ?></td>
           <td class="px-5 py-3 text-gray-600"><?= $cat['sort_order'] ?></td>
-          <td class="px-5 py-3">
+          <td class="px-5 py-3 admin-table-actions">
             <span class="px-2 py-0.5 rounded-full text-xs <?= $cat['active'] ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' ?>">
               <?= $cat['active'] ? 'Activa' : 'Inactiva' ?>
             </span>
@@ -53,6 +54,7 @@ require APP_PATH . '/views/layout/head.php';
         <?php endforeach; ?>
       </tbody>
     </table>
+    </div>
   </div>
 </main>
 
@@ -115,6 +117,36 @@ function openEditCat(id, name, icon, color, sortOrder, active) {
   document.getElementById('modal-edit-cat').classList.remove('hidden');
 }
 </script>
+
+<style>
+.admin-readable-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.admin-readable-table th {
+  padding: .9rem 1rem;
+  font-weight: 800;
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+.admin-readable-table td {
+  padding: 1rem;
+  line-height: 1.45;
+  vertical-align: middle;
+}
+.admin-readable-table tbody tr:nth-child(even) {
+  background: #fcfcfd;
+}
+.admin-readable-table tbody tr:hover {
+  background: #eff6ff;
+}
+.admin-table-actions button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  white-space: nowrap;
+}
+</style>
 
 <?php require APP_PATH . '/views/layout/bottom_nav.php'; ?>
 <?php require APP_PATH . '/views/layout/footer.php'; ?>

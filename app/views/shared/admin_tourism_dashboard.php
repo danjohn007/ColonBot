@@ -25,7 +25,49 @@ $tripLabel = function($type) {
 };
 ?>
 
-<main class="max-w-7xl mx-auto px-4 py-8 mb-24">
+<style>
+.admin-tourism-dashboard table {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 680px;
+}
+.admin-tourism-dashboard thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f9fafb;
+}
+.admin-tourism-dashboard th {
+  padding: .85rem 1rem;
+  color: #6b7280;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.admin-tourism-dashboard td {
+  padding: .9rem 1rem;
+  color: #374151;
+  line-height: 1.45;
+  vertical-align: middle;
+}
+.admin-tourism-dashboard tbody tr:nth-child(even) {
+  background: #fcfcfd;
+}
+.admin-tourism-dashboard tbody tr:hover {
+  background: #eff6ff;
+}
+.admin-tourism-dashboard td:first-child,
+.admin-tourism-dashboard th:first-child {
+  padding-left: 1.1rem;
+}
+.admin-tourism-dashboard .overflow-x-auto {
+  border-radius: .85rem;
+}
+</style>
+
+<main class="admin-tourism-dashboard max-w-7xl mx-auto px-4 py-8 mb-24">
   <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
     <div>
       <h1 class="text-2xl font-bold text-gray-900"><?= e($dashboardTitle ?? 'Dashboard turistico') ?></h1>
@@ -39,6 +81,22 @@ $tripLabel = function($type) {
       <?php endforeach; ?>
     </div>
   </div>
+
+  <?php if ((currentUser()['role'] ?? '') === 'superadmin'): ?>
+  <div class="mb-6">
+    <p class="text-xs font-bold uppercase tracking-wide text-blue-600 mb-2">Accesos del sistema</p>
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+      <a href="<?= url('superadmin/usuarios') ?>" class="bg-white rounded-xl shadow-sm p-3 border border-gray-100 text-center text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Usuarios</a>
+      <a href="<?= url('superadmin/negocios') ?>" class="bg-white rounded-xl shadow-sm p-3 border border-gray-100 text-center text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Negocios</a>
+      <a href="<?= url('superadmin/categorias') ?>" class="bg-white rounded-xl shadow-sm p-3 border border-gray-100 text-center text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Categorias</a>
+      <a href="<?= url('superadmin/analitica') ?>" class="bg-white rounded-xl shadow-sm p-3 border border-gray-100 text-center text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Analitica</a>
+      <a href="<?= url('superadmin/bitacora') ?>" class="bg-white rounded-xl shadow-sm p-3 border border-gray-100 text-center text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Bitacora</a>
+      <a href="<?= url('superadmin/errores') ?>" class="bg-white rounded-xl shadow-sm p-3 border border-gray-100 text-center text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Errores</a>
+      <a href="<?= url('configuraciones') ?>" class="bg-white rounded-xl shadow-sm p-3 border border-gray-100 text-center text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Configuraciones</a>
+      <a href="<?= url('mapa') ?>" class="bg-white rounded-xl shadow-sm p-3 border border-gray-100 text-center text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Mapa</a>
+    </div>
+  </div>
+  <?php endif; ?>
 
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
     <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">

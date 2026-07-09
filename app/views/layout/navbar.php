@@ -123,6 +123,28 @@ $loginUrl = url($navPrefix . 'login');
         <a href="<?= url('admin/notificaciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">🔔</span> Notificaciones
         </a>
+        <div class="pt-4 pb-1 text-xs uppercase tracking-wide text-gray-400 font-semibold px-3">Sistema</div>
+        <a href="<?= url('superadmin/usuarios') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">👥</span> Usuarios
+        </a>
+        <a href="<?= url('superadmin/negocios') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">🏢</span> Negocios
+        </a>
+        <a href="<?= url('superadmin/categorias') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">🏷️</span> Categorias
+        </a>
+        <a href="<?= url('superadmin/analitica') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">📈</span> Analitica
+        </a>
+        <a href="<?= url('superadmin/bitacora') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">📋</span> Bitacora
+        </a>
+        <a href="<?= url('superadmin/errores') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">⚠️</span> Errores
+        </a>
+        <a href="<?= url('configuraciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">⚙️</span> Configuraciones
+        </a>
         <?php endif; ?>
 
         <!-- COLABORADOR_ADMIN (strict) - merged admin + colaborador -->
@@ -200,13 +222,6 @@ $loginUrl = url($navPrefix . 'login');
 
         <!-- Divider -->
         <div class="border-t border-gray-200 my-3"></div>
-
-        <!-- Configuraciones above logout -->
-        <?php if ($role === 'superadmin'): ?>
-        <a href="<?= url('configuraciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
-          <span class="text-lg">⚙️</span> Configuraciones
-        </a>
-        <?php endif; ?>
 
         <!-- Logout -->
         <a href="<?= url('logout') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-600 hover:bg-red-50 transition">

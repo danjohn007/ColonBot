@@ -16,9 +16,9 @@ require APP_PATH . '/views/layout/head.php';
     </button>
   </div>
 
-  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+  <div class="admin-table-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="overflow-x-auto">
-      <table class="w-full min-w-[760px] text-sm">
+      <table class="admin-readable-table w-full min-w-[840px] text-sm">
         <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
           <tr>
             <th class="px-5 py-3 text-left">#</th>
@@ -41,7 +41,7 @@ require APP_PATH . '/views/layout/head.php';
                 <?= e($u['role']) ?>
               </span>
             </td>
-            <td class="px-5 py-3">
+            <td class="px-5 py-3 admin-table-actions">
               <span class="px-2.5 py-1 rounded-full text-xs font-semibold <?= $u['active'] ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' ?>">
                 <?= $u['active'] ? 'Activo' : 'Inactivo' ?>
               </span>
@@ -190,6 +190,33 @@ require APP_PATH . '/views/layout/head.php';
 }
 .password-eye:hover {
   color: #2563eb;
+}
+.admin-readable-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.admin-readable-table th {
+  padding: .9rem 1rem;
+  font-weight: 800;
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+.admin-readable-table td {
+  padding: 1rem;
+  line-height: 1.45;
+  vertical-align: middle;
+}
+.admin-readable-table tbody tr:nth-child(even) {
+  background: #fcfcfd;
+}
+.admin-readable-table tbody tr:hover {
+  background: #eff6ff;
+}
+.admin-table-actions button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  white-space: nowrap;
 }
 </style>
 
