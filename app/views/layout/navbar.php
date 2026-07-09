@@ -141,7 +141,7 @@ $loginUrl = url($navPrefix . 'login');
         <a href="<?= url($navPrefix . 'colaborador') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">📊</span> Turismo
         </a>
-        <a href="<?= url('mi-perfil') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+        <a href="<?= url($navPrefix . 'mi-perfil') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">👤</span> Mi Perfil
         </a>
         <?php endif; ?>
@@ -161,7 +161,7 @@ $loginUrl = url($navPrefix . 'login');
         <a href="<?= url('admin/crm') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">📇</span> CRM
         </a>
-        <a href="<?= url('mi-perfil') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+        <a href="<?= url($navPrefix . 'mi-perfil') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">👤</span> Mi Perfil
         </a>
         <?php endif; ?>
@@ -178,7 +178,7 @@ $loginUrl = url($navPrefix . 'login');
         <a href="<?= url($navPrefix . 'colaborador/metricas') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">📈</span> Métricas
         </a>
-        <a href="<?= url('mi-perfil') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+        <a href="<?= url($navPrefix . 'mi-perfil') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">👤</span> Mi Perfil
         </a>
         <?php endif; ?>
@@ -197,7 +197,7 @@ $loginUrl = url($navPrefix . 'login');
         <div class="border-t border-gray-200 my-3"></div>
 
         <!-- Configuraciones above logout -->
-        <?php if (in_array($role, ['superadmin', 'colaborador_admin', 'prestador'])): ?>
+        <?php if ($role === 'superadmin'): ?>
         <a href="<?= url('configuraciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">⚙️</span> Configuraciones
         </a>

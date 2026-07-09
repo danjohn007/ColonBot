@@ -196,6 +196,7 @@ class PublicRegisterController extends Controller
             'name'  => $user['name'],
             'email' => $user['email'],
             'role'  => $role,
+            'phone' => $user['phone'] ?? '',
         ];
 
         $this->logAction('prestador_login', 'users', $user['id']);

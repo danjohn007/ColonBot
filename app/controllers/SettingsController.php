@@ -12,14 +12,14 @@ class SettingsController extends Controller
 
     public function index(): void
     {
-        $this->requireAuth('superadmin');
+        $this->requireSuperadminSettings();
         $groups = $this->settings->allGrouped();
         $this->view('settings.index', compact('groups') + ['csrf' => $this->csrf()]);
     }
 
     public function save(): void
     {
-        $this->requireAuth('superadmin');
+        $this->requireSuperadminSettings();
         $this->verifyCsrf();
 
         $group = $_POST['group'] ?? 'general';
@@ -35,14 +35,14 @@ class SettingsController extends Controller
 
     public function hikvision(): void
     {
-        $this->requireAuth('superadmin');
+        $this->requireSuperadminSettings();
         $devices = $this->iot->allHikvision();
         $this->view('settings.hikvision', compact('devices') + ['csrf' => $this->csrf()]);
     }
 
     public function createHikvision(): void
     {
-        $this->requireAuth('superadmin');
+        $this->requireSuperadminSettings();
         $this->verifyCsrf();
 
         $this->iot->createHikvision([
@@ -62,7 +62,7 @@ class SettingsController extends Controller
 
     public function deleteHikvision(string $id): void
     {
-        $this->requireAuth('superadmin');
+        $this->requireSuperadminSettings();
         $this->verifyCsrf();
         $this->iot->deleteHikvision((int)$id);
         $this->logAction('delete_hikvision_device', 'iot_hikvision', (int)$id);
@@ -74,14 +74,14 @@ class SettingsController extends Controller
 
     public function shelly(): void
     {
-        $this->requireAuth('superadmin');
+        $this->requireSuperadminSettings();
         $devices = $this->iot->allShelly();
         $this->view('settings.shelly', compact('devices') + ['csrf' => $this->csrf()]);
     }
 
     public function createShelly(): void
     {
-        $this->requireAuth('superadmin');
+        $this->requireSuperadminSettings();
         $this->verifyCsrf();
 
         $this->iot->createShelly([
@@ -99,7 +99,7 @@ class SettingsController extends Controller
 
     public function deleteShelly(string $id): void
     {
-        $this->requireAuth('superadmin');
+        $this->requireSuperadminSettings();
         $this->verifyCsrf();
         $this->iot->deleteShelly((int)$id);
         $this->logAction('delete_shelly_device', 'iot_shelly', (int)$id);
@@ -111,14 +111,14 @@ class SettingsController extends Controller
 
     public function gps(): void
     {
-        $this->requireAuth('superadmin');
+        $this->requireSuperadminSettings();
         $trackers = $this->iot->allGps();
         $this->view('settings.gps', compact('trackers') + ['csrf' => $this->csrf()]);
     }
 
     public function createGps(): void
     {
-        $this->requireAuth('superadmin');
+        $this->requireSuperadminSettings();
         $this->verifyCsrf();
 
         $this->iot->createGps([
@@ -134,11 +134,32 @@ class SettingsController extends Controller
 
     public function deleteGps(string $id): void
     {
-        $this->requireAuth('superadmin');
+        $this->requireSuperadminSettings();
         $this->verifyCsrf();
         $this->iot->deleteGps((int)$id);
         $this->logAction('delete_gps_tracker', 'gps_trackers', (int)$id);
         $this->flash('success', 'GPS Tracker eliminado.');
         $this->redirect('configuraciones/gps');
+    }
+
+    private function requireSuperadminSettings(): void
+    {
+        if (!isLoggedIn()) {
+            $this->redirectForCurrentPrefix('login');
+        }
+
+        $role = $this->normalizeRole(currentUser()['role'] ?? '');
+        if ($role === 'superadmin') {
+            return;
+        }
+
+        $this->flash('error', 'Configuraciones globales solo esta disponible para SuperAdmin.');
+        $redirect = match ($role) {
+            'prestador' => 'admin/crm',
+            'colaborador_admin' => 'colaborador',
+            'visitor' => 'turista',
+            default => 'login',
+        };
+        $this->redirectForCurrentPrefix($redirect);
     }
 }

@@ -71,6 +71,7 @@ class AuthController extends Controller
             'name'  => $user['name'],
             'email' => $user['email'],
             'role'  => $user['role'],
+            'phone' => $user['phone'] ?? '',
         ];
 
         $this->logAction('login', 'users', $user['id']);

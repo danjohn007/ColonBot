@@ -108,10 +108,158 @@ class ColaboradorController extends Controller
             'dashboard_visits_by_week'
         );
 
+        $topSites = $this->safeRows(
+            "SELECT b.id, b.name, b.slug, c.name AS category, b.rating, b.visits,
+                    COALESCE(COUNT(a.id), 0) AS tracked_visits
+             FROM businesses b
+             JOIN categories c ON c.id = b.category_id
+             LEFT JOIN analytics a ON a.business_id = b.id AND a.event = 'map_view'
+             WHERE b.status = 'published'
+             GROUP BY b.id
+             ORDER BY tracked_visits DESC, b.visits DESC
+             LIMIT 100",
+            'dashboard_top_sites'
+        );
+
+        $recentTopReviews = $this->safeRows(
+            "SELECT r.rating, r.comment, r.created_at, b.name AS business_name,
+                    b.slug AS business_slug, c.name AS category_name
+             FROM reviews r
+             JOIN businesses b ON b.id = r.business_id
+             JOIN categories c ON c.id = b.category_id
+             WHERE r.rating >= 4
+             ORDER BY r.created_at DESC
+             LIMIT 30",
+            'dashboard_recent_top_reviews'
+        );
+
+        $topRoutes = $this->safeRows(
+            "SELECT tt.trip_type, COUNT(DISTINCT b.id) AS total_businesses,
+                    COALESCE(SUM(route_views.total), 0) AS total_visits,
+                    AVG(b.rating) AS avg_rating
+             FROM business_trip_types tt
+             JOIN businesses b ON b.id = tt.business_id
+             LEFT JOIN (
+                SELECT business_id, COUNT(*) AS total
+                FROM analytics
+                WHERE event = 'map_view'
+                GROUP BY business_id
+             ) route_views ON route_views.business_id = b.id
+             WHERE b.status = 'published'
+             GROUP BY tt.trip_type
+             ORDER BY total_visits DESC",
+            'dashboard_top_routes'
+        );
+
+        $providerVisits = $this->safeRows(
+            "SELECT b.id, b.name,
+                    SUM(CASE WHEN DATE(a.created_at) = CURDATE() THEN 1 ELSE 0 END) AS today,
+                    SUM(CASE WHEN YEARWEEK(a.created_at, 1) = YEARWEEK(CURDATE(), 1) THEN 1 ELSE 0 END) AS this_week,
+                    SUM(CASE WHEN YEAR(a.created_at) = YEAR(CURDATE()) AND MONTH(a.created_at) = MONTH(CURDATE()) THEN 1 ELSE 0 END) AS this_month,
+                    COUNT(a.id) AS total
+             FROM businesses b
+             LEFT JOIN analytics a ON a.business_id = b.id AND a.event = 'map_view'
+             GROUP BY b.id
+             ORDER BY total DESC, b.name ASC
+             LIMIT 100",
+            'dashboard_provider_visits'
+        );
+
+        $dailyVisits = $this->safeRows(
+            "SELECT DATE(created_at) AS period, COUNT(*) AS total
+             FROM analytics
+             WHERE event = 'map_view' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+             GROUP BY period
+             ORDER BY period DESC",
+            'dashboard_daily_visits'
+        );
+
+        $weeklyVisits = $this->safeRows(
+            "SELECT YEAR(created_at) AS year, WEEK(created_at, 1) AS week, COUNT(*) AS total
+             FROM analytics
+             WHERE event = 'map_view' AND created_at >= DATE_SUB(NOW(), INTERVAL 16 WEEK)
+             GROUP BY year, week
+             ORDER BY year DESC, week DESC",
+            'dashboard_weekly_visits'
+        );
+
+        $monthlyVisits = $this->safeRows(
+            "SELECT YEAR(created_at) AS year, MONTH(created_at) AS month, COUNT(*) AS total
+             FROM analytics
+             WHERE event = 'map_view' AND created_at >= DATE_SUB(NOW(), INTERVAL 18 MONTH)
+             GROUP BY year, month
+             ORDER BY year DESC, month DESC",
+            'dashboard_monthly_visits'
+        );
+
+        $seasonalData = $this->safeRows(
+            "SELECT MONTH(a.created_at) AS month,
+                    COUNT(*) AS total,
+                    WEEK(a.created_at) AS week
+             FROM analytics a
+             WHERE a.event = 'map_view' AND a.created_at >= DATE_SUB(NOW(), INTERVAL 1 YEAR)
+             GROUP BY month, week
+             ORDER BY month",
+            'dashboard_seasonal_data'
+        );
+
+        $eventSeasonality = $this->safeRows(
+            "SELECT source, month, COUNT(*) AS total
+             FROM (
+                SELECT 'evento' AS source, MONTH(start_date) AS month
+                FROM events
+                WHERE start_date IS NOT NULL
+                UNION ALL
+                SELECT type AS source, MONTH(start_date) AS month
+                FROM promotions
+                WHERE start_date IS NOT NULL
+             ) x
+             GROUP BY source, month
+             ORDER BY month, source",
+            'dashboard_event_seasonality'
+        );
+
+        $routesVsTourism = $this->safeRows(
+            "SELECT tt.trip_type, c.name AS category_name,
+                    COUNT(DISTINCT b.id) AS total_businesses,
+                    COALESCE(SUM(route_views.total), 0) AS total_visits,
+                    AVG(b.rating) AS avg_rating
+             FROM business_trip_types tt
+             JOIN businesses b ON b.id = tt.business_id
+             JOIN categories c ON c.id = b.category_id
+             LEFT JOIN (
+                SELECT business_id, COUNT(*) AS total
+                FROM analytics
+                WHERE event = 'map_view'
+                GROUP BY business_id
+             ) route_views ON route_views.business_id = b.id
+             GROUP BY tt.trip_type, c.id
+             ORDER BY tt.trip_type, total_visits DESC",
+            'dashboard_routes_vs_tourism'
+        );
+
+        $topSitesByTripType = $this->safeRows(
+            "SELECT tt.trip_type, b.name, c.name AS category_name, b.visits,
+                    COALESCE(COUNT(a.id), 0) AS tracked_visits
+             FROM business_trip_types tt
+             JOIN businesses b ON b.id = tt.business_id
+             JOIN categories c ON c.id = b.category_id
+             LEFT JOIN analytics a ON a.business_id = b.id AND a.event = 'map_view'
+             WHERE tt.trip_type IN ('familiar', 'pareja', 'adultos_mayores', 'amigos')
+               AND b.status = 'published'
+             GROUP BY tt.trip_type, b.id
+             ORDER BY tt.trip_type, tracked_visits DESC, b.visits DESC
+             LIMIT 100",
+            'dashboard_top_sites_by_trip_type'
+        );
+
         $this->view('colaborador.dashboard', compact(
             'totalBiz', 'totalUsers', 'pendingPromos', 'summary',
             'topBusinesses', 'dailyEvents', 'topByCategory',
-            'newProviders', 'providers', 'visitsByDay', 'visitsByWeek'
+            'newProviders', 'providers', 'visitsByDay', 'visitsByWeek',
+            'topSites', 'recentTopReviews', 'topRoutes', 'providerVisits',
+            'dailyVisits', 'weeklyVisits', 'monthlyVisits', 'seasonalData',
+            'eventSeasonality', 'routesVsTourism', 'topSitesByTripType'
         ) + ['csrf' => $this->csrf()]);
     }
 

@@ -25,6 +25,33 @@ require APP_PATH . '/views/layout/head.php';
     </div>
   </div>
 
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+    <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">Numero de leads</p>
+      <p class="text-2xl font-bold text-blue-600 mt-1"><?= (int)$leadCount ?></p>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">Conversion</p>
+      <p class="text-2xl font-bold text-green-600 mt-1"><?= number_format((float)$conversionRate, 1) ?>%</p>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">Respuesta promos/eventos</p>
+      <p class="text-2xl font-bold text-orange-600 mt-1"><?= number_format((float)($campaignResponse['rate'] ?? 0), 1) ?>%</p>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">Top Lovemarks</p>
+      <p class="text-2xl font-bold text-purple-600 mt-1"><?= count($topLovemarks ?? []) ?></p>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">Ventas semana</p>
+      <p class="text-2xl font-bold text-pink-600 mt-1">$<?= number_format((float)$weeklySales, 2) ?></p>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+      <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">Ventas mes</p>
+      <p class="text-2xl font-bold text-yellow-600 mt-1">$<?= number_format((float)$monthlySales, 2) ?></p>
+    </div>
+  </div>
+
     <!-- Stats Cards Row - Same as superadmin analytics -->
   <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
     <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
@@ -117,6 +144,51 @@ require APP_PATH . '/views/layout/head.php';
         <?php endforeach; ?>
       </div>
     <?php endif; ?>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+      <h2 class="font-semibold text-gray-900 mb-4">Respuesta a eventos y promociones</h2>
+      <div class="grid grid-cols-3 gap-3">
+        <div class="p-3 bg-gray-50 rounded-lg">
+          <p class="text-xs text-gray-500 uppercase font-semibold">Publicados</p>
+          <p class="text-xl font-bold text-gray-900 mt-1"><?= (int)($campaignResponse['campaigns'] ?? 0) ?></p>
+        </div>
+        <div class="p-3 bg-gray-50 rounded-lg">
+          <p class="text-xs text-gray-500 uppercase font-semibold">Vistas</p>
+          <p class="text-xl font-bold text-blue-600 mt-1"><?= (int)($campaignResponse['views'] ?? 0) ?></p>
+        </div>
+        <div class="p-3 bg-gray-50 rounded-lg">
+          <p class="text-xs text-gray-500 uppercase font-semibold">Consultas</p>
+          <p class="text-xl font-bold text-green-600 mt-1"><?= (int)($campaignResponse['inquiries'] ?? 0) ?></p>
+        </div>
+      </div>
+      <div class="mt-4 p-4 border border-gray-100 rounded-xl">
+        <div class="flex items-center justify-between text-sm">
+          <span class="font-medium text-gray-700">Porcentaje de respuesta</span>
+          <strong class="text-orange-600"><?= number_format((float)($campaignResponse['rate'] ?? 0), 1) ?>%</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+      <h2 class="font-semibold text-gray-900 mb-4">Top Lovemarks</h2>
+      <?php if (empty($topLovemarks)): ?>
+        <p class="text-gray-400 text-sm text-center py-4">Aun no hay Lovemarks registrados</p>
+      <?php else: ?>
+      <div class="space-y-3 max-h-72 overflow-y-auto">
+        <?php foreach ($topLovemarks as $lovemark): ?>
+        <div class="flex items-center justify-between gap-3 p-3 border border-gray-100 rounded-lg">
+          <div class="min-w-0">
+            <p class="font-medium text-gray-800 text-sm truncate"><?= e($lovemark['name']) ?></p>
+            <p class="text-xs text-gray-400"><?= (int)$lovemark['purchases'] ?> compras</p>
+          </div>
+          <span class="text-sm font-bold text-pink-600">$<?= number_format((float)$lovemark['total_spent'], 2) ?></span>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      <?php endif; ?>
+    </div>
   </div>
 
   <!-- Quick Links -->
@@ -232,7 +304,7 @@ function renderContactsChart() {
       datasets: [
         {
           label: 'Prospectos',
-          data: contactsData.map(d => parseInt(d.prospectos)),
+          data: contactsData.map(d => parseInt(d.prospectos || 0) + parseInt(d.prospectos_sin_historial || 0) + parseInt(d.prospectos_recurrentes || 0)),
           backgroundColor: '#8B5CF6',
         },
         {

@@ -98,9 +98,19 @@ class BusinessController extends Controller
         $stmt->execute([(int)$id]);
         $chatbotSessions = (int)$stmt->fetchColumn();
 
+        $leadCount = (int)($metrics['total'] ?? 0);
+        $convertedLeads = (int)($metrics['clientes'] ?? 0) + (int)($metrics['lovemarks'] ?? 0);
+        $conversionRate = $leadCount > 0 ? round(($convertedLeads / $leadCount) * 100, 1) : 0;
+        $campaignResponse = $this->campaignResponseMetrics((int)$id);
+        $topLovemarks = $this->topLovemarks((int)$id);
+        $weeklySales = $this->salesTotal((int)$id, 'week');
+        $monthlySales = $this->salesTotal((int)$id, 'month');
+
         $this->view('business.microsite_dashboard', compact(
             'business', 'user', 'images', 'services', 'products', 'events', 'reviews',
-            'metrics', 'chartData', 'mapViews', 'waClicks', 'directionsClicks', 'chatbotSessions'
+            'metrics', 'chartData', 'mapViews', 'waClicks', 'directionsClicks', 'chatbotSessions',
+            'leadCount', 'conversionRate', 'campaignResponse', 'topLovemarks',
+            'weeklySales', 'monthlySales'
         ) + ['csrf' => $this->csrf()]);
     }
 
@@ -604,5 +614,72 @@ class BusinessController extends Controller
             return $filename;
         }
         return null;
+    }
+
+    private function campaignResponseMetrics(int $businessId): array
+    {
+        try {
+            $stmt = Database::getInstance()->prepare(
+                "SELECT COUNT(DISTINCT p.id) AS campaigns,
+                        COALESCE(COUNT(DISTINCT pv.id), 0) AS views,
+                        COALESCE(COUNT(DISTINCT pi.id), 0) AS inquiries
+                 FROM promotions p
+                 LEFT JOIN promotion_views pv ON pv.promotion_id = p.id
+                 LEFT JOIN promotion_inquiries pi ON pi.promotion_id = p.id
+                 WHERE p.business_id = ?
+                   AND p.type IN ('promocion', 'evento')"
+            );
+            $stmt->execute([$businessId]);
+            $row = $stmt->fetch() ?: ['campaigns' => 0, 'views' => 0, 'inquiries' => 0];
+        } catch (Throwable $e) {
+            error_log('Provider campaign response skipped: ' . $e->getMessage());
+            $row = ['campaigns' => 0, 'views' => 0, 'inquiries' => 0];
+        }
+
+        $views = (int)($row['views'] ?? 0);
+        $inquiries = (int)($row['inquiries'] ?? 0);
+        $row['rate'] = $views > 0 ? round(($inquiries / $views) * 100, 1) : 0;
+        return $row;
+    }
+
+    private function topLovemarks(int $businessId): array
+    {
+        try {
+            $stmt = Database::getInstance()->prepare(
+                "SELECT c.name, c.phone, c.email,
+                        COUNT(cp.id) AS purchases,
+                        COALESCE(SUM(cp.amount), 0) AS total_spent
+                 FROM contacts c
+                 LEFT JOIN contact_purchases cp ON cp.contact_id = c.id
+                 WHERE c.business_id = ?
+                   AND c.category = 'lovemark'
+                 GROUP BY c.id
+                 ORDER BY total_spent DESC, purchases DESC, c.updated_at DESC
+                 LIMIT 10"
+            );
+            $stmt->execute([$businessId]);
+            return $stmt->fetchAll();
+        } catch (Throwable $e) {
+            error_log('Provider top lovemarks skipped: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    private function salesTotal(int $businessId, string $period): float
+    {
+        $interval = $period === 'week' ? '7 DAY' : '1 MONTH';
+        try {
+            $stmt = Database::getInstance()->prepare(
+                "SELECT COALESCE(SUM(amount), 0)
+                 FROM contact_purchases
+                 WHERE business_id = ?
+                   AND purchase_date >= DATE_SUB(NOW(), INTERVAL {$interval})"
+            );
+            $stmt->execute([$businessId]);
+            return (float)$stmt->fetchColumn();
+        } catch (Throwable $e) {
+            error_log("Provider sales {$period} skipped: " . $e->getMessage());
+            return 0.0;
+        }
     }
 }

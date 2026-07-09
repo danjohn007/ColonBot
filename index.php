@@ -152,6 +152,8 @@ $router->get('landing/colaborador/metricas',           'ColaboradorController', 
 // ─── Perfil ────────────────────────────────────────────────────────
 $router->get('mi-perfil',                   'ProfileController',   'index');
 $router->post('mi-perfil/actualizar',       'ProfileController',   'update');
+$router->get('landing/mi-perfil',           'ProfileController',   'index');
+$router->post('landing/mi-perfil/actualizar', 'ProfileController', 'update');
 
 // ─── Turista ──────────────────────────────────────────────────────
 $router->get('turista',                    'TouristController', 'dashboard');
