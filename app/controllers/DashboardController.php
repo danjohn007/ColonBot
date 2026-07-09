@@ -90,6 +90,15 @@ class DashboardController extends Controller
              LIMIT 50",
             'superadmin_new_providers'
         );
+        $providers = $this->metricRows(
+            "SELECT b.*, u.name AS owner_name, u.email AS owner_email,
+                    c.name AS category_name
+             FROM businesses b
+             JOIN users u ON u.id = b.user_id
+             JOIN categories c ON c.id = b.category_id
+             ORDER BY b.name ASC",
+            'superadmin_providers_directory'
+        );
         $providerVisits = $this->metricRows(
             "SELECT b.id, b.name,
                     SUM(CASE WHEN DATE(a.created_at) = CURDATE() THEN 1 ELSE 0 END) AS today,
@@ -190,8 +199,8 @@ class DashboardController extends Controller
             'topSites', 'topByCategory', 'recentTopReviews', 'topRoutes',
             'newProviders', 'providerVisits', 'dailyVisits', 'weeklyVisits',
             'monthlyVisits', 'seasonalData', 'eventSeasonality',
-            'routesVsTourism', 'topSitesByTripType'
-        ));
+            'routesVsTourism', 'topSitesByTripType', 'providers'
+        ) + ['csrf' => $this->csrf()]);
     }
 
     // ── Usuarios ──────────────────────────────────────────────────────────

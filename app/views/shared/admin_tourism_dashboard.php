@@ -23,6 +23,8 @@ $tripLabel = function($type) {
   ];
   return $labels[$type] ?? ucfirst((string)$type);
 };
+
+$providerActionBase = url(routePrefix() . 'colaborador/negocios');
 ?>
 
 <style>
@@ -65,6 +67,49 @@ $tripLabel = function($type) {
 .admin-tourism-dashboard .overflow-x-auto {
   border-radius: .85rem;
 }
+.admin-provider-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  min-width: 21rem;
+}
+.provider-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  border-radius: .65rem;
+  padding: .45rem .7rem;
+  font-size: .75rem;
+  font-weight: 800;
+  transition: background-color .2s ease, color .2s ease, opacity .2s ease;
+  white-space: nowrap;
+}
+.provider-action:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+}
+.provider-action-whatsapp {
+  background: #ecfdf5;
+  color: #047857;
+}
+.provider-action-email {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+.provider-action-reset {
+  background: #fff7ed;
+  color: #c2410c;
+}
+.provider-action-whatsapp:not(:disabled):hover {
+  background: #d1fae5;
+}
+.provider-action-email:not(:disabled):hover {
+  background: #dbeafe;
+}
+.provider-action-reset:hover {
+  background: #fed7aa;
+}
 </style>
 
 <main class="admin-tourism-dashboard max-w-7xl mx-auto px-4 py-8 mb-24">
@@ -81,22 +126,6 @@ $tripLabel = function($type) {
       <?php endforeach; ?>
     </div>
   </div>
-
-  <?php if ((currentUser()['role'] ?? '') === 'superadmin'): ?>
-  <div class="mb-6">
-    <p class="text-xs font-bold uppercase tracking-wide text-blue-600 mb-2">Accesos del sistema</p>
-    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-      <a href="<?= url('superadmin/usuarios') ?>" class="bg-white rounded-xl shadow-sm p-3 border border-gray-100 text-center text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Usuarios</a>
-      <a href="<?= url('superadmin/negocios') ?>" class="bg-white rounded-xl shadow-sm p-3 border border-gray-100 text-center text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Negocios</a>
-      <a href="<?= url('superadmin/categorias') ?>" class="bg-white rounded-xl shadow-sm p-3 border border-gray-100 text-center text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Categorias</a>
-      <a href="<?= url('superadmin/analitica') ?>" class="bg-white rounded-xl shadow-sm p-3 border border-gray-100 text-center text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Analitica</a>
-      <a href="<?= url('superadmin/bitacora') ?>" class="bg-white rounded-xl shadow-sm p-3 border border-gray-100 text-center text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Bitacora</a>
-      <a href="<?= url('superadmin/errores') ?>" class="bg-white rounded-xl shadow-sm p-3 border border-gray-100 text-center text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Errores</a>
-      <a href="<?= url('configuraciones') ?>" class="bg-white rounded-xl shadow-sm p-3 border border-gray-100 text-center text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Configuraciones</a>
-      <a href="<?= url('mapa') ?>" class="bg-white rounded-xl shadow-sm p-3 border border-gray-100 text-center text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Mapa</a>
-    </div>
-  </div>
-  <?php endif; ?>
 
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
     <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
@@ -219,6 +248,68 @@ $tripLabel = function($type) {
       </div>
     </section>
   </div>
+
+  <section class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+      <div>
+        <h2 class="font-semibold text-gray-900">Directorio de prestadores</h2>
+        <p class="text-sm text-gray-500 mt-1">Contacto directo por WhatsApp o correo, y restablecimiento de valoraciones.</p>
+      </div>
+      <span class="text-xs px-3 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold"><?= count($providers ?? []) ?> registros</span>
+    </div>
+    <div class="overflow-x-auto max-h-[30rem] overflow-y-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-left text-xs text-gray-500 uppercase tracking-wide border-b">
+            <th class="pb-2 pr-4">Prestador</th>
+            <th class="pb-2 pr-4">Responsable</th>
+            <th class="pb-2 pr-4">WhatsApp</th>
+            <th class="pb-2 pr-4">Correo</th>
+            <th class="pb-2 pr-4">Valoracion</th>
+            <th class="pb-2">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($providers ?? [] as $provider): ?>
+          <?php
+            $providerEmail = $provider['email'] ?: ($provider['owner_email'] ?? '');
+            $providerWhatsapp = $provider['whatsapp'] ?: ($provider['phone'] ?? '');
+          ?>
+          <tr class="border-b last:border-0">
+            <td class="py-2 pr-4">
+              <a href="<?= url('lugar/' . $provider['slug']) ?>" target="_blank" class="font-semibold text-gray-900 hover:text-blue-700"><?= e($provider['name']) ?></a>
+              <p class="text-xs text-gray-500 mt-1"><?= e($provider['status'] ?? '') ?></p>
+            </td>
+            <td class="py-2 pr-4 text-gray-600">
+              <?= e($provider['owner_name'] ?? 'Sin responsable') ?>
+            </td>
+            <td class="py-2 pr-4 text-gray-600">
+              <?= $providerWhatsapp ? e($providerWhatsapp) : '<span class="text-gray-400">Sin WhatsApp</span>' ?>
+            </td>
+            <td class="py-2 pr-4 text-gray-600">
+              <?= $providerEmail ? e($providerEmail) : '<span class="text-gray-400">Sin correo</span>' ?>
+            </td>
+            <td class="py-2 pr-4">
+              <span class="inline-flex items-center rounded-full bg-yellow-50 px-2.5 py-1 text-xs font-semibold text-yellow-700">
+                <?= number_format((float)($provider['rating'] ?? 0), 1) ?>/5
+              </span>
+            </td>
+            <td class="py-2">
+              <div class="admin-provider-actions">
+                <button type="button" data-provider-id="<?= (int)$provider['id'] ?>" data-channel="whatsapp" onclick="contactProviderFromDashboard(this)" class="provider-action provider-action-whatsapp" <?= $providerWhatsapp ? '' : 'disabled' ?>>WhatsApp</button>
+                <button type="button" data-provider-id="<?= (int)$provider['id'] ?>" data-channel="email" onclick="contactProviderFromDashboard(this)" class="provider-action provider-action-email" <?= $providerEmail ? '' : 'disabled' ?>>Correo</button>
+                <button type="button" data-provider-id="<?= (int)$provider['id'] ?>" onclick="resetProviderRatingFromDashboard(this)" class="provider-action provider-action-reset">Restablecer valoracion</button>
+              </div>
+            </td>
+          </tr>
+          <?php endforeach; ?>
+          <?php if (empty($providers)): ?>
+          <tr><td colspan="6" class="py-6 text-center text-gray-400">Sin prestadores registrados</td></tr>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+  </section>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
     <section class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 lg:col-span-2">
@@ -425,3 +516,58 @@ $tripLabel = function($type) {
     </section>
   </div>
 </main>
+
+<script>
+const PROVIDER_ACTION_BASE = '<?= e($providerActionBase) ?>';
+const PROVIDER_CSRF = '<?= e($csrf ?? '') ?>';
+
+function setProviderButtonBusy(button, busy) {
+  if (!button) return;
+  button.disabled = busy;
+  button.dataset.originalText = button.dataset.originalText || button.textContent;
+  button.textContent = busy ? 'Procesando...' : button.dataset.originalText;
+}
+
+function contactProviderFromDashboard(button) {
+  const id = button?.dataset.providerId;
+  const channel = button?.dataset.channel || 'contact';
+  if (!id) return;
+
+  setProviderButtonBusy(button, true);
+  fetch(`${PROVIDER_ACTION_BASE}/${id}/contactar?channel=${encodeURIComponent(channel)}`)
+    .then(response => response.json())
+    .then(data => {
+      if (!data.ok) throw new Error(data.error || 'No se pudo contactar al prestador.');
+      const link = channel === 'email' ? data.business.email_url : data.business.whatsapp;
+      if (!link) {
+        alert(channel === 'email' ? 'Este prestador no tiene correo registrado.' : 'Este prestador no tiene WhatsApp registrado.');
+        return;
+      }
+      window.open(link, '_blank', 'noopener');
+    })
+    .catch(error => alert(error.message || 'No se pudo contactar al prestador.'))
+    .finally(() => setProviderButtonBusy(button, false));
+}
+
+function resetProviderRatingFromDashboard(button) {
+  const id = button?.dataset.providerId;
+  if (!id || !confirm('Restablecer la valoracion de este prestador? Esta accion eliminara sus resenas.')) return;
+
+  setProviderButtonBusy(button, true);
+  fetch(`${PROVIDER_ACTION_BASE}/${id}/reestablecer-valoraciones`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ _csrf: PROVIDER_CSRF }),
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (!data.ok) throw new Error(data.error || 'No se pudo restablecer la valoracion.');
+      alert('Valoracion restablecida correctamente.');
+      window.location.reload();
+    })
+    .catch(error => {
+      alert(error.message || 'No se pudo restablecer la valoracion.');
+      setProviderButtonBusy(button, false);
+    });
+}
+</script>
