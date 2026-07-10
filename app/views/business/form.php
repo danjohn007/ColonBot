@@ -479,8 +479,6 @@ require APP_PATH . '/views/layout/head.php';
     </form>
   </div><!-- /tab-basic -->
 
-  <?php endif; ?>
-
 </main>
 
 <style>
