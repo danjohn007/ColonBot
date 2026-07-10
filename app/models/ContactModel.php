@@ -184,18 +184,18 @@ class ContactModel extends Model
     }
 
     /**
-     * Clasificar contactos basado en sesiones de chatbot WhatsApp.
-     * Utiliza los datos de chatbot_sessions (session_count, purchase_count, has_purchased, category)
+     * Clasificar contactos basado en sesiones de chatbot WhatsApp y consultas.
+     * Utiliza los datos de chatbot_sessions y de la tabla consultas (tipo_accion)
      * para determinar automáticamente la categoría de cada contacto en el CRM.
      *
-     * Clasificación:
-     * - purchase_count >= 3  → lovemark
-     * - has_purchased = 1 o purchase_count >= 1  → cliente
-     * - session_count > 1 y sin compras  → prospecto_recurrente
-     * - session_count = 1 y sin compras  → prospecto_sin_historial
+     * Clasificación (basada en consultas.tipo_accion):
+     * - 3+ 'compra_reservacion'                → lovemark (cliente frecuente)
+     * - 1+ 'compra_reservacion'                → cliente
+     * - 1+ 'solicitar_informacion'             → prospecto_recurrente
+     * - Sin acciones en consultas              → prospecto_sin_historial
      *
      * @param int $businessId ID del negocio
-     * @return array Lista de contactos clasificados con datos de chatbot
+     * @return array Lista de contactos clasificados con datos de chatbot y consultas
      */
     public function classifyByChatbotSessions(int $businessId): array
     {
@@ -211,9 +211,26 @@ class ContactModel extends Model
 
         $results = [];
 
-        // 1) Procesar contactos existentes que tienen wa_id - clasificar según sus sesiones
+        // 1) Procesar contactos existentes que tienen wa_id - clasificar según sus consultas y sesiones
         foreach ($existingContacts as $contact) {
             $waId = $contact['wa_id'];
+
+            // Consultar acciones en tabla consultas
+            $stmt = $db->prepare(
+                "SELECT 
+                    COUNT(*) AS total_acciones,
+                    SUM(CASE WHEN tipo_accion = 'solicitar_informacion' THEN 1 ELSE 0 END) AS info_count,
+                    SUM(CASE WHEN tipo_accion = 'compra_reservacion' THEN 1 ELSE 0 END) AS compra_count
+                 FROM consultas 
+                 WHERE wa_id = ? AND business_id = ?"
+            );
+            $stmt->execute([$waId, $businessId]);
+            $consultasData = $stmt->fetch();
+
+            $infoCount = (int)($consultasData['info_count'] ?? 0);
+            $compraCount = (int)($consultasData['compra_count'] ?? 0);
+
+            // Consultar sesión de chatbot
             $stmt = $db->prepare(
                 "SELECT session_count, purchase_count, has_purchased, category
                  FROM chatbot_sessions WHERE wa_id = ? LIMIT 1"
@@ -221,45 +238,28 @@ class ContactModel extends Model
             $stmt->execute([$waId]);
             $session = $stmt->fetch();
 
-            if ($session) {
-                $newCategory = $this->determineCategoryFromSession($session);
-                $results[] = [
-                    'id'               => $contact['id'],
-                    'wa_id'            => $waId,
-                    'name'             => $contact['name'],
-                    'email'            => $contact['email'] ?? '',
-                    'phone'            => $contact['phone'] ?? $waId,
-                    'category'         => $newCategory,
-                    'total_visits'     => (int)$session['session_count'],
-                    'total_spent'      => 0,
-                    'source'           => 'whatsapp',
-                    'last_contact_at'  => null,
-                    'purchase_count'   => (int)$session['purchase_count'],
-                    'chatbot_session_id' => 0,
-                    'is_chatbot'       => true,
-                ];
+            // Determinar categoría basada en consultas (tipo_accion)
+            $newCategory = $this->determineCategoryFromConsultas($infoCount, $compraCount, $session);
 
-                // Actualizar la categoría en la tabla contacts si cambió
-                if ($newCategory !== $contact['category']) {
-                    $this->update((int)$contact['id'], ['category' => $newCategory]);
-                }
-            } else {
-                // Contacto con wa_id pero sin sesión de chatbot - mantener su categoría actual
-                $results[] = [
-                    'id'               => $contact['id'],
-                    'wa_id'            => $waId,
-                    'name'             => $contact['name'],
-                    'email'            => $contact['email'] ?? '',
-                    'phone'            => $contact['phone'] ?? $waId,
-                    'category'         => $contact['category'] ?: 'prospecto_sin_historial',
-                    'total_visits'     => 0,
-                    'total_spent'      => 0,
-                    'source'           => $contact['source'] ?: 'manual',
-                    'last_contact_at'  => null,
-                    'purchase_count'   => 0,
-                    'chatbot_session_id' => 0,
-                    'is_chatbot'       => false,
-                ];
+            $results[] = [
+                'id'               => $contact['id'],
+                'wa_id'            => $waId,
+                'name'             => $contact['name'],
+                'email'            => $contact['email'] ?? '',
+                'phone'            => $contact['phone'] ?? $waId,
+                'category'         => $newCategory,
+                'total_visits'     => (int)($session ? $session['session_count'] : 0),
+                'total_spent'      => 0,
+                'source'           => 'whatsapp',
+                'last_contact_at'  => null,
+                'purchase_count'   => $compraCount,
+                'chatbot_session_id' => 0,
+                'is_chatbot'       => true,
+            ];
+
+            // Actualizar la categoría en la tabla contacts si cambió
+            if ($newCategory !== $contact['category']) {
+                $this->update((int)$contact['id'], ['category' => $newCategory]);
             }
         }
 
@@ -283,7 +283,25 @@ class ContactModel extends Model
         $chatbotOnlySessions = $stmt->fetchAll();
 
         foreach ($chatbotOnlySessions as $session) {
-            $newCategory = $this->determineCategoryFromSession($session);
+            $waId = $session['wa_id'];
+
+            // Consultar acciones en tabla consultas
+            $stmt = $db->prepare(
+                "SELECT 
+                    COUNT(*) AS total_acciones,
+                    SUM(CASE WHEN tipo_accion = 'solicitar_informacion' THEN 1 ELSE 0 END) AS info_count,
+                    SUM(CASE WHEN tipo_accion = 'compra_reservacion' THEN 1 ELSE 0 END) AS compra_count
+                 FROM consultas 
+                 WHERE wa_id = ? AND business_id = ?"
+            );
+            $stmt->execute([$waId, $businessId]);
+            $consultasData = $stmt->fetch();
+
+            $infoCount = (int)($consultasData['info_count'] ?? 0);
+            $compraCount = (int)($consultasData['compra_count'] ?? 0);
+
+            $newCategory = $this->determineCategoryFromConsultas($infoCount, $compraCount, $session);
+
             $results[] = [
                 'id'               => $session['id'],
                 'wa_id'            => $session['wa_id'],
@@ -295,7 +313,7 @@ class ContactModel extends Model
                 'total_spent'      => 0,
                 'source'           => 'whatsapp',
                 'last_contact_at'  => $session['updated_at'],
-                'purchase_count'   => (int)$session['purchase_count'],
+                'purchase_count'   => $compraCount,
                 'chatbot_session_id' => (int)$session['id'],
                 'is_chatbot'       => true,
             ];
@@ -305,23 +323,37 @@ class ContactModel extends Model
     }
 
     /**
-     * Determinar la categoría del cliente basado en datos de sesión del chatbot.
+     * Determinar la categoría del cliente basado en las acciones registradas en consultas.
+     *
+     * Clasificación:
+     * - 3+ 'compra_reservacion'    → lovemark
+     * - 1+ 'compra_reservacion'    → cliente
+     * - 1+ 'solicitar_informacion' → prospecto_recurrente
+     * - Sin acciones               → prospecto_sin_historial
+     *
+     * @param int   $infoCount    Cantidad de acciones 'solicitar_informacion'
+     * @param int   $compraCount  Cantidad de acciones 'compra_reservacion'
+     * @param array|null $session Datos de sesión del chatbot (opcional, como respaldo)
+     * @return string Categoría del contacto
      */
-    private function determineCategoryFromSession(array $session): string
+    private function determineCategoryFromConsultas(int $infoCount, int $compraCount, ?array $session = null): string
     {
-        $purchaseCount = (int)($session['purchase_count'] ?? 0);
-        $hasPurchased  = (bool)($session['has_purchased'] ?? false);
-        $sessionCount  = (int)($session['session_count'] ?? 1);
-
-        if ($purchaseCount >= 3) {
+        // Clasificar basado en acciones de consultas
+        if ($compraCount >= 3) {
             return 'lovemark';
         }
-        if ($hasPurchased || $purchaseCount >= 1) {
+        if ($compraCount >= 1) {
             return 'cliente';
         }
-        if ($sessionCount > 1) {
+        if ($infoCount >= 1) {
             return 'prospecto_recurrente';
         }
+
+        // Sin acciones en consultas -> verificar si al menos tiene sesión de chatbot
+        if ($session) {
+            return 'prospecto_sin_historial';
+        }
+
         return 'prospecto_sin_historial';
     }
 
