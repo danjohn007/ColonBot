@@ -124,10 +124,10 @@ class PromotionModel extends Model
             $conditions[] = "c.category = 'cliente'";
         }
         if (in_array('prospectos_recurrentes', $segments)) {
-            $conditions[] = "(c.category = 'prospecto' AND c.last_contact_at IS NOT NULL)";
+            $conditions[] = "c.category = 'prospecto_recurrente'";
         }
         if (in_array('prospectos_sin_historial', $segments)) {
-            $conditions[] = "(c.category = 'prospecto' AND c.last_contact_at IS NULL)";
+            $conditions[] = "c.category = 'prospecto_sin_historial'";
         }
 
         if (empty($conditions)) return [];
