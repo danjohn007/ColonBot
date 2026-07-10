@@ -37,7 +37,7 @@ require APP_PATH . '/views/layout/head.php';
   <div class="flex border-b border-gray-200 mb-6">
     <button type="button" id="tab-btn-basic"
       class="tab-btn px-5 py-2.5 text-sm font-medium border-b-2 border-blue-600 text-blue-600 -mb-px"
-      onclick="switchTab('basic')">
+      onclick="switchTab()">
       📋 Información básica
     </button>
     <button type="button" id="scroll-btn-products"
@@ -801,20 +801,23 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 <?php if ($isEdit): ?>
-// ── Smooth scroll to section ────────────────────────────────────────────────
-function scrollToSection(sectionId, btn) {
-  // First make sure we're on the basic tab
+// ── Switch to basic tab (no more products tab) ──────────────────────────────
+function switchTab() {
   document.getElementById('tab-basic').classList.remove('hidden');
-
-  // Update tabs visual state - make basic the active tab
+  // Update basic tab button active state
   const tabBtn = document.getElementById('tab-btn-basic');
   if (tabBtn) {
     tabBtn.classList.add('border-blue-600', 'text-blue-600');
     tabBtn.classList.remove('border-transparent', 'text-gray-500');
   }
-
-  // Invalidate map if needed
+  // Invalidate map
   setTimeout(() => { if (typeof editMap !== 'undefined') editMap.invalidateSize(); }, 50);
+}
+
+// ── Smooth scroll to section ────────────────────────────────────────────────
+function scrollToSection(sectionId, btn) {
+  // First switch to basic tab (this also invalidates the map)
+  switchTab();
 
   // Scroll to the target section after a brief delay for the map to render
   setTimeout(() => {
