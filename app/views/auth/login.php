@@ -11,7 +11,7 @@ require APP_PATH . '/views/layout/head.php';
 <main class="colon-auth-page">
   <div class="colon-auth-shell">
     <section class="colon-auth-copy">
-      <img src="<?= asset('img/cristo-bot-nino.png') ?>" alt="Cristo Bot Colón" class="colon-auth-logo mb-6">
+      <img src="<?= asset('img/cristo-bot-nino-small.png') ?>" alt="Cristo Bot Colón" class="colon-auth-logo mb-6" width="160" height="160" decoding="async">
       <p class="colon-eyebrow">Panel de administración</p>
       <h1>Turismo en Colón</h1>
       <p>Administra a los negocios turísticos, promociones y eventos para los turistas de Colón, Querétaro</p>
@@ -70,7 +70,7 @@ require APP_PATH . '/views/layout/head.php';
 
         <div class="colon-user-login-banners" aria-label="Accesos para usuarios publicos">
           <a href="<?= url($publicLoginPrefix . 'registro/visitante') ?>" class="colon-login-banner colon-login-banner--visitor">
-            <img src="<?= asset('img/cristo-bot-nino.png') ?>" alt="">
+            <img src="<?= asset('img/cristo-bot-nino-small.png') ?>" alt="" loading="lazy" decoding="async">
             <span class="colon-login-banner-overlay"></span>
             <span class="colon-login-banner-content">
               <small>Visitantes</small>

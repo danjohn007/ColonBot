@@ -1,5 +1,3 @@
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <!-- App JS -->
   <script src="<?= asset('js/app.js') ?>"></script>
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v7.0.0/css/all.css">

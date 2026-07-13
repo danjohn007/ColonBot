@@ -3,6 +3,7 @@ $pageTitle = 'Colón te conquistará | Mapa Interactivo';
 $extraHead = '<link rel="preconnect" href="https://fonts.googleapis.com">' . PHP_EOL
   . '  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . PHP_EOL
   . '  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">' . PHP_EOL
+  . '  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">' . PHP_EOL
   . '  <link rel="stylesheet" href="' . asset('css/landing-map.css') . '">';
 $viewer = currentUser();
 $landingProfiles = [
@@ -361,7 +362,7 @@ require APP_PATH . '/views/layout/head.php';
 
 <section id="cristo-bot" class="colon-bot-section">
   <div class="colon-bot-visual reveal-scale" aria-hidden="true">
-    <span class="colon-bot-badge"><img src="<?= asset('img/cristo-bot-nino.png') ?>" alt=""></span>
+    <span class="colon-bot-badge"><img src="<?= asset('img/cristo-bot-nino-small.png') ?>" alt="" loading="lazy" decoding="async"></span>
   </div>
   <div class="colon-bot-content reveal-up">
     <p class="colon-eyebrow">WhatsApp</p>
@@ -428,7 +429,7 @@ require APP_PATH . '/views/layout/head.php';
 <section class="colon-public-band" aria-label="Registro público">
   <div class="colon-public-grid">
     <a href="<?= url(($routePrefix ?? '') . 'registro/visitante') ?>" class="colon-public-banner">
-      <img src="<?= asset('img/cristo-bot-nino.png') ?>" alt="Visitante de Colón">
+      <img src="<?= asset('img/cristo-bot-nino.png') ?>" alt="Visitante de Colón" loading="lazy" decoding="async">
       <span class="colon-public-overlay" aria-hidden="true"></span>
       <div class="colon-public-banner-content">
         <span>Visitantes</span>
@@ -437,7 +438,7 @@ require APP_PATH . '/views/layout/head.php';
       </div>
     </a>
     <a href="<?= url(($routePrefix ?? '') . 'registro/prestador') ?>" class="colon-public-banner">
-      <img src="<?= asset('img/landing/noche-restaurante.jpeg') ?>" alt="Negocio turístico en Colón">
+      <img src="<?= asset('img/landing/noche-restaurante.jpeg') ?>" alt="Negocio turístico en Colón" loading="lazy" decoding="async">
       <span class="colon-public-overlay" aria-hidden="true"></span>
       <div class="colon-public-banner-content">
         <span>Prestadores</span>
@@ -534,7 +535,7 @@ mapEl.addEventListener('mouseleave', () => map.scrollWheelZoom.disable());
 // ─── Divisi\u00F3n territorial (l\u00EDmite municipal de Col\u00F3n) ──────────────────
 if (BOUNDARY_DATA && BOUNDARY_DATA.length > 0) {
   // Si es array de arrays (m\u00FAltiples anillos), dibujar cada uno como polyline
-  if (Array.isArray(BOUNDARY_DATA[0])) {
+  if (Array.isArray(BOUNDARY_DATA[0]) && Array.isArray(BOUNDARY_DATA[0][0])) {
     BOUNDARY_DATA.forEach(ring => {
       L.polyline(ring, {
         color: '#f97316',

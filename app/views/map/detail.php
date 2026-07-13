@@ -1,5 +1,6 @@
 <?php
 $pageTitle = e($business['name']) . ' – ' . APP_NAME;
+$extraHead = '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">';
 $viewer = currentUser();
 $isVisitor = $viewer && ($viewer['role'] ?? '') === 'visitor';
 $reviewReturnTo = ($routePrefix ?? '') . 'lugar/' . $business['slug'] . '#valoraciones';

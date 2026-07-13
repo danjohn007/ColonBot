@@ -106,12 +106,27 @@ class MapController extends Controller
      */
     private function fetchColonBoundary(): string
     {
+        if (getenv('COLONBOT_LIVE_BOUNDARY') !== '1') {
+            return json_encode([
+                [20.9386651, -100.1783701],
+                [20.8907208, -100.2504651],
+                [20.7804625, -100.1993357],
+                [20.7001255, -100.1570654],
+                [20.5686339, -100.1151677],
+                [20.5753753, -100.0636573],
+                [20.6495900, -100.0310589],
+                [20.7600000, -100.0400000],
+                [20.8800000, -100.0800000],
+                [20.9386651, -100.1783701],
+            ]);
+        }
+
         // Overpass API query para obtener el polígono del municipio de Colón (relación 5605684)
         $overpassQuery = '[out:json];relation(5605684);out geom;';
         $url = 'https://overpass-api.de/api/interpreter?data=' . urlencode($overpassQuery);
         $ctx = stream_context_create([
             'http' => [
-                'timeout' => 15,
+                'timeout' => 2,
                 'header' => "User-Agent: ColonBot/1.0\r\n",
             ],
         ]);

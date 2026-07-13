@@ -1,5 +1,6 @@
 <?php
 $pageTitle = 'Analítica – SuperAdmin';
+$extraHead = '<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>';
 require APP_PATH . '/views/layout/head.php';
 ?>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>

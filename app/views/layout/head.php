@@ -36,10 +36,6 @@
       letter-spacing: -0.02em;
     }
   </style>
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <!-- ApexCharts -->
-  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
   <!-- Custom CSS -->
   <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
   <?php if (!empty($extraHead)): ?>

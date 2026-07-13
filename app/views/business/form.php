@@ -1,6 +1,7 @@
 <?php
 $isEdit     = $business !== null;
 $pageTitle  = ($isEdit ? 'Editar: ' . $business['name'] : 'Nuevo Negocio') . ' – ' . APP_NAME;
+$extraHead  = '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">';
 $puntoReferenciaId = null;
 foreach ($categories ?? [] as $cat) {
     if (($cat['slug'] ?? '') === 'punto-de-referencia') {
