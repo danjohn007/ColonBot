@@ -27,7 +27,11 @@ function routePrefix(string $prefix = 'landing'): string
 
 function asset(string $path): string
 {
-    return BASE_URL . '/assets/' . ltrim($path, '/');
+    $path = ltrim($path, '/');
+    $url = BASE_URL . '/assets/' . $path;
+    return preg_match('/\.(css|js)$/i', $path)
+        ? $url . '?v=' . rawurlencode(APP_VERSION)
+        : $url;
 }
 
 function imageUrl(string $filename): string
