@@ -1,9 +1,6 @@
 Options -Indexes
 DirectoryIndex index.php
 AddDefaultCharset UTF-8
-
-# Montaje temporal en public_html/colon con acento.
-SetEnvIf Request_URI "^/(col%C3%B3n|colón)(/|$)" APP_BASE_PATH=/colón
 RewriteEngine On
 
 # Redirigir a HTTPS (descomentar en producción)

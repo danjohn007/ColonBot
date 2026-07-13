@@ -5,6 +5,17 @@
  */
 
 // ─── Detección automática de la URL base ───────────────────────────────────
+if (!function_exists('app_url_path')) {
+    function app_url_path(string $path): string
+    {
+        $path = trim(str_replace('\\', '/', rawurldecode($path)), '/');
+        if ($path === '' || $path === '.') {
+            return '';
+        }
+        return '/' . implode('/', array_map('rawurlencode', explode('/', $path)));
+    }
+}
+
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host     = $_SERVER['HTTP_HOST'] ?? 'localhost';
 if (!defined('BASE_URL')) {
@@ -15,8 +26,7 @@ if (!defined('BASE_URL')) {
         $script   = rawurldecode($_SERVER['SCRIPT_NAME'] ?? '/index.php');
         $basePath = getenv('APP_BASE_PATH') ?: dirname($script);
         $basePath = str_replace('\\', '/', rawurldecode((string)$basePath));
-        $basePath = trim($basePath, '/');
-        define('BASE_URL', $protocol . '://' . $host . ($basePath !== '' && $basePath !== '.' ? '/' . $basePath : ''));
+        define('BASE_URL', $protocol . '://' . $host . app_url_path($basePath));
     }
 }
 
@@ -48,9 +58,9 @@ if (basename(ROOT_PATH) === 'landing' || is_dir($currentImagesRoot) || !is_dir($
 
 // ─── Base de datos ─────────────────────────────────────────────────────────
 define('DB_HOST',     getenv('DB_HOST')     ?: 'localhost');
-define('DB_NAME',     getenv('DB_NAME')     ?: 'colon_colonbotdb');
-define('DB_USER',     getenv('DB_USER')     ?: 'colon_enolobot');
-define('DB_PASS',     getenv('DB_PASS')     ?: 'B@#O,lv&uA2*');
+define('DB_NAME',     getenv('DB_NAME')     ?: 'fix360_colon');
+define('DB_USER',     getenv('DB_USER')     ?: 'admin_colon');
+define('DB_PASS',     getenv('DB_PASS')     ?: '');
 define('DB_CHARSET',  'utf8mb4');
 
 // ─── Aplicación ────────────────────────────────────────────────────────────
@@ -124,7 +134,7 @@ if (APP_ENV === 'development') {
 // ─── Iniciar sesión ────────────────────────────────────────────────────────
 if (session_status() === PHP_SESSION_NONE) {
     session_name(SESSION_NAME);
-    $sessionPath = (string)(parse_url(BASE_URL, PHP_URL_PATH) ?? '');
+    $sessionPath = app_url_path((string)(parse_url(BASE_URL, PHP_URL_PATH) ?? ''));
     $sessionPath = $sessionPath !== '' ? $sessionPath : '/';
     session_set_cookie_params([
         'lifetime' => SESSION_LIFETIME,
