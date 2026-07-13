@@ -31,8 +31,10 @@ abstract class Controller
 
     protected function currentRouteUri(): string
     {
-        $requestPath = trim((string)(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? ''), '/');
-        $basePath = trim((string)(parse_url(BASE_URL, PHP_URL_PATH) ?? ''), '/');
+        $requestPath = trim(rawurldecode((string)(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '')), '/');
+        $basePath = function_exists('basePath')
+            ? basePath()
+            : trim(rawurldecode((string)(parse_url(BASE_URL, PHP_URL_PATH) ?? '')), '/');
 
         if ($basePath !== '' && ($requestPath === $basePath || strpos($requestPath, $basePath . '/') === 0)) {
             $requestPath = trim(substr($requestPath, strlen($basePath)), '/');

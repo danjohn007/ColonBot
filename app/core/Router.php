@@ -40,8 +40,9 @@ class Router
 
     private function getUri(): string
     {
-        $scriptDir  = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-        $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $scriptDir  = function_exists('basePath') ? '/' . basePath() : rtrim(dirname(rawurldecode($_SERVER['SCRIPT_NAME'] ?? '/index.php')), '/\\');
+        $scriptDir  = rtrim($scriptDir, '/\\');
+        $requestUri = rawurldecode((string)(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? ''));
         if ($scriptDir !== '' && strpos($requestUri, $scriptDir) === 0) {
             $requestUri = substr($requestUri, strlen($scriptDir));
         }

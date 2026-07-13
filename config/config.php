@@ -5,12 +5,19 @@
  */
 
 // ─── Detección automática de la URL base ───────────────────────────────────
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host     = $_SERVER['HTTP_HOST'] ?? 'localhost';
 if (!defined('BASE_URL')) {
-    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-    $host     = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    $script   = $_SERVER['SCRIPT_NAME'] ?? '/index.php';
-    $basePath = rtrim(dirname($script), '/\\');
-    define('BASE_URL', $protocol . '://' . $host . $basePath);
+    $baseUrlOverride = getenv('APP_BASE_URL') ?: '';
+    if ($baseUrlOverride !== '') {
+        define('BASE_URL', rtrim($baseUrlOverride, '/'));
+    } else {
+        $script   = rawurldecode($_SERVER['SCRIPT_NAME'] ?? '/index.php');
+        $basePath = getenv('APP_BASE_PATH') ?: dirname($script);
+        $basePath = str_replace('\\', '/', rawurldecode((string)$basePath));
+        $basePath = trim($basePath, '/');
+        define('BASE_URL', $protocol . '://' . $host . ($basePath !== '' && $basePath !== '.' ? '/' . $basePath : ''));
+    }
 }
 
 // ─── Rutas del sistema ─────────────────────────────────────────────────────
@@ -117,6 +124,14 @@ if (APP_ENV === 'development') {
 // ─── Iniciar sesión ────────────────────────────────────────────────────────
 if (session_status() === PHP_SESSION_NONE) {
     session_name(SESSION_NAME);
-    session_set_cookie_params(SESSION_LIFETIME);
+    $sessionPath = (string)(parse_url(BASE_URL, PHP_URL_PATH) ?? '');
+    $sessionPath = $sessionPath !== '' ? $sessionPath : '/';
+    session_set_cookie_params([
+        'lifetime' => SESSION_LIFETIME,
+        'path' => $sessionPath,
+        'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
     session_start();
 }
