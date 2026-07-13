@@ -1,5 +1,5 @@
 Options -Indexes
-DirectoryIndex index.php
+DirectoryIndex front.php index.php
 AddDefaultCharset UTF-8
 RewriteEngine On
 
@@ -15,7 +15,7 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
 # Reescribir todo lo demás al front controller alterno
-RewriteRule ^(.*)$ index.php [QSA,L]
+RewriteRule ^(.*)$ front.php [QSA,L]
 
 # Seguridad: bloquear acceso directo a config y app
 <FilesMatch "^(config|database)\.php$">
