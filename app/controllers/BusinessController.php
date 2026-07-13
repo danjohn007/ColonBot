@@ -548,6 +548,7 @@ class BusinessController extends Controller
             'website'     => trim($_POST['website'] ?? ''),
             'facebook'    => trim($_POST['facebook'] ?? ''),
             'instagram'   => trim($_POST['instagram'] ?? ''),
+            'schedule'    => trim($_POST['schedule'] ?? ''),
             'is_open'     => $isOpen,
             'estado'      => $isOpen ? 'activo' : 'inactivo',
             'open_for_messaging' => in_array($_POST['open_for_messaging'] ?? '24hrs', ['24hrs', 'schedule'], true)
