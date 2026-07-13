@@ -26,3 +26,108 @@
 
 /* ─── Map height fix ────────────────────────────────────────── */
 #map { min-height: 400px; }
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.site-login-label-short {
+  display: none;
+}
+
+.site-brand,
+.site-nav-actions {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .site-nav-inner {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .site-nav-row {
+    height: 58px;
+    gap: 8px;
+  }
+
+  .site-brand {
+    gap: 6px;
+    flex: 1 1 auto;
+    overflow: hidden;
+  }
+
+  .site-logo-main {
+    height: 34px;
+    max-width: 90px;
+    object-fit: contain;
+  }
+
+  .site-logo-bot {
+    height: 30px;
+    width: 30px;
+    flex: 0 0 30px;
+  }
+
+  .site-logo-gov {
+    display: inline-block;
+    height: 34px;
+    max-width: 86px;
+    object-fit: contain;
+  }
+
+  .site-nav-actions {
+    flex: 0 0 auto;
+    gap: 6px;
+  }
+
+  .site-social-link {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 999px;
+  }
+
+  .site-social-link svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .site-login-link {
+    min-height: 40px;
+    padding: 0 13px;
+    gap: 6px;
+    font-size: 12px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .site-login-link svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .site-login-label-full {
+    display: none;
+  }
+
+  .site-login-label-short {
+    display: inline;
+  }
+}
+
+@media (max-width: 480px) {
+  .site-logo-gov {
+    display: none;
+  }
+
+  .site-logo-main {
+    max-width: 104px;
+  }
+
+  .site-login-link {
+    padding-inline: 11px;
+  }
+}

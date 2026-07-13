@@ -6,9 +6,9 @@ $showSidebar = $user !== null;
 $loginUrl = url($navPrefix . 'login');
 ?>
 <!-- Top Navigation Bar (slim - only logo + hamburger) -->
-<nav class="shadow-sm sticky top-0 z-50 bg-white">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between h-16">
+<nav class="site-top-nav shadow-sm sticky top-0 z-50 bg-white">
+  <div class="site-nav-inner max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="site-nav-row flex items-center justify-between h-16">
       <!-- Hamburger button (always visible on desktop too now) -->
       <?php if ($showSidebar): ?>
       <button id="sidebar-toggle" class="p-2 rounded-lg hover:bg-gray-100 transition text-gray-700 focus:outline-none">
@@ -19,28 +19,29 @@ $loginUrl = url($navPrefix . 'login');
       <?php endif; ?>
 
       <!-- Logo -->
-      <a href="https://colon.click/sistema/mapa" class="flex items-center gap-3 font-bold text-lg">
-        <img src="<?= asset('img/colon.png') ?>" alt="Colón te conquistará" class="h-12 w-auto">
-        <img src="<?= asset('img/cristo-bot-nino-small.png') ?>" alt="Cristo Bot Colón" class="h-10 w-auto rounded-full" width="40" height="40" decoding="async">
-        <img src="<?= asset('img/logo-header-nuevo.jpeg') ?>" alt="Ayuntamiento de Colón" class="h-12 w-auto hidden sm:inline-block">
+      <a href="<?= url($navPrefix . 'mapa') ?>" class="site-brand flex items-center gap-3 font-bold text-lg">
+        <img src="<?= asset('img/colon.png') ?>" alt="Colón te conquistará" class="site-logo-main h-12 w-auto">
+        <img src="<?= asset('img/cristo-bot-nino-small.png') ?>" alt="Cristo Bot Colón" class="site-logo-bot h-10 w-auto rounded-full" width="40" height="40" decoding="async">
+        <img src="<?= asset('img/logo-header-nuevo.jpeg') ?>" alt="Ayuntamiento de Colón" class="site-logo-gov h-12 w-auto hidden sm:inline-block">
         <span class="text-base font-semibold whitespace-nowrap hidden sm:inline site-title-brand"><?= e(setting('site_name', 'CristobalBot: Mapa interactivo del turismo en Colón')) ?></span>
       </a>
 
       <!-- User / Login on the right -->
-      <div class="flex items-center gap-2">
+      <div class="site-nav-actions flex items-center gap-2">
         <a href="https://www.facebook.com/share/1LUHTDWc5t/" target="_blank" rel="noopener noreferrer"
-           class="flex items-center gap-1.5 bg-purple-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-medium hover:bg-purple-700 transition whitespace-nowrap">
+           class="site-social-link flex items-center gap-1.5 bg-purple-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-medium hover:bg-purple-700 transition whitespace-nowrap">
           <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
           <span class="hidden sm:inline">Turismo</span>
         </a>
         <?php if ($user): ?>
           <a href="<?= url('logout') ?>" class="text-xs text-red-600 hover:text-red-700 transition hidden sm:inline">Salir</a>
         <?php else: ?>
-          <a href="<?= e($loginUrl) ?>" class="inline-flex items-center gap-2 rounded-full bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-purple-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition">
+          <a href="<?= e($loginUrl) ?>" class="site-login-link inline-flex items-center gap-2 rounded-full bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-purple-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/>
             </svg>
-            <span>Ingresar / Registrarse</span>
+            <span class="site-login-label-full">Ingresar / Registrarse</span>
+            <span class="site-login-label-short">Ingresar</span>
           </a>
         <?php endif; ?>
       </div>

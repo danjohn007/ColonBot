@@ -62,6 +62,7 @@
 .colon-hero-content {
   position: relative;
   z-index: 1;
+  width: 100%;
   max-width: 960px;
 }
 
@@ -1057,19 +1058,53 @@
 
 @media (max-width: 680px) {
   .colon-hero {
-    min-height: 88svh;
-    padding: 96px 18px 58px;
+    min-height: calc(100svh - 58px);
+    padding: 76px 18px 48px;
+    align-items: end;
   }
 
   .colon-hero-title {
-    font-size: clamp(3rem, 16vw, 5.6rem);
+    max-width: 100%;
+    font-size: clamp(2.5rem, 12vw, 4.35rem);
+    line-height: .94;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .colon-hero-copy {
+    max-width: 100%;
+    font-size: .98rem;
+    line-height: 1.55;
+  }
+
+  .colon-hero-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .colon-hero-actions .colon-btn {
+    width: 100%;
+    min-height: 48px;
+    padding-inline: 14px;
+    font-size: .7rem;
+    letter-spacing: .08em;
   }
 
   .colon-slide-dots {
     position: relative;
     left: auto;
     bottom: auto;
-    margin-top: 34px;
+    width: 100%;
+    justify-content: center;
+    margin-top: 28px;
+    gap: 8px;
+  }
+
+  .colon-dot {
+    width: min(44px, 18vw);
   }
 
   .colon-map-shell {
