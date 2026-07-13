@@ -18,17 +18,14 @@ if (!function_exists('app_url_path')) {
 
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host     = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$script   = rawurldecode($_SERVER['SCRIPT_NAME'] ?? '/index.php');
 if (!defined('BASE_URL')) {
     $baseUrlOverride = getenv('APP_BASE_URL') ?: '';
     if ($baseUrlOverride !== '') {
         define('BASE_URL', rtrim($baseUrlOverride, '/'));
-    } elseif (preg_match('/(^|\.)fix360\.app$/i', $host)) {
-        define('BASE_URL', 'https://fix360.app/colon');
     } else {
-        $script   = rawurldecode($_SERVER['SCRIPT_NAME'] ?? '/index.php');
         $basePath = getenv('APP_BASE_PATH') ?: dirname($script);
-        $basePath = str_replace('\\', '/', rawurldecode((string)$basePath));
-        define('BASE_URL', $protocol . '://' . $host . app_url_path($basePath));
+        define('BASE_URL', $protocol . '://' . $host . app_url_path((string)$basePath));
     }
 }
 
@@ -60,8 +57,8 @@ if (basename(ROOT_PATH) === 'landing' || is_dir($currentImagesRoot) || !is_dir($
 
 // ─── Base de datos ─────────────────────────────────────────────────────────
 define('DB_HOST',     getenv('DB_HOST')     ?: 'localhost');
-define('DB_NAME',     getenv('DB_NAME')     ?: 'fix360_colon');
-define('DB_USER',     getenv('DB_USER')     ?: 'admin_colon');
+define('DB_NAME',     getenv('DB_NAME')     ?: 'colon_colonbotdb');
+define('DB_USER',     getenv('DB_USER')     ?: 'colon_enolobot');
 define('DB_PASS',     getenv('DB_PASS')     ?: '');
 define('DB_CHARSET',  'utf8mb4');
 
@@ -69,47 +66,6 @@ define('DB_CHARSET',  'utf8mb4');
 define('APP_NAME',    'Plataforma Turística – Colón');
 define('APP_VERSION', '1.0.0');
 define('APP_ENV',     getenv('APP_ENV') ?: 'production'); // development | production
-
-ini_set('default_charset', 'UTF-8');
-if (PHP_SAPI !== 'cli' && !headers_sent()) {
-    header('Content-Type: text/html; charset=UTF-8');
-}
-
-// ─── Registro explícito de errores para diagnosticar HTTP 500 ─────────────
-ini_set('log_errors', '1');
-set_error_handler(function (int $severity, string $message, string $file, int $line): bool {
-    if (!(error_reporting() & $severity)) {
-        return false;
-    }
-
-    $url = ($_SERVER['REQUEST_METHOD'] ?? 'CLI') . ' ' . ($_SERVER['REQUEST_URI'] ?? '');
-    error_log("[ColonBot PHP error] {$message} in {$file}:{$line} | {$url}");
-    return false;
-});
-
-set_exception_handler(function (Throwable $e): void {
-    $url = ($_SERVER['REQUEST_METHOD'] ?? 'CLI') . ' ' . ($_SERVER['REQUEST_URI'] ?? '');
-    error_log('[ColonBot uncaught exception] ' . get_class($e) . ': ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine() . " | {$url}\n" . $e->getTraceAsString());
-    http_response_code(500);
-    if (defined('APP_ENV') && APP_ENV === 'development') {
-        echo '<pre>' . htmlspecialchars((string)$e, ENT_QUOTES, 'UTF-8') . '</pre>';
-    }
-});
-
-register_shutdown_function(function (): void {
-    $error = error_get_last();
-    if (!$error) {
-        return;
-    }
-
-    $fatalTypes = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR];
-    if (!in_array($error['type'], $fatalTypes, true)) {
-        return;
-    }
-
-    $url = ($_SERVER['REQUEST_METHOD'] ?? 'CLI') . ' ' . ($_SERVER['REQUEST_URI'] ?? '');
-    error_log("[ColonBot fatal error] {$error['message']} in {$error['file']}:{$error['line']} | {$url}");
-});
 
 // ─── Sesiones ──────────────────────────────────────────────────────────────
 define('SESSION_NAME',     'colonbot_session');
@@ -130,7 +86,7 @@ if (APP_ENV === 'development') {
     error_reporting(E_ALL);
 } else {
     ini_set('display_errors', 0);
-    error_reporting(E_ALL);
+    error_reporting(0);
 }
 
 // ─── Iniciar sesión ────────────────────────────────────────────────────────

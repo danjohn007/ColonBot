@@ -21,7 +21,7 @@ $loginUrl = url($navPrefix . 'login');
       <!-- Logo -->
       <a href="<?= url($navPrefix . 'mapa') ?>" class="site-brand flex items-center gap-3 font-bold text-lg">
         <img src="<?= asset('img/colon.png') ?>" alt="Colón te conquistará" class="site-logo-main h-12 w-auto">
-        <img src="<?= asset('img/cristo-bot-nino-small.png') ?>" alt="Cristo Bot Colón" class="site-logo-bot h-10 w-auto rounded-full" width="40" height="40" decoding="async">
+        <img src="<?= asset('img/cristo-bot-nino-small.png') ?>" alt="Cristo Bot Colón" class="site-logo-bot hidden sm:inline-block h-10 w-auto rounded-full" width="40" height="40" decoding="async">
         <img src="<?= asset('img/logo-header-nuevo.jpeg') ?>" alt="Ayuntamiento de Colón" class="site-logo-gov h-12 w-auto hidden sm:inline-block">
         <span class="text-base font-semibold whitespace-nowrap hidden sm:inline site-title-brand"><?= e(setting('site_name', 'CristobalBot: Mapa interactivo del turismo en Colón')) ?></span>
       </a>
@@ -40,8 +40,8 @@ $loginUrl = url($navPrefix . 'login');
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/>
             </svg>
-            <span class="site-login-label-full">Ingresar / Registrarse</span>
-            <span class="site-login-label-short">Ingresar</span>
+            <span class="site-login-label-full hidden sm:inline">Ingresar / Registrarse</span>
+            <span class="site-login-label-short sm:hidden">Ingresar</span>
           </a>
         <?php endif; ?>
       </div>
