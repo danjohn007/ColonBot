@@ -235,8 +235,8 @@ class CrmController extends Controller
     private function ownerOrAdmin(array $business): void
     {
         $user = currentUser();
-        // Colaborador_admin y colaborador pueden gestionar contactos de los negocios
-        if (in_array($this->normalizeRole($user['role'] ?? ''), ['colaborador_admin', 'superadmin'], true)) {
+        // Prestador, colaborador_admin y superadmin pueden gestionar contactos de los negocios
+        if (in_array($this->normalizeRole($user['role'] ?? ''), ['prestador', 'colaborador_admin', 'superadmin'], true)) {
             return;
         }
         if ((int)$business['user_id'] !== (int)$user['id']) {
