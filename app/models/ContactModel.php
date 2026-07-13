@@ -2,12 +2,13 @@
 class ContactModel extends Model
 {
     protected string $table = 'contacts';
+    private const CLIENTE_RECURRENTE_MIN_PURCHASES = 4;
 
     public function byBusiness(int $businessId, string $category = ''): array
     {
         $sql = 'SELECT c.*, 
                 (SELECT COUNT(*) FROM contact_purchases cp WHERE cp.contact_id = c.id) AS purchase_count,
-                (SELECT SUM(cp.amount) FROM contact_purchases cp WHERE cp.contact_id = c.id) AS total_spent
+                (SELECT COALESCE(SUM(cp.amount), 0) FROM contact_purchases cp WHERE cp.contact_id = c.id) AS total_spent
                 FROM contacts c WHERE c.business_id = ?';
         $params = [$businessId];
 
@@ -17,7 +18,7 @@ class ContactModel extends Model
             } elseif ($category === 'prospecto_recurrente') {
                 $sql .= " AND c.category = 'prospecto_recurrente'";
             } elseif ($category === 'cliente_frecuente') {
-                $sql .= " AND (c.category = 'lovemark' OR (SELECT COUNT(*) FROM contact_purchases cp WHERE cp.contact_id = c.id) >= 3)";
+                $sql .= " AND (c.category = 'lovemark' OR (SELECT COUNT(*) FROM contact_purchases cp WHERE cp.contact_id = c.id) >= " . self::CLIENTE_RECURRENTE_MIN_PURCHASES . ")";
             } else {
                 $sql .= ' AND c.category = ?';
                 $params[] = $category;
@@ -114,28 +115,22 @@ class ContactModel extends Model
             [$amount, $contactId]
         );
 
-        // Check if should upgrade based on purchase count
-        $stmt = $this->db->prepare('SELECT COUNT(*) FROM contact_purchases WHERE contact_id = ?');
-        $stmt->execute([$contactId]);
-        $purchaseCount = (int)$stmt->fetchColumn();
-
-        $contact = $this->find($contactId);
-        if ($contact) {
-            if ($purchaseCount >= 3 && $contact['category'] !== 'lovemark') {
-                $this->update($contactId, ['category' => 'lovemark']);
-            } elseif ($purchaseCount >= 1 && $contact['category'] !== 'cliente' && $contact['category'] !== 'lovemark') {
-                $this->update($contactId, ['category' => 'cliente']);
-            }
-        }
+        $this->refreshCategoryFromPurchases($contactId);
     }
 
     public function upgradeToCliente(int $contactId, float $amount = 0, string $products = '', string $notes = ''): void
     {
-        $this->update($contactId, ['category' => 'cliente']);
-        if ($amount > 0) {
-            $contact = $this->find($contactId);
-            $this->addPurchase($contactId, $contact['business_id'], $amount, $products, $notes);
+        $contact = $this->find($contactId);
+        if ($contact) {
+            $this->addPurchase($contactId, (int)$contact['business_id'], $amount, $products, $notes);
         }
+    }
+
+    public function purchaseCount(int $contactId): int
+    {
+        $stmt = $this->db->prepare('SELECT COUNT(*) FROM contact_purchases WHERE contact_id = ?');
+        $stmt->execute([$contactId]);
+        return (int)$stmt->fetchColumn();
     }
 
     /**
@@ -168,7 +163,7 @@ class ContactModel extends Model
                 $stmt->execute([$existing['id']]);
                 $purchaseCount = (int)$stmt->fetchColumn();
 
-                if ($purchaseCount >= 3) {
+                if ($purchaseCount >= self::CLIENTE_RECURRENTE_MIN_PURCHASES) {
                     $category = 'lovemark';
                 } elseif ($purchaseCount >= 1) {
                     $category = 'cliente';
@@ -183,14 +178,65 @@ class ContactModel extends Model
         ];
     }
 
+    public function syncWebVisitorProspect(int $businessId, array $user): void
+    {
+        $userId = (int)($user['id'] ?? 0);
+        $name = trim($user['name'] ?? '') ?: 'Visitante web';
+        $email = trim($user['email'] ?? '');
+        $phone = trim($user['phone'] ?? '');
+
+        if ($userId <= 0 || ($email === '' && $phone === '')) {
+            return;
+        }
+
+        $existing = null;
+        if ($email !== '') {
+            $existing = $this->queryOne(
+                'SELECT * FROM contacts WHERE business_id = ? AND email = ? LIMIT 1',
+                [$businessId, $email]
+            );
+        }
+        if (!$existing && $phone !== '') {
+            $existing = $this->findByPhone($businessId, $phone);
+        }
+
+        $stmt = $this->db->prepare('SELECT COUNT(*) FROM visitor_place_visits WHERE user_id = ? AND business_id = ?');
+        $stmt->execute([$userId, $businessId]);
+        $visitCount = (int)$stmt->fetchColumn();
+        $prospectCategory = $visitCount > 1 ? 'prospecto_recurrente' : 'prospecto_sin_historial';
+
+        if ($existing) {
+            $purchaseCount = $this->purchaseCount((int)$existing['id']);
+            $this->update((int)$existing['id'], [
+                'name' => $name,
+                'email' => $email ?: $existing['email'],
+                'phone' => $phone ?: $existing['phone'],
+                'category' => $purchaseCount > 0 ? $this->categoryFromPurchaseCount($purchaseCount) : $prospectCategory,
+                'source' => $existing['source'] ?: 'mapa',
+                'total_visits' => max($visitCount, (int)($existing['total_visits'] ?? 0)),
+                'last_contact_at' => date('Y-m-d H:i:s'),
+            ]);
+            return;
+        }
+
+        $this->insert([
+            'business_id' => $businessId,
+            'name' => $name,
+            'email' => $email ?: null,
+            'phone' => $phone ?: null,
+            'category' => $prospectCategory,
+            'source' => 'mapa',
+            'total_visits' => $visitCount,
+            'last_contact_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
+
     /**
      * Clasificar contactos basado en sesiones de chatbot WhatsApp.
-     * Utiliza los datos de chatbot_sessions (session_count, purchase_count, has_purchased, category)
-     * para determinar automáticamente la categoría de cada contacto en el CRM.
+     * Utiliza session_count para distinguir prospectos sin historial y recurrentes.
+     * Las categorias de cliente dependen solo de compras capturadas por el prestador.
      *
      * Clasificación:
-     * - purchase_count >= 3  → lovemark
-     * - has_purchased = 1 o purchase_count >= 1  → cliente
      * - session_count > 1 y sin compras  → prospecto_recurrente
      * - session_count = 1 y sin compras  → prospecto_sin_historial
      *
@@ -222,7 +268,10 @@ class ContactModel extends Model
             $session = $stmt->fetch();
 
             if ($session) {
-                $newCategory = $this->determineCategoryFromSession($session);
+                $purchaseCount = $this->purchaseCount((int)$contact['id']);
+                $newCategory = $purchaseCount > 0
+                    ? $this->categoryFromPurchaseCount($purchaseCount)
+                    : $this->determineProspectCategoryFromSession($session);
                 $results[] = [
                     'id'               => $contact['id'],
                     'wa_id'            => $waId,
@@ -231,10 +280,10 @@ class ContactModel extends Model
                     'phone'            => $contact['phone'] ?? $waId,
                     'category'         => $newCategory,
                     'total_visits'     => (int)$session['session_count'],
-                    'total_spent'      => 0,
+                    'total_spent'      => $this->totalSpent((int)$contact['id']),
                     'source'           => 'whatsapp',
                     'last_contact_at'  => null,
-                    'purchase_count'   => (int)$session['purchase_count'],
+                    'purchase_count'   => $purchaseCount,
                     'chatbot_session_id' => 0,
                     'is_chatbot'       => true,
                 ];
@@ -283,7 +332,7 @@ class ContactModel extends Model
         $chatbotOnlySessions = $stmt->fetchAll();
 
         foreach ($chatbotOnlySessions as $session) {
-            $newCategory = $this->determineCategoryFromSession($session);
+            $newCategory = $this->determineProspectCategoryFromSession($session);
             $results[] = [
                 'id'               => $session['id'],
                 'wa_id'            => $session['wa_id'],
@@ -295,7 +344,7 @@ class ContactModel extends Model
                 'total_spent'      => 0,
                 'source'           => 'whatsapp',
                 'last_contact_at'  => $session['updated_at'],
-                'purchase_count'   => (int)$session['purchase_count'],
+                'purchase_count'   => 0,
                 'chatbot_session_id' => (int)$session['id'],
                 'is_chatbot'       => true,
             ];
@@ -307,22 +356,38 @@ class ContactModel extends Model
     /**
      * Determinar la categoría del cliente basado en datos de sesión del chatbot.
      */
-    private function determineCategoryFromSession(array $session): string
+    private function determineProspectCategoryFromSession(array $session): string
     {
-        $purchaseCount = (int)($session['purchase_count'] ?? 0);
-        $hasPurchased  = (bool)($session['has_purchased'] ?? false);
-        $sessionCount  = (int)($session['session_count'] ?? 1);
+        $sessionCount = (int)($session['session_count'] ?? 1);
+        return $sessionCount > 1 ? 'prospecto_recurrente' : 'prospecto_sin_historial';
+    }
 
-        if ($purchaseCount >= 3) {
+    private function categoryFromPurchaseCount(int $purchaseCount): string
+    {
+        if ($purchaseCount >= self::CLIENTE_RECURRENTE_MIN_PURCHASES) {
             return 'lovemark';
         }
-        if ($hasPurchased || $purchaseCount >= 1) {
+        if ($purchaseCount >= 1) {
             return 'cliente';
         }
-        if ($sessionCount > 1) {
-            return 'prospecto_recurrente';
-        }
         return 'prospecto_sin_historial';
+    }
+
+    private function refreshCategoryFromPurchases(int $contactId): void
+    {
+        $purchaseCount = $this->purchaseCount($contactId);
+        if ($purchaseCount <= 0 || !$this->find($contactId)) {
+            return;
+        }
+
+        $this->update($contactId, ['category' => $this->categoryFromPurchaseCount($purchaseCount)]);
+    }
+
+    private function totalSpent(int $contactId): float
+    {
+        $stmt = $this->db->prepare('SELECT COALESCE(SUM(amount), 0) FROM contact_purchases WHERE contact_id = ?');
+        $stmt->execute([$contactId]);
+        return (float)$stmt->fetchColumn();
     }
 
     public function getMetrics(int $businessId, string $period = 'all'): array

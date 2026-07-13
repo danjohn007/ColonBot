@@ -4,12 +4,14 @@ class MapController extends Controller
     private BusinessModel  $businesses;
     private CategoryModel  $categories;
     private AnalyticsModel $analytics;
+    private ContactModel   $contacts;
 
     public function __construct()
     {
         $this->businesses = new BusinessModel();
         $this->categories = new CategoryModel();
         $this->analytics  = new AnalyticsModel();
+        $this->contacts   = new ContactModel();
     }
 
     public function index(string $id = ''): void
@@ -71,6 +73,7 @@ class MapController extends Controller
         $user = currentUser();
         if ($user && ($user['role'] ?? '') === 'visitor') {
             $this->businesses->recordVisitorVisit((int)$user['id'], (int)$business['id']);
+            $this->contacts->syncWebVisitorProspect((int)$business['id'], $user);
         }
         $this->analytics->track('map_view', $business['id']);
 

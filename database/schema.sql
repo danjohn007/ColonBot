@@ -280,7 +280,7 @@ CREATE TABLE IF NOT EXISTS `contacts` (
   `name` VARCHAR(120) NOT NULL,
   `email` VARCHAR(191) DEFAULT NULL,
   `phone` VARCHAR(20) DEFAULT NULL,
-  `category` ENUM('prospecto','cliente','lovemark') NOT NULL DEFAULT 'prospecto',
+  `category` ENUM('prospecto','prospecto_sin_historial','prospecto_recurrente','cliente','lovemark') NOT NULL DEFAULT 'prospecto_sin_historial',
   `source` ENUM('whatsapp','mapa','manual') NOT NULL DEFAULT 'manual',
   `notes` TEXT DEFAULT NULL,
   `total_visits` INT UNSIGNED NOT NULL DEFAULT 0,

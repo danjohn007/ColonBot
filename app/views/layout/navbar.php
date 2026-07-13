@@ -168,6 +168,9 @@ $loginUrl = url($navPrefix . 'login');
         <a href="<?= url('admin/notificaciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">🔔</span> Notificaciones
         </a>
+        <a href="<?= url('superadmin/negocios') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+          <span class="text-lg">OK</span> Aprobar negocios
+        </a>
         <a href="<?= url($navPrefix . 'configuraciones') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
           <span class="text-lg">⚙️</span> Configuraciones
         </a>

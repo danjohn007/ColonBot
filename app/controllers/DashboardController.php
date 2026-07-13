@@ -287,14 +287,15 @@ class DashboardController extends Controller
 
     public function businesses(): void
     {
-        $this->requireAuth('superadmin');
+        $this->requireAuth('colaborador_admin');
         $businesses = $this->businesses->allWithCategory();
-        $this->view('dashboard.businesses', compact('businesses') + ['csrf' => $this->csrf()]);
+        $user = currentUser();
+        $this->view('dashboard.businesses', compact('businesses', 'user') + ['csrf' => $this->csrf()]);
     }
 
     public function approveBusiness(string $id): void
     {
-        $this->requireAuth('superadmin');
+        $this->requireAuth('colaborador_admin');
         $this->verifyCsrf();
         $this->businesses->update((int)$id, ['status' => 'published']);
         $this->logAction('approve_business', 'businesses', (int)$id);
@@ -304,7 +305,7 @@ class DashboardController extends Controller
 
     public function rejectBusiness(string $id): void
     {
-        $this->requireAuth('superadmin');
+        $this->requireAuth('colaborador_admin');
         $this->verifyCsrf();
         $this->businesses->update((int)$id, ['status' => 'rejected']);
         $this->logAction('reject_business', 'businesses', (int)$id);

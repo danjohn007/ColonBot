@@ -1,5 +1,6 @@
 <?php
 $pageTitle = 'Negocios – SuperAdmin';
+$viewerRole = $user['role'] ?? '';
 require APP_PATH . '/views/layout/head.php';
 ?>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
@@ -61,11 +62,13 @@ require APP_PATH . '/views/layout/head.php';
                 <button type="submit" class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-lg hover:bg-yellow-200 transition">✗ Rechazar</button>
               </form>
               <?php endif; ?>
+              <?php if ($viewerRole === 'superadmin'): ?>
               <form method="POST" action="<?= url('superadmin/negocios/' . $b['id'] . '/eliminar') ?>" class="inline"
                 onsubmit="return confirm('¿Eliminar este negocio?')">
                 <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
                 <button type="submit" class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-lg hover:bg-red-200 transition">Eliminar</button>
               </form>
+              <?php endif; ?>
             </div>
           </td>
         </tr>

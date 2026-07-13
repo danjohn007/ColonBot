@@ -118,16 +118,16 @@ class PromotionModel extends Model
         $params = [$businessId];
 
         if (in_array('clientes_frecuentes', $segments)) {
-            $conditions[] = "c.category = 'lovemark'";
+            $conditions[] = "(c.category = 'lovemark' OR (SELECT COUNT(*) FROM contact_purchases cp WHERE cp.contact_id = c.id) >= 4)";
         }
         if (in_array('clientes', $segments)) {
             $conditions[] = "c.category = 'cliente'";
         }
         if (in_array('prospectos_recurrentes', $segments)) {
-            $conditions[] = "(c.category = 'prospecto' AND c.last_contact_at IS NOT NULL)";
+            $conditions[] = "c.category = 'prospecto_recurrente'";
         }
         if (in_array('prospectos_sin_historial', $segments)) {
-            $conditions[] = "(c.category = 'prospecto' AND c.last_contact_at IS NULL)";
+            $conditions[] = "c.category IN ('prospecto', 'prospecto_sin_historial')";
         }
 
         if (empty($conditions)) return [];

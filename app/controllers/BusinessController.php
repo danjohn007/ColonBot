@@ -219,7 +219,12 @@ class BusinessController extends Controller
         $data['category_id'] = $categoryIds[0];
         $slug = $this->uniqueSlug($data['name']);
         $data['slug']    = $slug;
-        $data['user_id'] = currentUser()['id'];
+        $user = currentUser();
+        $data['user_id'] = $user['id'];
+
+        if (($user['role'] ?? '') === 'prestador') {
+            $data['status'] = 'pending';
+        }
 
         $id = $this->businesses->insert($data);
 
@@ -238,7 +243,13 @@ class BusinessController extends Controller
         $this->handleCoverUpload($id);
 
         $this->logAction('create_business', 'businesses', $id, $data['name']);
-        $this->flash('success', 'Negocio creado exitosamente.');
+        if (($user['role'] ?? '') === 'prestador') {
+            $this->notifyAdminsForBusinessApproval($id, $data['name'], $user);
+        }
+        $message = (($user['role'] ?? '') === 'prestador')
+            ? 'Negocio creado exitosamente. Queda pendiente de aprobacion.'
+            : 'Negocio creado exitosamente.';
+        $this->flash('success', $message);
         $this->redirect('admin/negocio');
     }
 
@@ -599,6 +610,23 @@ class BusinessController extends Controller
                 'type' => 'system',
                 'title' => 'Nuevo evento disponible',
                 'message' => "Ya puedes consultar el evento \"{$title}\" en tu panel de visitante.",
+            ]);
+        }
+    }
+
+    private function notifyAdminsForBusinessApproval(int $businessId, string $businessName, array $provider): void
+    {
+        $users = new UserModel();
+        $notifications = new NotificationModel();
+        $providerName = trim($provider['name'] ?? '') ?: 'Un prestador';
+
+        foreach ($users->admins() as $admin) {
+            $notifications->create([
+                'user_id' => (int)$admin['id'],
+                'business_id' => $businessId,
+                'type' => 'status',
+                'title' => 'Nuevo negocio pendiente de aprobacion',
+                'message' => "{$providerName} registro \"{$businessName}\". Revisalo en Gestion de Negocios para aprobarlo.",
             ]);
         }
     }

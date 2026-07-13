@@ -78,6 +78,12 @@ require APP_PATH . '/views/layout/head.php';
         <?php if (!empty($n['message'])): ?>
         <p class="text-sm text-gray-600 mt-1"><?= e($n['message']) ?></p>
         <?php endif; ?>
+        <?php if (($n['type'] ?? '') === 'status' && !empty($n['business_id']) && in_array($user['role'] ?? '', ['superadmin', 'colaborador_admin'], true)): ?>
+        <a href="<?= url('superadmin/negocios') ?>"
+           class="inline-flex mt-3 text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition font-semibold">
+          Revisar para aprobar
+        </a>
+        <?php endif; ?>
       </div>
     </div>
     <?php endforeach; ?>

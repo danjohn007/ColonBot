@@ -83,9 +83,8 @@ require APP_PATH . '/views/layout/head.php';
       <div>
         <label class="label block text-sm font-medium text-gray-700 mb-1">Categoría</label>
         <select id="add-category" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
-          <option value="prospecto">📋 Prospecto</option>
-          <option value="cliente">✅ Cliente</option>
-          <option value="lovemark">⭐ Lovemark</option>
+          <option value="prospecto_sin_historial">Prospecto sin historial</option>
+          <option value="prospecto_recurrente">Prospecto recurrente</option>
         </select>
       </div>
       <div>
@@ -104,7 +103,7 @@ require APP_PATH . '/views/layout/head.php';
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 relative">
     <button onclick="closeUpgradeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">✕</button>
     <h2 class="text-lg font-bold text-gray-900 mb-1">Convertir PROSPECTO a CLIENTE</h2>
-    <p class="text-xs text-gray-500 mb-4">Customer Journey — Etapa A → B: Captura los datos de la venta</p>
+    <p class="text-xs text-gray-500 mb-4">Customer Journey: un prospecto se convierte en cliente solo al registrar una compra.</p>
     <p class="text-sm text-gray-500 mb-4" id="upgrade-contact-name"></p>
     <form onsubmit="upgradeToCliente(event)" class="space-y-4">
       <input type="hidden" id="upgrade-contact-id" value="">
@@ -141,7 +140,7 @@ require APP_PATH . '/views/layout/head.php';
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 relative">
     <button onclick="closePurchaseModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">✕</button>
     <h2 class="text-lg font-bold text-gray-900 mb-1">Registrar Nueva Compra</h2>
-    <p class="text-xs text-gray-500 mb-4">Customer Journey — 3 compras o más = Lovemark ⭐ (automático)</p>
+    <p class="text-xs text-gray-500 mb-4">Customer Journey: mas de 3 compras = cliente recurrente / Lovemark.</p>
     <p class="text-sm text-gray-500 mb-4" id="purchase-contact-name"></p>
     <form onsubmit="addPurchase(event)" class="space-y-4">
       <input type="hidden" id="purchase-contact-id" value="">
@@ -230,7 +229,7 @@ function loadContacts() {
           <td class="px-4 py-3 text-gray-400 text-xs">${lastContact}</td>
           <td class="px-4 py-3">
             <div class="flex gap-1">
-              ${c.category !== 'cliente' && c.category !== 'lovemark' ? `<button onclick="openUpgradeModal(${c.id}, '${escHtml(c.name)}')" class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" title="Convertir a cliente">⬆</button>` : ''}
+              ${c.category !== 'cliente' && c.category !== 'lovemark' ? `<button onclick="openUpgradeModal(${c.id}, '${escHtml(c.name)}')" class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" title="Registrar compra y convertir a cliente">⬆</button>` : ''}
               ${c.category === 'cliente' || c.category === 'lovemark' ? `<button onclick="openPurchaseModal(${c.id}, '${escHtml(c.name)}')" class="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100" title="Registrar compra">💰</button>` : ''}
               ${phone !== '—' ? `<a href="https://wa.me/${phone.replace(/\D/g,'')}" target="_blank" class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" title="WhatsApp">💬</a>` : ''}
             </div>
@@ -300,6 +299,7 @@ function saveContact(e) {
 
 function openUpgradeModal(id, name) {
   document.getElementById('upgrade-contact-id').value = id;
+  document.getElementById('upgrade-name').value = name;
   document.getElementById('upgrade-contact-name').textContent = `Convertir a "${name}" a cliente`;
   document.getElementById('upgrade-modal').classList.remove('hidden');
 }
@@ -313,6 +313,8 @@ function upgradeToCliente(e) {
   const id = document.getElementById('upgrade-contact-id').value;
   const body = new URLSearchParams({
     _csrf: CSRF,
+    name: document.getElementById('upgrade-name').value.trim(),
+    email: document.getElementById('upgrade-email').value.trim(),
     amount: document.getElementById('upgrade-amount').value || '0',
     products: document.getElementById('upgrade-products').value.trim(),
     notes: document.getElementById('upgrade-notes').value.trim(),
@@ -339,6 +341,7 @@ function upgradeToCliente(e) {
 
 function openPurchaseModal(id, name) {
   document.getElementById('purchase-contact-id').value = id;
+  document.getElementById('purchase-name').value = name;
   document.getElementById('purchase-contact-name').textContent = `Registrar compra para "${name}"`;
   document.getElementById('purchase-modal').classList.remove('hidden');
 }
