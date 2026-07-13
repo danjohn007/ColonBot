@@ -506,18 +506,12 @@ function isotipoToEmoji(isotipo) {
 }
 
 // Initialise map
-const map = L.map('map', {
-  zoomControl: true,
-  maxZoom: 18,
-}).setView([MAP_LAT, MAP_LNG], MAP_ZOOM);
+const map = L.map('map', { zoomControl: true }).setView([MAP_LAT, MAP_LNG], MAP_ZOOM);
+
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '\u00A9 <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   maxZoom: 18,
 }).addTo(map);
-const mapEl = map.getContainer();
-mapEl.addEventListener('click', () => map.scrollWheelZoom.enable());
-mapEl.addEventListener('mouseleave', () => map.scrollWheelZoom.disable());
-
 // ─── Divisi\u00F3n territorial (l\u00EDmite municipal de Col\u00F3n) ──────────────────
 if (BOUNDARY_DATA && BOUNDARY_DATA.length > 0) {
   // Si es array de arrays (m\u00FAltiples anillos), dibujar cada uno como polyline
