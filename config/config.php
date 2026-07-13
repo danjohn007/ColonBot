@@ -22,6 +22,8 @@ if (!defined('BASE_URL')) {
     $baseUrlOverride = getenv('APP_BASE_URL') ?: '';
     if ($baseUrlOverride !== '') {
         define('BASE_URL', rtrim($baseUrlOverride, '/'));
+    } elseif (preg_match('/(^|\.)fix360\.app$/i', $host)) {
+        define('BASE_URL', 'https://fix360.app/colon');
     } else {
         $script   = rawurldecode($_SERVER['SCRIPT_NAME'] ?? '/index.php');
         $basePath = getenv('APP_BASE_PATH') ?: dirname($script);
