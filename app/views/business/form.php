@@ -443,20 +443,28 @@ require APP_PATH . '/views/layout/head.php';
               <span class="text-xs text-gray-400">(inactivo)</span>
               <?php endif; ?>
             </span>
-            <button type="button" onclick="removeService(<?= $business['id'] ?>, <?= $s['id'] ?>)"
-              class="text-red-500 hover:text-red-700 text-xs ml-3 transition">Eliminar</button>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <button type="button" onclick="editService(<?= $business['id'] ?>, <?= $s['id'] ?>)"
+                class="text-blue-600 hover:text-blue-800 text-xs transition">Editar</button>
+              <button type="button" onclick="removeService(<?= $business['id'] ?>, <?= $s['id'] ?>)"
+                class="text-red-500 hover:text-red-700 text-xs transition">Eliminar</button>
+            </div>
           </div>
           <?php endforeach; ?>
         </div>
         <details class="text-sm" id="add-service-details">
           <summary class="cursor-pointer text-blue-600 hover:underline">+ Agregar servicio</summary>
-          <div class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t">
+          <div class="mt-3 pt-2 border-t space-y-2">
+            <input type="hidden" id="svc-id" value="">
             <input type="text" id="svc-name" placeholder="Nombre" class="input text-sm">
-            <input type="number" id="svc-price" placeholder="Precio (opcional)" class="input text-sm" step="0.01" min="0">
-            <button type="button" onclick="addService(<?= $business['id'] ?>)"
-              class="bg-green-500 text-white px-3 py-2 rounded-xl text-sm font-medium hover:bg-green-600 transition">
-              Guardar
-            </button>
+            <textarea id="svc-desc" rows="2" class="input text-sm" placeholder="Descripción (opcional)"></textarea>
+            <div class="flex items-center gap-2">
+              <input type="number" id="svc-price" placeholder="Precio (opcional)" class="input text-sm flex-1" step="0.01" min="0">
+              <button type="button" onclick="addService(<?= $business['id'] ?>)"
+                class="bg-green-500 text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-green-600 transition whitespace-nowrap">
+                Guardar
+              </button>
+            </div>
           </div>
         </details>
       </div>
@@ -871,12 +879,16 @@ function deleteImage(id, btn) {
 }
 
 // ── Services ─────────────────────────────────────────────────────────────────
+const servicesData = <?= json_encode($services ?? []) ?>;
+
 function addService(businessId) {
   const name  = document.getElementById('svc-name').value.trim();
+  const desc  = document.getElementById('svc-desc').value.trim();
   const price = document.getElementById('svc-price').value;
+  const sid   = document.getElementById('svc-id').value;
   if (!name) { alert('Escribe el nombre del servicio.'); return; }
 
-  const body = new URLSearchParams({ _csrf: CSRF, name, price });
+  const body = new URLSearchParams({ _csrf: CSRF, name, description: desc, price, service_id: sid });
   fetch('<?= url('admin/negocio/' . $business['id'] . '/servicio') ?>', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -886,13 +898,37 @@ function addService(businessId) {
   .then(d => {
     if (d.ok) {
       renderServices(d.services);
-      document.getElementById('svc-name').value  = '';
-      document.getElementById('svc-price').value = '';
-      document.getElementById('add-service-details').removeAttribute('open');
+      resetServiceForm();
     } else {
       alert(d.error || 'Error al guardar.');
     }
   });
+}
+
+function editService(businessId, sid) {
+  // Open the details if not already open
+  const details = document.getElementById('add-service-details');
+  if (!details.hasAttribute('open')) {
+    details.setAttribute('open', '');
+  }
+  // Find the service in the servicesData array
+  const service = servicesData.find(s => String(s.id) === String(sid));
+  if (service) {
+    document.getElementById('svc-id').value = service.id;
+    document.getElementById('svc-name').value = service.name || '';
+    document.getElementById('svc-desc').value = service.description || '';
+    document.getElementById('svc-price').value = service.price || '';
+  } else {
+    alert('Servicio no encontrado.');
+  }
+}
+
+function resetServiceForm() {
+  document.getElementById('svc-id').value = '';
+  document.getElementById('svc-name').value = '';
+  document.getElementById('svc-desc').value = '';
+  document.getElementById('svc-price').value = '';
+  document.getElementById('add-service-details').removeAttribute('open');
 }
 
 function removeService(businessId, sid) {
@@ -917,12 +953,20 @@ function renderServices(services) {
   list.innerHTML = '';
   services.forEach(s => {
     const priceText = s.price ? ` – $${parseFloat(s.price).toFixed(2)}` : '';
+    const descText = s.description ? `<p class="text-xs text-gray-500 mt-0.5 truncate">${escHtml(s.description)}</p>` : '';
     const activeText = s.active === 0 ? ' <span class="text-xs text-gray-400">(inactivo)</span>' : '';
     const bid = <?= $business['id'] ?>;
-    list.innerHTML += `<div class="py-2 flex justify-between items-center" id="svc-row-${s.id}">
-      <span class="text-sm text-gray-700">${escHtml(s.name)}${priceText}${activeText}</span>
-      <button type="button" onclick="removeService(${bid}, ${s.id})"
-        class="text-red-500 hover:text-red-700 text-xs ml-3 transition">Eliminar</button>
+    list.innerHTML += `<div class="py-2 flex justify-between items-start gap-3" id="svc-row-${s.id}">
+      <div class="text-sm text-gray-700 min-w-0 flex-1">
+        <span class="font-medium">${escHtml(s.name)}</span>${priceText}${activeText}
+        ${descText}
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <button type="button" onclick="editService(${bid}, ${s.id})"
+          class="text-blue-600 hover:text-blue-800 text-xs transition">Editar</button>
+        <button type="button" onclick="removeService(${bid}, ${s.id})"
+          class="text-red-500 hover:text-red-700 text-xs transition">Eliminar</button>
+      </div>
     </div>`;
   });
 }
