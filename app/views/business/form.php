@@ -37,13 +37,18 @@ require APP_PATH . '/views/layout/head.php';
   <div class="flex border-b border-gray-200 mb-6">
     <button type="button" id="tab-btn-basic"
       class="tab-btn px-5 py-2.5 text-sm font-medium border-b-2 border-blue-600 text-blue-600 -mb-px"
-      onclick="switchTab('basic')">
+      onclick="switchTab()">
       📋 Información básica
     </button>
-    <button type="button" id="tab-btn-products"
-      class="tab-btn px-5 py-2.5 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 -mb-px"
-      onclick="switchTab('products')">
+    <button type="button" id="scroll-btn-products"
+      class="tab-btn px-5 py-2.5 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:text-blue-600 -mb-px cursor-pointer"
+      onclick="scrollToSection('section-services-products', this)">
       🛍️ Mis Productos
+    </button>
+    <button type="button" id="scroll-btn-services"
+      class="tab-btn px-5 py-2.5 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:text-blue-600 -mb-px cursor-pointer"
+      onclick="scrollToSection('section-services', this)">
+      📋 Mis Servicios
     </button>
   </div>
   <?php endif; ?>
@@ -220,10 +225,42 @@ require APP_PATH . '/views/layout/head.php';
             <label class="label">Instagram</label>
             <input type="url" name="instagram" value="<?= e($business['instagram'] ?? '') ?>" class="input" placeholder="https://instagram.com/...">
           </div>
+          <!-- Horarios estilo Google My Business -->
           <div class="sm:col-span-2">
-            <label class="label">Horarios (JSON)</label>
-            <input type="text" name="schedule" value="<?= e($business['schedule'] ?? '') ?>" class="input font-mono text-sm"
-              placeholder='{"lun-vie":"09:00-18:00","sab":"10:00-16:00"}'>
+            <label class="label">Horarios</label>
+            <input type="hidden" name="schedule" id="schedule-json" value="<?= e($business['schedule'] ?? '') ?>">
+            <div id="schedule-picker" class="space-y-2">
+              <?php
+              $days = ['lunes'=>'Lunes', 'martes'=>'Martes', 'miercoles'=>'Miércoles', 'jueves'=>'Jueves', 'viernes'=>'Viernes', 'sabado'=>'Sábado', 'domingo'=>'Domingo'];
+              $dayKeys = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
+              $savedSchedule = [];
+              if (!empty($business['schedule'])) {
+                $decoded = json_decode($business['schedule'], true);
+                if (is_array($decoded)) $savedSchedule = $decoded;
+              }
+              foreach ($dayKeys as $dk):
+                $dayData = $savedSchedule[$dk] ?? '';
+                $isClosed = $dayData === 'closed' || $dayData === '';
+                $rangeParts = $isClosed ? ['09:00', '18:00'] : explode('-', $dayData);
+                $openTime = $rangeParts[0] ?? '09:00';
+                $closeTime = $rangeParts[1] ?? '18:00';
+              ?>
+              <div class="schedule-row flex flex-wrap items-center gap-2 py-1.5" data-day="<?= $dk ?>">
+                <span class="w-24 text-sm font-medium text-gray-700"><?= $days[$dk] ?></span>
+                <label class="flex items-center gap-1.5 cursor-pointer">
+                  <input type="checkbox" class="schedule-toggle w-4 h-4 text-blue-600 rounded" <?= !$isClosed ? 'checked' : '' ?>>
+                  <span class="text-xs text-gray-500">Abierto</span>
+                </label>
+                <div class="schedule-times flex items-center gap-1 <?= $isClosed ? 'opacity-40' : '' ?>">
+                  <input type="time" class="schedule-open input !min-h-0 !py-1.5 !px-2 w-28 text-xs" value="<?= $openTime ?>">
+                  <span class="text-gray-400 text-xs">a</span>
+                  <input type="time" class="schedule-close input !min-h-0 !py-1.5 !px-2 w-28 text-xs" value="<?= $closeTime ?>">
+                </div>
+                <span class="schedule-closed-text text-xs text-red-500 font-medium <?= !$isClosed ? 'hidden' : '' ?>">Cerrado</span>
+              </div>
+              <?php endforeach; ?>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">Marca los días y ajusta los horarios de apertura y cierre.</p>
           </div>
           <div class="sm:col-span-2 rounded-xl border <?= ($business['is_open'] ?? 1) ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-gray-50' ?> p-4">
             <input type="hidden" name="is_open" value="0">
@@ -304,8 +341,96 @@ require APP_PATH . '/views/layout/head.php';
         <?php endif; ?>
       </div>
 
-      <!-- Servicios -->
+      <!-- Products section (inside basic tab) -->
       <?php if ($isEdit): ?>
+      <div id="section-services-products" class="business-form-card">
+        <h2 class="font-semibold text-gray-900 border-b pb-2 mb-4">🛍️ Mis Productos</h2>
+        <div id="products-table-wrap">
+          <?php if (empty($products)): ?>
+          <p class="text-sm text-gray-400 text-center py-8" id="no-products-msg">No hay productos registrados.</p>
+          <?php else: ?>
+          <div class="hidden" id="no-products-msg"></div>
+          <?php endif; ?>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm" id="products-table" <?= empty($products) ? 'class="hidden"' : '' ?>>
+              <thead>
+                <tr class="text-left text-xs text-gray-500 uppercase tracking-wide border-b">
+                  <th class="pb-2 pr-4">Nombre</th>
+                  <th class="pb-2 pr-4">Descripción</th>
+                  <th class="pb-2 pr-4">Precio</th>
+                  <th class="pb-2 pr-4">Disponible</th>
+                  <th class="pb-2"></th>
+                </tr>
+              </thead>
+              <tbody id="products-tbody">
+                <?php foreach ($products as $p): ?>
+                <tr class="border-b last:border-0" id="prod-row-<?= $p['id'] ?>">
+                  <td class="py-2 pr-4 font-medium text-gray-800"><?= e($p['name']) ?></td>
+                  <td class="py-2 pr-4 text-gray-500 max-w-xs truncate"><?= e($p['description'] ?? '') ?></td>
+                  <td class="py-2 pr-4"><?= $p['price'] !== null ? formatPrice((float)$p['price']) : '–' ?></td>
+                  <td class="py-2 pr-4">
+                    <span class="<?= $p['available'] ? 'text-green-600' : 'text-gray-400' ?>">
+                      <?= $p['available'] ? '✓ Sí' : '✗ No' ?>
+                    </span>
+                  </td>
+                  <td class="py-2 text-right whitespace-nowrap">
+                    <button type="button"
+                      onclick="editProduct(<?= htmlspecialchars(json_encode($p), ENT_QUOTES) ?>)"
+                      class="text-blue-600 hover:text-blue-800 mr-3 transition">Editar</button>
+                    <button type="button"
+                      onclick="removeProduct(<?= $business['id'] ?>, <?= $p['id'] ?>)"
+                      class="text-red-500 hover:text-red-700 transition">Eliminar</button>
+                  </td>
+                </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="flex items-center justify-between mt-4 pt-4 border-t">
+          <button type="button" onclick="openProductForm()"
+            class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition">
+            + Agregar producto
+          </button>
+        </div>
+        <!-- Product form (hidden by default) -->
+        <div id="product-form-wrap" class="hidden mt-4 pt-4 border-t">
+          <h3 class="text-sm font-semibold text-gray-800 mb-3" id="product-form-title">Nuevo producto</h3>
+          <input type="hidden" id="prod-id" value="">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="sm:col-span-2">
+              <label class="label">Nombre *</label>
+              <input type="text" id="prod-name" class="input" placeholder="Ej. Vino tinto reserva">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="label">Descripción</label>
+              <textarea id="prod-desc" rows="2" class="input" placeholder="Descripción del producto..."></textarea>
+            </div>
+            <div>
+              <label class="label">Precio</label>
+              <input type="number" id="prod-price" class="input" step="0.01" min="0" placeholder="0.00">
+            </div>
+            <div class="flex items-end gap-3">
+              <label class="flex items-center gap-2 cursor-pointer mb-2.5">
+                <input type="checkbox" id="prod-available" checked class="w-4 h-4 text-blue-600 rounded">
+                <span class="text-sm text-gray-700">Disponible</span>
+              </label>
+            </div>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button type="button" onclick="saveProduct(<?= $business['id'] ?>)"
+              class="bg-green-500 text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-green-600 transition">
+              Guardar producto
+            </button>
+            <button type="button" onclick="cancelProductForm()"
+              class="px-5 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Servicios -->
       <div id="section-services" class="business-form-card">
         <h2 class="font-semibold text-gray-900 border-b pb-2 mb-4">📋 Servicios</h2>
         <div id="services-list" class="divide-y mb-4">
@@ -353,102 +478,6 @@ require APP_PATH . '/views/layout/head.php';
       </div>
     </form>
   </div><!-- /tab-basic -->
-
-  <?php if ($isEdit): ?>
-  <!-- Tab: Mis Productos -->
-  <div id="tab-products" class="hidden">
-    <div class="bg-white rounded-2xl shadow-sm p-6">
-      <div class="flex items-center justify-between border-b pb-3 mb-4">
-        <h2 class="font-semibold text-gray-900">🛍️ Mis Productos</h2>
-        <button type="button" onclick="openProductForm()"
-          class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition">
-          + Agregar producto
-        </button>
-      </div>
-
-      <!-- Products table -->
-      <div id="products-table-wrap">
-        <?php if (empty($products)): ?>
-        <p class="text-sm text-gray-400 text-center py-8" id="no-products-msg">No hay productos registrados.</p>
-        <?php else: ?>
-        <div class="hidden" id="no-products-msg"></div>
-        <?php endif; ?>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm" id="products-table" <?= empty($products) ? 'class="hidden"' : '' ?>>
-            <thead>
-              <tr class="text-left text-xs text-gray-500 uppercase tracking-wide border-b">
-                <th class="pb-2 pr-4">Nombre</th>
-                <th class="pb-2 pr-4">Descripción</th>
-                <th class="pb-2 pr-4">Precio</th>
-                <th class="pb-2 pr-4">Disponible</th>
-                <th class="pb-2"></th>
-              </tr>
-            </thead>
-            <tbody id="products-tbody">
-              <?php foreach ($products as $p): ?>
-              <tr class="border-b last:border-0" id="prod-row-<?= $p['id'] ?>">
-                <td class="py-2 pr-4 font-medium text-gray-800"><?= e($p['name']) ?></td>
-                <td class="py-2 pr-4 text-gray-500 max-w-xs truncate"><?= e($p['description'] ?? '') ?></td>
-                <td class="py-2 pr-4"><?= $p['price'] !== null ? formatPrice((float)$p['price']) : '–' ?></td>
-                <td class="py-2 pr-4">
-                  <span class="<?= $p['available'] ? 'text-green-600' : 'text-gray-400' ?>">
-                    <?= $p['available'] ? '✓ Sí' : '✗ No' ?>
-                  </span>
-                </td>
-                <td class="py-2 text-right whitespace-nowrap">
-                  <button type="button"
-                    onclick="editProduct(<?= htmlspecialchars(json_encode($p), ENT_QUOTES) ?>)"
-                    class="text-blue-600 hover:text-blue-800 mr-3 transition">Editar</button>
-                  <button type="button"
-                    onclick="removeProduct(<?= $business['id'] ?>, <?= $p['id'] ?>)"
-                    class="text-red-500 hover:text-red-700 transition">Eliminar</button>
-                </td>
-              </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Product form (hidden by default) -->
-      <div id="product-form-wrap" class="hidden mt-4 pt-4 border-t">
-        <h3 class="text-sm font-semibold text-gray-800 mb-3" id="product-form-title">Nuevo producto</h3>
-        <input type="hidden" id="prod-id" value="">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="sm:col-span-2">
-            <label class="label">Nombre *</label>
-            <input type="text" id="prod-name" class="input" placeholder="Ej. Vino tinto reserva">
-          </div>
-          <div class="sm:col-span-2">
-            <label class="label">Descripción</label>
-            <textarea id="prod-desc" rows="2" class="input" placeholder="Descripción del producto..."></textarea>
-          </div>
-          <div>
-            <label class="label">Precio</label>
-            <input type="number" id="prod-price" class="input" step="0.01" min="0" placeholder="0.00">
-          </div>
-          <div class="flex items-end gap-3">
-            <label class="flex items-center gap-2 cursor-pointer mb-2.5">
-              <input type="checkbox" id="prod-available" checked class="w-4 h-4 text-blue-600 rounded">
-              <span class="text-sm text-gray-700">Disponible</span>
-            </label>
-          </div>
-        </div>
-        <div class="flex gap-2 mt-3">
-          <button type="button" onclick="saveProduct(<?= $business['id'] ?>)"
-            class="bg-green-500 text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-green-600 transition">
-            Guardar producto
-          </button>
-          <button type="button" onclick="cancelProductForm()"
-            class="px-5 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition">
-            Cancelar
-          </button>
-        </div>
-      </div>
-    </div>
-  </div><!-- /tab-products -->
-
-  <?php endif; ?>
 
 </main>
 
@@ -728,22 +757,77 @@ document.addEventListener('DOMContentLoaded', function() {
   togglePuntoReferencia();
 });
 
-<?php if ($isEdit): ?>
-// ── Tab switching ────────────────────────────────────────────────────────────
-function switchTab(tab) {
-  document.getElementById('tab-basic').classList.toggle('hidden', tab !== 'basic');
-  document.getElementById('tab-products').classList.toggle('hidden', tab !== 'products');
-
-  ['basic', 'products'].forEach(t => {
-    const btn = document.getElementById('tab-btn-' + t);
-    btn.classList.toggle('border-blue-600', t === tab);
-    btn.classList.toggle('text-blue-600', t === tab);
-    btn.classList.toggle('border-transparent', t !== tab);
-    btn.classList.toggle('text-gray-500', t !== tab);
+// ── Schedule picker: sync visual controls to hidden JSON input ──────────────
+function syncSchedule() {
+  const result = {};
+  document.querySelectorAll('.schedule-row').forEach(row => {
+    const day = row.dataset.day;
+    const isOpen = row.querySelector('.schedule-toggle').checked;
+    if (isOpen) {
+      const openVal = row.querySelector('.schedule-open').value || '09:00';
+      const closeVal = row.querySelector('.schedule-close').value || '18:00';
+      result[day] = openVal + '-' + closeVal;
+    } else {
+      result[day] = 'closed';
+    }
   });
+  document.getElementById('schedule-json').value = JSON.stringify(result);
+}
 
-  // Invalidate the map when switching back to basic tab so it renders correctly
-  if (tab === 'basic') { setTimeout(() => editMap.invalidateSize(), 50); }
+// Set up schedule toggle listeners
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.schedule-toggle').forEach(toggle => {
+    toggle.addEventListener('change', function() {
+      const row = this.closest('.schedule-row');
+      const timesDiv = row.querySelector('.schedule-times');
+      const closedText = row.querySelector('.schedule-closed-text');
+      if (this.checked) {
+        timesDiv.classList.remove('opacity-40');
+        closedText.classList.add('hidden');
+      } else {
+        timesDiv.classList.add('opacity-40');
+        closedText.classList.remove('hidden');
+      }
+      syncSchedule();
+    });
+  });
+  document.querySelectorAll('.schedule-open, .schedule-close').forEach(input => {
+    input.addEventListener('change', syncSchedule);
+  });
+  // Initial sync
+  syncSchedule();
+});
+
+<?php if ($isEdit): ?>
+// ── Switch to basic tab (no more products tab) ──────────────────────────────
+function switchTab() {
+  document.getElementById('tab-basic').classList.remove('hidden');
+  // Update basic tab button active state
+  const tabBtn = document.getElementById('tab-btn-basic');
+  if (tabBtn) {
+    tabBtn.classList.add('border-blue-600', 'text-blue-600');
+    tabBtn.classList.remove('border-transparent', 'text-gray-500');
+  }
+  // Invalidate map
+  setTimeout(() => { if (typeof editMap !== 'undefined') editMap.invalidateSize(); }, 50);
+}
+
+// ── Smooth scroll to section ────────────────────────────────────────────────
+function scrollToSection(sectionId, btn) {
+  // First switch to basic tab (this also invalidates the map)
+  switchTab();
+
+  // Scroll to the target section after a brief delay for the map to render
+  setTimeout(() => {
+    const target = document.getElementById(sectionId);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Add a flash highlight effect
+      target.style.transition = 'box-shadow 0.3s ease';
+      target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.3)';
+      setTimeout(() => { target.style.boxShadow = ''; }, 1500);
+    }
+  }, 100);
 }
 
 // ── Image upload ─────────────────────────────────────────────────────────────
