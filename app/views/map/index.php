@@ -465,11 +465,6 @@ const PRELOAD_CAT = '<?= e($preloadCat ?? '') ?>';
 const BOUNDARY_DATA = <?= $boundaryData ?: '[]' ?>;
 const CHATBOT_ACTIVE    = <?= setting('chatbot_active', '0') === '1' ? 'true' : 'false' ?>;
 const CHATBOT_WA_NUMBER = '<?= e(setting('chatbot_wa_number', '')) ?>';
-const MAP_LIMITS = L.latLngBounds(
-  L.latLng(19.85, -100.65),
-  L.latLng(21.05, -99.05)
-);
-
 // ─── Icon name → emoji mapping for category symbols (panels/modals) ────
 const ICON_MAP = {
   'utensils':      '\u{1F37D}\u{FE0F}',
@@ -513,21 +508,12 @@ function isotipoToEmoji(isotipo) {
 // Initialise map
 const map = L.map('map', {
   zoomControl: true,
-  scrollWheelZoom: false,
-  minZoom: 9,
   maxZoom: 18,
-  maxBounds: MAP_LIMITS,
-  maxBoundsViscosity: 0.95,
-}).setView([MAP_LAT, MAP_LNG], Math.max(MAP_ZOOM, 10));
-
+}).setView([MAP_LAT, MAP_LNG], MAP_ZOOM);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '\u00A9 <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   maxZoom: 18,
-  minZoom: 9,
-  bounds: MAP_LIMITS,
-  noWrap: true,
 }).addTo(map);
-
 const mapEl = map.getContainer();
 mapEl.addEventListener('click', () => map.scrollWheelZoom.enable());
 mapEl.addEventListener('mouseleave', () => map.scrollWheelZoom.disable());
