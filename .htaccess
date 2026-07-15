@@ -10,6 +10,9 @@ RewriteEngine On
 # Servir /assets/ desde /public/
 RewriteRule ^assets/(.*)$ public/$1 [L]
 
+# Compatibilidad tras mover de /landing a raiz: servir imagenes subidas antiguas.
+RewriteRule ^landing/images/(.*)$ images/$1 [L]
+
 # No reescribir archivos o directorios existentes
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

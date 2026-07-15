@@ -462,7 +462,7 @@ const MAP_LNG  = <?= setting('map_lng','-99.7242') ?>;
 const MAP_ZOOM = <?= setting('map_zoom','13') ?>;
 const PRELOAD_ID  = <?= (int)($preloadId ?? 0) ?>;
 const PRELOAD_CAT = '<?= e($preloadCat ?? '') ?>';
-const BOUNDARY_DATA = <?= $boundaryData ?: '[]' ?>;
+const BOUNDARY_GEOJSON_URL = '<?= e($boundaryGeoJsonUrl ?? asset('data/colon-boundary.geojson')) ?>';
 const CHATBOT_ACTIVE    = <?= setting('chatbot_active', '0') === '1' ? 'true' : 'false' ?>;
 const CHATBOT_WA_NUMBER = '<?= e(setting('chatbot_wa_number', '')) ?>';
 const MAP_LIMITS = L.latLngBounds(
@@ -532,28 +532,31 @@ const mapEl = map.getContainer();
 mapEl.addEventListener('click', () => map.scrollWheelZoom.enable());
 mapEl.addEventListener('mouseleave', () => map.scrollWheelZoom.disable());
 
-// ─── Divisi\u00F3n territorial (l\u00EDmite municipal de Col\u00F3n) ──────────────────
-if (BOUNDARY_DATA && BOUNDARY_DATA.length > 0) {
-  // Si es array de arrays (m\u00FAltiples anillos), dibujar cada uno como polyline
-  if (Array.isArray(BOUNDARY_DATA[0]) && Array.isArray(BOUNDARY_DATA[0][0])) {
-    BOUNDARY_DATA.forEach(ring => {
-      L.polyline(ring, {
-        color: '#f97316',
-        weight: 2,
-        opacity: 0.8,
-        dashArray: '8, 8',
-      }).addTo(map);
-    });
-  } else {
-    // Compatibilidad con formato plano anterior
-    L.polyline(BOUNDARY_DATA, {
-      color: '#f97316',
-      weight: 2,
-      opacity: 0.8,
-      dashArray: '8, 8',
+// Municipio de Colon resaltado desde GeoJSON local.
+fetch(BOUNDARY_GEOJSON_URL)
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`No se pudo cargar el limite municipal (${response.status})`);
+    }
+    return response.json();
+  })
+  .then(boundaryGeoJson => {
+    const boundaryLayer = L.geoJSON(boundaryGeoJson, {
+      interactive: false,
+      style: {
+        color: '#ea580c',
+        weight: 3,
+        opacity: 0.95,
+        fillColor: '#f97316',
+        fillOpacity: 0.18,
+      },
     }).addTo(map);
-  }
-}
+
+    boundaryLayer.bringToBack();
+  })
+  .catch(error => {
+    console.warn('No se pudo cargar el limite municipal de Colon:', error);
+  });
 
 // ─── Geolocalizaci\u00F3n ─────────────────────────────────────────────────────
 if (navigator.geolocation) {

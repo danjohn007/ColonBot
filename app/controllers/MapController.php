@@ -21,11 +21,10 @@ class MapController extends Controller
         $preloadId  = (is_numeric($id) && (int)$id > 0) ? (int)$id : 0;
         $preloadCat = (!is_numeric($id) && $id !== '') ? $id : '';
 
-        // Cargar el límite de Colón desde OSM (server-side para evitar CORS)
-        $boundaryData = $this->fetchColonBoundary();
+        $boundaryGeoJsonUrl = asset('data/colon-boundary.geojson');
         $routePrefix = $this->pathForCurrentPrefix('');
 
-        $this->view('map.index', compact('categories', 'preloadId', 'preloadCat', 'boundaryData', 'routePrefix'));
+        $this->view('map.index', compact('categories', 'preloadId', 'preloadCat', 'boundaryGeoJsonUrl', 'routePrefix'));
     }
 
     /** API: devuelve POIs en JSON para el mapa */

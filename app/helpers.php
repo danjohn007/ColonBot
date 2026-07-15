@@ -38,12 +38,19 @@ function imageUrl(string $filename): string
 {
     if (empty($filename)) return '';
     if (preg_match('#^https?://#i', $filename)) {
-        return $filename;
+        $urlPath = parse_url($filename, PHP_URL_PATH);
+        if ($urlPath === null || $urlPath === false) {
+            return $filename;
+        }
+        $filename = $urlPath;
     }
     $filename = ltrim($filename, '/');
-    if (str_starts_with($filename, 'images/')) {
-        $filename = substr($filename, 7);
+
+    $filename = preg_replace('#^(public/|assets/|uploads/)#i', '', $filename) ?? $filename;
+    if (preg_match('#(?:^|/)images/(.+)$#i', $filename, $matches)) {
+        $filename = $matches[1];
     }
+
     return UPLOAD_URL . '/' . $filename;
 }
 
