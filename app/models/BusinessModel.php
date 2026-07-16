@@ -83,6 +83,16 @@ class BusinessModel extends Model
         return $this->query($sql, $params);
     }
 
+    public function setTrusted(int $businessId, bool $trusted, int $userId, string $note = ''): bool
+    {
+        return $this->update($businessId, [
+            'is_trusted'   => $trusted ? 1 : 0,
+            'trusted_by'   => $trusted ? $userId : null,
+            'trusted_at'   => $trusted ? date('Y-m-d H:i:s') : null,
+            'trusted_note' => $trusted ? ($note !== '' ? $note : null) : null,
+        ]);
+    }
+
     public function images(int $businessId): array
     {
         return $this->query('SELECT * FROM business_images WHERE business_id = ? ORDER BY sort_order', [$businessId]);
@@ -148,11 +158,82 @@ class BusinessModel extends Model
     public function allWithCategory(): array
     {
         return $this->query(
-            'SELECT b.*, c.name AS category_name, u.name AS owner_name
+            'SELECT b.*, c.name AS category_name, u.name AS owner_name,
+                    COALESCE(rs.reviews_count, 0) AS reviews_count,
+                    COALESCE(rs.reviews_avg, 0) AS reviews_avg,
+                    COALESCE(rs.low_reviews_count, 0) AS low_reviews_count,
+                    (
+                        IF(b.lat IS NOT NULL AND b.lng IS NOT NULL, 1, 0) +
+                        IF(NULLIF(TRIM(COALESCE(b.description, "")), "") IS NOT NULL, 1, 0) +
+                        IF(NULLIF(TRIM(COALESCE(b.cover_image, "")), "") IS NOT NULL, 1, 0) +
+                        IF(NULLIF(TRIM(COALESCE(b.whatsapp, "")), "") IS NOT NULL OR NULLIF(TRIM(COALESCE(b.phone, "")), "") IS NOT NULL, 1, 0)
+                    ) AS verification_profile_score,
+                    CASE
+                      WHEN b.status = "published"
+                       AND COALESCE(b.is_trusted, 0) = 0
+                       AND COALESCE(rs.reviews_count, 0) >= 3
+                       AND COALESCE(rs.reviews_avg, 0) >= 4.3
+                       AND COALESCE(rs.low_reviews_count, 0) = 0
+                       AND (
+                            IF(b.lat IS NOT NULL AND b.lng IS NOT NULL, 1, 0) +
+                            IF(NULLIF(TRIM(COALESCE(b.description, "")), "") IS NOT NULL, 1, 0) +
+                            IF(NULLIF(TRIM(COALESCE(b.cover_image, "")), "") IS NOT NULL, 1, 0) +
+                            IF(NULLIF(TRIM(COALESCE(b.whatsapp, "")), "") IS NOT NULL OR NULLIF(TRIM(COALESCE(b.phone, "")), "") IS NOT NULL, 1, 0)
+                       ) >= 3
+                      THEN 1 ELSE 0
+                    END AS verification_suggested
              FROM businesses b
              JOIN categories c ON c.id = b.category_id
              JOIN users u ON u.id = b.user_id
+             LEFT JOIN (
+                SELECT business_id,
+                       COUNT(*) AS reviews_count,
+                       ROUND(AVG(rating), 1) AS reviews_avg,
+                       SUM(CASE WHEN rating <= 2 THEN 1 ELSE 0 END) AS low_reviews_count
+                FROM reviews
+                GROUP BY business_id
+             ) rs ON rs.business_id = b.id
              ORDER BY b.created_at DESC'
+        );
+    }
+
+    public function verificationCandidates(): array
+    {
+        return $this->query(
+            'SELECT b.*, c.name AS category_name, u.name AS owner_name,
+                    COALESCE(rs.reviews_count, 0) AS reviews_count,
+                    COALESCE(rs.reviews_avg, 0) AS reviews_avg,
+                    COALESCE(rs.low_reviews_count, 0) AS low_reviews_count,
+                    (
+                        IF(b.lat IS NOT NULL AND b.lng IS NOT NULL, 1, 0) +
+                        IF(NULLIF(TRIM(COALESCE(b.description, "")), "") IS NOT NULL, 1, 0) +
+                        IF(NULLIF(TRIM(COALESCE(b.cover_image, "")), "") IS NOT NULL, 1, 0) +
+                        IF(NULLIF(TRIM(COALESCE(b.whatsapp, "")), "") IS NOT NULL OR NULLIF(TRIM(COALESCE(b.phone, "")), "") IS NOT NULL, 1, 0)
+                    ) AS verification_profile_score,
+                    1 AS verification_suggested
+             FROM businesses b
+             JOIN categories c ON c.id = b.category_id
+             JOIN users u ON u.id = b.user_id
+             LEFT JOIN (
+                SELECT business_id,
+                       COUNT(*) AS reviews_count,
+                       ROUND(AVG(rating), 1) AS reviews_avg,
+                       SUM(CASE WHEN rating <= 2 THEN 1 ELSE 0 END) AS low_reviews_count
+                FROM reviews
+                GROUP BY business_id
+             ) rs ON rs.business_id = b.id
+             WHERE b.status = "published"
+               AND COALESCE(b.is_trusted, 0) = 0
+               AND COALESCE(rs.reviews_count, 0) >= 3
+               AND COALESCE(rs.reviews_avg, 0) >= 4.3
+               AND COALESCE(rs.low_reviews_count, 0) = 0
+               AND (
+                    IF(b.lat IS NOT NULL AND b.lng IS NOT NULL, 1, 0) +
+                    IF(NULLIF(TRIM(COALESCE(b.description, "")), "") IS NOT NULL, 1, 0) +
+                    IF(NULLIF(TRIM(COALESCE(b.cover_image, "")), "") IS NOT NULL, 1, 0) +
+                    IF(NULLIF(TRIM(COALESCE(b.whatsapp, "")), "") IS NOT NULL OR NULLIF(TRIM(COALESCE(b.phone, "")), "") IS NOT NULL, 1, 0)
+               ) >= 3
+             ORDER BY rs.reviews_avg DESC, rs.reviews_count DESC, b.visits DESC'
         );
     }
 

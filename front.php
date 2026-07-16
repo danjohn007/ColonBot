@@ -211,6 +211,7 @@ $router->post('superadmin/usuarios/{id}/eliminar', 'DashboardController', 'delet
 $router->get('superadmin/negocios',     'DashboardController', 'businesses');
 $router->post('superadmin/negocios/{id}/aprobar',  'DashboardController', 'approveBusiness');
 $router->post('superadmin/negocios/{id}/rechazar', 'DashboardController', 'rejectBusiness');
+$router->post('superadmin/negocios/{id}/confiable', 'DashboardController', 'trustBusiness');
 $router->post('superadmin/negocios/{id}/eliminar', 'DashboardController', 'deleteBusiness');
 $router->get('superadmin/categorias',   'DashboardController', 'categories');
 $router->post('superadmin/categorias/crear', 'DashboardController', 'createCategory');

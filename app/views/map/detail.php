@@ -46,7 +46,17 @@ require APP_PATH . '/views/layout/head.php';
             <span class="text-xs font-semibold px-3 py-1 rounded-full text-white" style="background: <?= e($business['category_color']) ?>">
               <?= e($business['category_name']) ?>
             </span>
+            <?php if ((int)($business['is_trusted'] ?? 0) === 1): ?>
+            <span class="ml-2 inline-flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700" title="Negocio verificado por Turismo Colón">
+              Negocio confiable
+            </span>
+            <?php endif; ?>
             <h1 class="text-2xl font-bold text-gray-900 mt-2"><?= e($business['name']) ?></h1>
+            <?php if ((int)($business['is_trusted'] ?? 0) === 1): ?>
+            <p class="mt-2 text-sm font-medium text-orange-700">
+              <?= e($business['trusted_note'] ?: 'Validado por Turismo Colon') ?>
+            </p>
+            <?php endif; ?>
           </div>
           <div class="text-right shrink-0">
             <?= stars((float)$business['rating']) ?>
