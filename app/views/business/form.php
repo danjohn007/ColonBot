@@ -85,6 +85,25 @@ require APP_PATH . '/views/layout/head.php';
               class="input" placeholder="Ej. Restaurante El Sabor">
           </div>
 
+          <!-- Tipo de Negocio -->
+          <div class="sm:col-span-2">
+            <label class="label">Tipo de Negocio <span class="text-xs text-gray-400">(selecciona uno)</span></label>
+            <div class="business-choice-grid mt-2">
+              <label class="business-choice">
+                <input type="radio" name="business_type" value="lugar_de_paso"
+                  <?= ($business['business_type'] ?? '') === 'lugar_de_paso' ? 'checked' : '' ?>
+                  class="w-4 h-4 text-blue-600">
+                <span class="text-sm text-gray-700">🚶 Lugar de paso</span>
+              </label>
+              <label class="business-choice">
+                <input type="radio" name="business_type" value="lugar_turistico"
+                  <?= ($business['business_type'] ?? '') === 'lugar_turistico' ? 'checked' : '' ?>
+                  class="w-4 h-4 text-blue-600">
+                <span class="text-sm text-gray-700">🏛️ Lugar turístico</span>
+              </label>
+            </div>
+          </div>
+
           <div class="sm:col-span-2">
             <label class="label">Categoría(s) * <span class="text-xs text-gray-400">(selecciona al menos una)</span></label>
             <div class="business-choice-grid mt-2">
@@ -316,10 +335,27 @@ require APP_PATH . '/views/layout/head.php';
         <?php if ($isEdit): ?>
         <!-- Galería existente -->
         <?php if (!empty($images)): ?>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex items-start gap-2 mb-2">
+          <button type="button" id="btn-quitar-fotos" onclick="toggleSelectMode()"
+            class="bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-xl text-sm font-medium hover:bg-red-100 transition">
+            🗑️ Quitar fotos
+          </button>
+          <button type="button" id="btn-delete-selected" onclick="deleteSelectedImages()"
+            class="hidden bg-red-600 text-white px-3 py-1.5 rounded-xl text-sm font-medium hover:bg-red-700 transition">
+            Eliminar seleccionadas
+          </button>
+          <button type="button" id="btn-cancel-select" onclick="cancelSelectMode()"
+            class="hidden px-3 py-1.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-100 transition">
+            Cancelar
+          </button>
+        </div>
+        <div class="flex flex-wrap gap-2" id="gallery-container">
           <?php foreach ($images as $img): ?>
-          <div class="relative group">
+          <div class="relative group cursor-pointer" data-img-id="<?= $img['id'] ?>">
             <img src="<?= imageUrl($img['path']) ?>" class="h-20 w-20 object-cover rounded-lg">
+            <div class="img-select-overlay hidden absolute inset-0 bg-black/30 rounded-lg flex items-center justify-center">
+              <input type="checkbox" class="img-select-cb w-5 h-5 accent-red-500" value="<?= $img['id'] ?>">
+            </div>
             <button type="button" onclick="deleteImage(<?= $img['id'] ?>, this)"
               class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition">✕</button>
           </div>
@@ -877,6 +913,74 @@ function deleteImage(id, btn) {
     }
   })
   .catch(() => alert('Error al eliminar la imagen.'));
+}
+
+// ── Batch image select/delete ──────────────────────────────────────────────
+let selectModeActive = false;
+
+function toggleSelectMode() {
+  selectModeActive = !selectModeActive;
+  const overlays = document.querySelectorAll('.img-select-overlay');
+  const btnDeleteSelected = document.getElementById('btn-delete-selected');
+  const btnCancelSelect = document.getElementById('btn-cancel-select');
+  const btnQuitarFotos = document.getElementById('btn-quitar-fotos');
+
+  overlays.forEach(el => el.classList.toggle('hidden', !selectModeActive));
+  btnDeleteSelected.classList.toggle('hidden', !selectModeActive);
+  btnCancelSelect.classList.toggle('hidden', !selectModeActive);
+  btnQuitarFotos.textContent = selectModeActive ? '☑️ Seleccionar fotos' : '🗑️ Quitar fotos';
+}
+
+function cancelSelectMode() {
+  if (selectModeActive) toggleSelectMode();
+}
+
+function deleteSelectedImages() {
+  const checkboxes = document.querySelectorAll('.img-select-cb:checked');
+  const ids = Array.from(checkboxes).map(cb => parseInt(cb.value, 10));
+  if (ids.length === 0) {
+    alert('Selecciona al menos una imagen.');
+    return;
+  }
+  if (!confirm(`¿Eliminar ${ids.length} imagen(es) seleccionada(s)?`)) return;
+
+  let completed = 0;
+  let errors = 0;
+  const total = ids.length;
+
+  ids.forEach(id => {
+    const body = new URLSearchParams({ _csrf: CSRF });
+    fetch(`<?= url('admin/imagen/') ?>${id}/eliminar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString()
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok) {
+        const imgDiv = document.querySelector(`[data-img-id="${id}"]`);
+        if (imgDiv) imgDiv.remove();
+        completed++;
+      } else {
+        errors++;
+        completed++;
+      }
+      if (completed === total) {
+        cancelSelectMode();
+        if (errors > 0) {
+          alert(`${total - errors} imagen(es) eliminada(s), ${errors} error(es).`);
+        }
+      }
+    })
+    .catch(() => {
+      errors++;
+      completed++;
+      if (completed === total) {
+        cancelSelectMode();
+        alert(`${total - errors} imagen(es) eliminada(s), ${errors} error(es).`);
+      }
+    });
+  });
 }
 
 // ── Services ─────────────────────────────────────────────────────────────────

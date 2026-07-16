@@ -375,9 +375,18 @@ require APP_PATH . '/views/layout/head.php';
       <span>Llega por la mejor ruta</span>
     </div>
     <?php if (setting('chatbot_wa_number', '')): ?>
-    <a href="https://wa.me/<?= e(preg_replace('/\D/', '', setting('chatbot_wa_number', ''))) ?>" target="_blank" class="colon-btn colon-btn-whatsapp">
-      Contáctalo aquí
-    </a>
+    <div class="colon-bot-actions-row flex flex-wrap items-center gap-4 mt-4">
+      <a href="https://wa.me/<?= e(preg_replace('/\D/', '', setting('chatbot_wa_number', ''))) ?>" target="_blank" class="colon-btn colon-btn-whatsapp">
+        Contáctalo aquí
+      </a>
+      <div class="colon-bot-qr flex items-center gap-2">
+        <span class="text-sm text-gray-600 font-medium">O escanea el código QR:</span>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://wa.me/<?= e(preg_replace('/\D/', '', setting('chatbot_wa_number', ''))) ?>&margin=10" 
+             alt="Código QR de CristoBot" 
+             class="w-20 h-20 rounded-lg border border-gray-200" 
+             loading="lazy" decoding="async">
+      </div>
+    </div>
     <?php endif; ?>
   </div>
 </section>

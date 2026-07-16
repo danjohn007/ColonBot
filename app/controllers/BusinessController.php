@@ -536,6 +536,7 @@ class BusinessController extends Controller
     private function buildData(): array
     {
         $isOpen = isset($_POST['is_open']) ? (int)$_POST['is_open'] : 0;
+        $businessType = trim($_POST['business_type'] ?? '');
         $data = [
             'name'        => trim($_POST['name'] ?? ''),
             'description' => trim($_POST['description'] ?? ''),
@@ -553,6 +554,7 @@ class BusinessController extends Controller
             'estado'      => $isOpen ? 'activo' : 'inactivo',
             'open_for_messaging' => in_array($_POST['open_for_messaging'] ?? '24hrs', ['24hrs', 'schedule'], true)
                 ? $_POST['open_for_messaging'] : '24hrs',
+            'business_type' => in_array($businessType, ['lugar_de_paso', 'lugar_turistico'], true) ? $businessType : null,
         ];
 
         // Only superadmin can change business status
