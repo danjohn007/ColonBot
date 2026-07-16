@@ -44,6 +44,11 @@ require APP_PATH . '/views/layout/head.php';
               } ?>">
               <?= match($b['status']) { 'published'=>'Publicado','pending'=>'Pendiente','rejected'=>'Rechazado',default=>'Borrador' } ?>
             </span>
+            <?php if ((int)($b['is_trusted'] ?? 0) === 1): ?>
+            <span class="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700 border border-orange-200">
+              Verificado
+            </span>
+            <?php endif; ?>
           </td>
           <td class="px-4 py-3 text-gray-600"><?= number_format($b['visits']) ?></td>
           <td class="px-4 py-3">
@@ -62,6 +67,17 @@ require APP_PATH . '/views/layout/head.php';
                 <button type="submit" class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-lg hover:bg-yellow-200 transition">✗ Rechazar</button>
               </form>
               <?php endif; ?>
+              <form method="POST" action="<?= url('superadmin/negocios/' . $b['id'] . '/confiable') ?>" class="inline">
+                <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
+                <?php if ((int)($b['is_trusted'] ?? 0) === 1): ?>
+                <input type="hidden" name="trusted" value="0">
+                <button type="submit" class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg hover:bg-gray-200 transition">Quitar confiable</button>
+                <?php else: ?>
+                <input type="hidden" name="trusted" value="1">
+                <input type="hidden" name="trusted_note" value="Validado por Turismo Colon">
+                <button type="submit" class="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-lg hover:bg-orange-200 transition">Negocio confiable</button>
+                <?php endif; ?>
+              </form>
               <?php if ($viewerRole === 'superadmin'): ?>
               <form method="POST" action="<?= url('superadmin/negocios/' . $b['id'] . '/eliminar') ?>" class="inline"
                 onsubmit="return confirm('¿Eliminar este negocio?')">

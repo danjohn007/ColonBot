@@ -66,6 +66,8 @@ class MapController extends Controller
                 'rating'         => (float)$b['rating'],
                 'cover'          => $b['cover_image'] ? imageUrl($b['cover_image']) : asset('img/placeholder.svg'),
                 'url'            => url($routePrefix . 'lugar/' . $b['slug']),
+                'is_trusted'     => (int)($b['is_trusted'] ?? 0) === 1,
+                'trusted_note'   => $b['trusted_note'] ?? '',
                 'isotipo'        => $b['isotipo'] ?? '',
                 'trip_types'     => $tripTypes,
             ];

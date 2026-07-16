@@ -178,11 +178,187 @@ require APP_PATH . '/views/layout/head.php';
     justify-content: center;
     font: 800 0.9rem/1 "Montserrat", system-ui, sans-serif;
   }
+  .colon-map-zoom-hint {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    z-index: 25;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: calc(100% - 2rem);
+    padding: 0.58rem 0.9rem;
+    border: 1px solid rgba(234, 88, 12, 0.24);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.94);
+    color: #9a3412;
+    font: 800 0.82rem/1.2 "Montserrat", system-ui, sans-serif;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14);
+    backdrop-filter: blur(8px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .colon-map-zoom-hint.is-hidden {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  .colon-trusted-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.36rem;
+    width: fit-content;
+    max-width: 100%;
+    margin-bottom: 0.75rem;
+    padding: 0.42rem 0.7rem;
+    border: 1px solid rgba(249, 115, 22, 0.28);
+    border-radius: 999px;
+    background: #fff7ed;
+    color: #9a3412;
+    font-size: 0.76rem;
+    font-weight: 900;
+    line-height: 1.15;
+  }
+  .colon-trusted-badge span {
+    color: #c2410c;
+    font-weight: 700;
+  }
+  .colon-route-legend {
+    position: absolute;
+    top: 1rem;
+    left: 4.9rem;
+    z-index: 20;
+    width: min(13rem, calc(100% - 6rem));
+  }
+  .colon-map-bot-card {
+    position: fixed;
+    top: auto;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 70;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    width: min(24rem, calc(100% - 2rem));
+    min-height: 5.1rem;
+    padding: 0.78rem 5rem 0.78rem 0.92rem;
+    border: 1px solid rgba(249, 115, 22, 0.24);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.94);
+    color: #334155;
+    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.16);
+    backdrop-filter: blur(10px);
+    overflow: visible;
+    transform: none;
+    transition: top 0.22s ease, right 0.22s ease, bottom 0.22s ease, transform 0.22s ease, opacity 0.22s ease;
+  }
+  .colon-map-bot-card.is-docked-to-map {
+    top: var(--bot-docked-top, 1rem);
+    right: var(--bot-docked-right, 1rem);
+    bottom: auto;
+  }
+  .colon-map-bot-card.is-hidden-before-map {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(0.75rem);
+  }
+  .colon-map-bot-card.is-panel-open {
+    right: 21rem;
+  }
+  .colon-map-bot-card.is-docked-to-map.is-panel-open {
+    right: calc(var(--bot-docked-right, 1rem) + 20rem);
+  }
+  .colon-map-bot-card img {
+    position: absolute;
+    right: -0.55rem;
+    bottom: -0.52rem;
+    width: 96px;
+    height: 96px;
+    border-radius: 999px 999px 18px 999px;
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 8px 20px rgba(124, 45, 18, 0.18);
+    transform: rotate(-4deg);
+    transform-origin: center bottom;
+  }
+  .colon-map-bot-card strong {
+    display: block;
+    color: #9a3412;
+    font-size: 0.92rem;
+    line-height: 1.15;
+  }
+  .colon-map-bot-card span {
+    display: block;
+    margin-top: 0.12rem;
+    color: #64748b;
+    font-size: 0.75rem;
+    line-height: 1.25;
+  }
+  .colon-map-bot-card a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.48rem;
+    padding: 0.42rem 0.72rem;
+    border-radius: 999px;
+    background: #16a34a;
+    color: #fff;
+    font-size: 0.76rem;
+    font-weight: 800;
+    line-height: 1;
+    text-decoration: none;
+    box-shadow: 0 10px 20px rgba(22, 163, 74, 0.22);
+  }
   @media (max-width: 640px) {
     .colon-boundary-name span {
       min-width: 5.9rem;
       padding: 0.32rem 0.68rem;
       font-size: 0.82rem;
+    }
+    .colon-map-zoom-hint {
+      bottom: 0.75rem;
+      max-width: calc(100% - 1.5rem);
+      padding: 0.5rem 0.72rem;
+      font-size: 0.72rem;
+    }
+    .colon-map-bot-card {
+      top: auto;
+      left: auto;
+      right: 0.75rem;
+      bottom: 5.25rem;
+      width: min(19rem, calc(100% - 1.5rem));
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.62rem;
+      padding: 0.62rem 4.1rem 0.62rem 0.72rem;
+      min-height: 4.45rem;
+    }
+    .colon-map-bot-card.is-docked-to-map {
+      top: var(--bot-docked-top, 0.75rem);
+      right: var(--bot-docked-right, 0.75rem);
+      bottom: auto;
+    }
+    .colon-map-bot-card.is-panel-open {
+      right: 0.75rem;
+    }
+    .colon-map-bot-card.is-docked-to-map.is-panel-open {
+      right: var(--bot-docked-right, 0.75rem);
+    }
+    .colon-map-bot-card img {
+      right: -0.38rem;
+      bottom: -0.35rem;
+      width: 76px;
+      height: 76px;
+    }
+    .colon-map-bot-card strong {
+      font-size: 0.82rem;
+    }
+    .colon-map-bot-card span {
+      font-size: 0.68rem;
+    }
+    .colon-map-bot-card a {
+      padding: 0.38rem 0.58rem;
+      font-size: 0.7rem;
     }
   }
 </style>
@@ -292,12 +468,16 @@ require APP_PATH . '/views/layout/head.php';
   </div>
 
   <!-- Map + Sidebar layout -->
-  <div class="flex-1 flex relative overflow-hidden colon-map-frame" style="height: calc(100vh - 130px);">
+  <div id="map-frame" class="flex-1 flex relative overflow-hidden colon-map-frame" style="height: calc(100vh - 130px);">
     <!-- Map -->
     <div id="map" class="flex-1 z-0"></div>
+    <div id="map-zoom-hint" class="colon-map-zoom-hint">
+      <span aria-hidden="true">+</span>
+      <span>Haz click en el mapa para activar el zoom</span>
+    </div>
 
     <!-- Route Legend Boxes (top corner of map) -->
-    <div id="route-legend" class="hidden md:block absolute top-4 left-4 z-20 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-3 max-w-[200px]">
+    <div id="route-legend" class="hidden md:block colon-route-legend bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-3">
       <h4 class="text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Rutas Turísticas</h4>
       <div class="space-y-1.5">
         <?php foreach ($categories as $cat): ?>
@@ -325,6 +505,21 @@ require APP_PATH . '/views/layout/head.php';
   </div>
   </section>
 </main>
+
+<?php
+  $chatbotPhone = preg_replace('/\D/', '', setting('chatbot_wa_number', ''));
+  $chatbotMapUrl = $chatbotPhone
+    ? 'https://wa.me/' . $chatbotPhone . '?text=' . rawurlencode('Hola CristoBot, quiero que seas mi guia de turismo en Colon.')
+    : '#cristo-bot';
+?>
+<div id="map-bot-card" class="colon-map-bot-card is-hidden-before-map">
+  <div>
+    <strong>Hola, soy CristoBot</strong>
+    <span>Soy tu gu&iacute;a de turismo en Col&oacute;n.</span>
+    <a href="<?= e($chatbotMapUrl) ?>" <?= $chatbotPhone ? 'target="_blank" rel="noopener"' : '' ?>>Habla conmigo</a>
+  </div>
+  <img src="<?= asset('img/cristo-bot-nino-small.png') ?>" alt="CristoBot, gu&iacute;a de turismo" loading="lazy" decoding="async">
+</div>
 
 <!-- Mis Favoritos modal -->
 <div id="favoritos-modal" class="fixed inset-0 z-50 hidden" style="display:none;">
@@ -516,8 +711,8 @@ const BOUNDARY_GEOJSON_URL = '<?= e($boundaryGeoJsonUrl ?? asset('data/colon-bou
 const CHATBOT_ACTIVE    = <?= setting('chatbot_active', '0') === '1' ? 'true' : 'false' ?>;
 const CHATBOT_WA_NUMBER = '<?= e(setting('chatbot_wa_number', '')) ?>';
 const MAP_LIMITS = L.latLngBounds(
-  L.latLng(18.85, -101.75),
-  L.latLng(21.35, -98.55)
+  L.latLng(19.05, -101.25),
+  L.latLng(21.2, -98.65)
 );
 
 // ─── Icon name → emoji mapping for category symbols (panels/modals) ────
@@ -564,7 +759,7 @@ function isotipoToEmoji(isotipo) {
 const map = L.map('map', {
   zoomControl: true,
   scrollWheelZoom: false,
-  minZoom: 7,
+  minZoom: 8,
   maxZoom: 18,
   maxBounds: MAP_LIMITS,
   maxBoundsViscosity: 0.95,
@@ -573,14 +768,54 @@ const map = L.map('map', {
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '\u00A9 <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   maxZoom: 18,
-  minZoom: 7,
-  bounds: MAP_LIMITS,
+  minZoom: 8,
   noWrap: true,
 }).addTo(map);
 
 const mapEl = map.getContainer();
-mapEl.addEventListener('click', () => map.scrollWheelZoom.enable());
-mapEl.addEventListener('mouseleave', () => map.scrollWheelZoom.disable());
+const mapZoomHint = document.getElementById('map-zoom-hint');
+const mapBotCard = document.getElementById('map-bot-card');
+const mapFrame = document.getElementById('map-frame');
+mapEl.addEventListener('click', () => {
+  map.scrollWheelZoom.enable();
+  mapZoomHint?.classList.add('is-hidden');
+});
+mapEl.addEventListener('mouseleave', () => {
+  map.scrollWheelZoom.disable();
+  mapZoomHint?.classList.remove('is-hidden');
+});
+
+function updateMapBotDock() {
+  if (!mapFrame || !mapBotCard) return;
+  const rect = mapFrame.getBoundingClientRect();
+  const beforeMap = rect.top > window.innerHeight - 72;
+  mapBotCard.classList.toggle('is-hidden-before-map', beforeMap);
+
+  if (beforeMap) {
+    mapBotCard.classList.remove('is-docked-to-map');
+    mapBotCard.style.removeProperty('--bot-docked-top');
+    mapBotCard.style.removeProperty('--bot-docked-right');
+    return;
+  }
+
+  const mapHasUsableViewport = rect.bottom > 160 && rect.top < window.innerHeight - 120;
+
+  if (mapHasUsableViewport) {
+    const top = Math.max(rect.top + 16, 16);
+    const right = Math.max(window.innerWidth - rect.right + 16, 16);
+    mapBotCard.style.setProperty('--bot-docked-top', `${top}px`);
+    mapBotCard.style.setProperty('--bot-docked-right', `${right}px`);
+    mapBotCard.classList.add('is-docked-to-map');
+  } else {
+    mapBotCard.classList.remove('is-docked-to-map');
+    mapBotCard.style.removeProperty('--bot-docked-top');
+    mapBotCard.style.removeProperty('--bot-docked-right');
+  }
+}
+
+window.addEventListener('scroll', updateMapBotDock, { passive: true });
+window.addEventListener('resize', updateMapBotDock);
+updateMapBotDock();
 
 // Municipio de Colon resaltado desde GeoJSON local.
 fetch(BOUNDARY_GEOJSON_URL)
@@ -654,11 +889,12 @@ const markerClusterLayer = typeof L.markerClusterGroup === 'function'
   : null;
 let activeMarkerLayer = markerDirectLayer;
 
-function createIcon(color, emoji) {
+function createIcon(color, emoji, trusted = false) {
   return L.divIcon({
     className: '',
     html: `<div style="background:${color};width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center">
       <span style="transform:rotate(45deg);font-size:17px;line-height:1">${emoji}</span>
+      ${trusted ? '<span style="position:absolute;right:-7px;top:-7px;width:18px;height:18px;border:2px solid #fff;border-radius:999px;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;transform:rotate(45deg);box-shadow:0 2px 7px rgba(22,163,74,.35)">✓</span>' : ''}
     </div>`,
     iconSize: [34, 34], iconAnchor: [17, 34], popupAnchor: [0, -38],
   });
@@ -703,7 +939,7 @@ function beginMarkerRender() {
 function addPoiMarker(poi, emoji) {
   if (!poi.lat || !poi.lng) return;
   const marker = L.marker([poi.lat, poi.lng], {
-    icon: createIcon(poi.category_color || '#f97316', emoji),
+    icon: createIcon(poi.category_color || '#f97316', emoji, Boolean(poi.is_trusted)),
   });
   marker.on('click', () => showPOI(poi));
   activeMarkerLayer.addLayer(marker);
@@ -780,6 +1016,9 @@ function showPOI(poi) {
   const isFav = isFavorito(poi.id);
   const categoryEmoji = iconToEmoji(poi.category_icon);
   const isPuntoReferencia = poi.category_slug === 'punto-de-referencia';
+  const trustedBadge = (!isPuntoReferencia && poi.is_trusted)
+    ? `<div class="colon-trusted-badge">✓ Negocio confiable<span>${poi.trusted_note || 'Validado por Turismo Colon'}</span></div>`
+    : '';
 
   // Build trip type badges HTML
   const tripTypeBadges = (poi.trip_types && poi.trip_types.length > 0)
@@ -825,6 +1064,7 @@ function showPOI(poi) {
       <span class="text-gray-500 ml-1">${poi.rating.toFixed(1)}</span>
     </div>
     ` : ''}
+    ${trustedBadge}
     ${!isPuntoReferencia && isotipoBadge ? `<div class="flex items-center gap-2 mb-3">${isotipoBadge}</div>` : ''}
     ${!isPuntoReferencia && tripTypeBadges ? `<div class="flex flex-wrap gap-1 mb-3">${tripTypeBadges}</div>` : ''}
     ${reviewCta}
@@ -874,6 +1114,7 @@ function showPOI(poi) {
   document.getElementById('panel-title').textContent = poi.name;
   document.getElementById('panel-content').innerHTML = renderedHtml;
   panel.classList.remove('translate-x-full');
+  mapBotCard?.classList.add('is-panel-open');
 
   // Mobile bottom sheet
   document.getElementById('bottom-sheet-content').innerHTML = renderedHtml;
@@ -891,12 +1132,14 @@ function resetMapUrl() {
 function closePanel() {
   resetMapUrl();
   document.getElementById('poi-panel').classList.add('translate-x-full');
+  mapBotCard?.classList.remove('is-panel-open');
 }
 
 function closeBottomSheet() {
   resetMapUrl();
   document.getElementById('bottom-sheet').classList.add('translate-y-full');
   document.getElementById('bottom-sheet-overlay').classList.add('hidden');
+  mapBotCard?.classList.remove('is-panel-open');
 }
 
 function setActiveCatButton(cat) {

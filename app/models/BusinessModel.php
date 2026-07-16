@@ -83,6 +83,16 @@ class BusinessModel extends Model
         return $this->query($sql, $params);
     }
 
+    public function setTrusted(int $businessId, bool $trusted, int $userId, string $note = ''): bool
+    {
+        return $this->update($businessId, [
+            'is_trusted'   => $trusted ? 1 : 0,
+            'trusted_by'   => $trusted ? $userId : null,
+            'trusted_at'   => $trusted ? date('Y-m-d H:i:s') : null,
+            'trusted_note' => $trusted ? ($note !== '' ? $note : null) : null,
+        ]);
+    }
+
     public function images(int $businessId): array
     {
         return $this->query('SELECT * FROM business_images WHERE business_id = ? ORDER BY sort_order', [$businessId]);

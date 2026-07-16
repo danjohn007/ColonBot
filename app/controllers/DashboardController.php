@@ -313,6 +313,27 @@ class DashboardController extends Controller
         $this->redirect('superadmin/negocios');
     }
 
+    public function trustBusiness(string $id): void
+    {
+        $this->requireAuth('colaborador_admin');
+        $this->verifyCsrf();
+
+        $business = $this->businesses->find((int)$id);
+        if (!$business) {
+            $this->flash('error', 'Negocio no encontrado.');
+            $this->redirect('superadmin/negocios');
+        }
+
+        $trusted = ($_POST['trusted'] ?? '1') === '1';
+        $note = trim((string)($_POST['trusted_note'] ?? 'Validado por Turismo Colon'));
+        $userId = (int)(currentUser()['id'] ?? 0);
+
+        $this->businesses->setTrusted((int)$id, $trusted, $userId, $note);
+        $this->logAction($trusted ? 'trust_business' : 'untrust_business', 'businesses', (int)$id, $business['name']);
+        $this->flash('success', $trusted ? 'Negocio marcado como confiable.' : 'Verificacion de confianza retirada.');
+        $this->redirect('superadmin/negocios');
+    }
+
     public function deleteBusiness(string $id): void
     {
         $this->requireAuth('superadmin');
