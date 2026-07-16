@@ -204,7 +204,7 @@ require APP_PATH . '/views/layout/head.php';
     <p class="colon-hero-copy reveal-up">Combina el estilo de visita que quieras realizar con la ruta ideal y encuentra la mejor hospitalidad de los Colonenses.</p>
     <div class="colon-hero-actions reveal-up">
       <a href="#explorar-mapa" class="colon-btn colon-btn-primary">Explorar rutas</a>
-      <a href="#cristo-bot" class="colon-btn colon-btn-ghost">Conocer a CristoBot</a>
+      <a href="#cristo-bot" class="colon-btn colon-btn-ghost">Conocer a CristoBot <img src="<?= asset('img/cristo-bot-nino-small.png') ?>" alt="" class="inline-block h-6 w-6 rounded-full ml-1.5" loading="lazy" decoding="async"></a>
     </div>
   </div>
   <div class="colon-slide-dots" aria-label="Controles del carrusel">
@@ -968,6 +968,12 @@ function filterIsotipo(isotipo) {
     ? allPois.filter(poi => poi.isotipo === currentIsotipo)
     : allPois;
   beginMarkerRender();
+
+  allRefPoints.forEach(poi => {
+    const refEmoji = isotipoToEmoji(poi.isotipo) || iconToEmoji(poi.category_icon);
+    addPoiMarker(poi, refEmoji);
+  });
+
   filtered.forEach(poi => {
     const poiEmoji = isotipoToEmoji(poi.isotipo);
     addPoiMarker(poi, poiEmoji);

@@ -37,6 +37,20 @@ class MapController extends Controller
         ];
         $businesses = $this->businesses->withFilters($filters);
 
+        // Siempre incluir puntos de referencia, incluso si hay filtro de categoría activo
+        if (!empty($filters['category'])) {
+            $refFilters = $filters;
+            $refFilters['category'] = 'punto-de-referencia';
+            $refPoints = $this->businesses->withFilters($refFilters);
+            // Evitar duplicados: solo agregar puntos de referencia que no estén ya en $businesses
+            $existingIds = array_column($businesses, 'id');
+            foreach ($refPoints as $ref) {
+                if (!in_array($ref['id'], $existingIds)) {
+                    $businesses[] = $ref;
+                }
+            }
+        }
+
         $pois = array_map(function($b) use ($routePrefix) {
             $tripTypes = array_column($this->businesses->tripTypes((int)$b['id']), 'trip_type');
             return [
