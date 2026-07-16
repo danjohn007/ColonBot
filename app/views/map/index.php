@@ -4,6 +4,8 @@ $extraHead = '<link rel="preconnect" href="https://fonts.googleapis.com">' . PHP
   . '  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . PHP_EOL
   . '  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">' . PHP_EOL
   . '  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">' . PHP_EOL
+  . '  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">' . PHP_EOL
+  . '  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">' . PHP_EOL
   . '  <link rel="stylesheet" href="' . asset('css/landing-map.css') . '">';
 $viewer = currentUser();
 $landingProfiles = [
@@ -135,6 +137,53 @@ require APP_PATH . '/views/layout/head.php';
     content: '🗺️';
     font-size: 1.5rem;
     -webkit-text-fill-color: initial;
+  }
+  .colon-boundary-name {
+    pointer-events: none;
+  }
+  .colon-boundary-name span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 7rem;
+    padding: 0.38rem 0.9rem;
+    border: 2px solid rgba(234, 88, 12, 0.88);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+    color: #9a3412;
+    font-family: "Montserrat", system-ui, sans-serif;
+    font-size: 1.02rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+    box-shadow: 0 8px 24px rgba(124, 45, 18, 0.18);
+    backdrop-filter: blur(6px);
+  }
+  .colon-marker-cluster {
+    border-radius: 999px;
+    background: rgba(249, 115, 22, 0.2);
+    box-shadow: 0 10px 24px rgba(124, 45, 18, 0.26);
+  }
+  .colon-marker-cluster div {
+    width: 42px;
+    height: 42px;
+    margin: 4px;
+    border: 3px solid #fff;
+    border-radius: 999px;
+    background: #f97316;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font: 800 0.9rem/1 "Montserrat", system-ui, sans-serif;
+  }
+  @media (max-width: 640px) {
+    .colon-boundary-name span {
+      min-width: 5.9rem;
+      padding: 0.32rem 0.68rem;
+      font-size: 0.82rem;
+    }
   }
 </style>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
@@ -450,6 +499,7 @@ require APP_PATH . '/views/layout/head.php';
 </section>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script>
 const BASE_URL = '<?= BASE_URL ?>';
 const ROUTE_PREFIX = '<?= e($routePrefix ?? '') ?>';
@@ -466,8 +516,8 @@ const BOUNDARY_GEOJSON_URL = '<?= e($boundaryGeoJsonUrl ?? asset('data/colon-bou
 const CHATBOT_ACTIVE    = <?= setting('chatbot_active', '0') === '1' ? 'true' : 'false' ?>;
 const CHATBOT_WA_NUMBER = '<?= e(setting('chatbot_wa_number', '')) ?>';
 const MAP_LIMITS = L.latLngBounds(
-  L.latLng(19.85, -100.65),
-  L.latLng(21.05, -99.05)
+  L.latLng(18.85, -101.75),
+  L.latLng(21.35, -98.55)
 );
 
 // ─── Icon name → emoji mapping for category symbols (panels/modals) ────
@@ -514,7 +564,7 @@ function isotipoToEmoji(isotipo) {
 const map = L.map('map', {
   zoomControl: true,
   scrollWheelZoom: false,
-  minZoom: 9,
+  minZoom: 7,
   maxZoom: 18,
   maxBounds: MAP_LIMITS,
   maxBoundsViscosity: 0.95,
@@ -523,7 +573,7 @@ const map = L.map('map', {
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '\u00A9 <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   maxZoom: 18,
-  minZoom: 9,
+  minZoom: 7,
   bounds: MAP_LIMITS,
   noWrap: true,
 }).addTo(map);
@@ -553,6 +603,17 @@ fetch(BOUNDARY_GEOJSON_URL)
     }).addTo(map);
 
     boundaryLayer.bringToBack();
+    L.marker(boundaryLayer.getBounds().getCenter(), {
+      icon: L.divIcon({
+        className: 'colon-boundary-name',
+        html: '<span>COL&Oacute;N</span>',
+        iconSize: [126, 34],
+        iconAnchor: [63, 17],
+      }),
+      interactive: false,
+      keyboard: false,
+      zIndexOffset: -500,
+    }).addTo(map);
   })
   .catch(error => {
     console.warn('No se pudo cargar el limite municipal de Colon:', error);
@@ -575,6 +636,23 @@ let currentCat = PRELOAD_CAT;
 let currentSearch = '';
 let currentIsotipo = '';
 let currentTripType = '';
+const markerDirectLayer = L.layerGroup().addTo(map);
+const markerClusterLayer = typeof L.markerClusterGroup === 'function'
+  ? L.markerClusterGroup({
+      showCoverageOnHover: false,
+      spiderfyOnMaxZoom: true,
+      disableClusteringAtZoom: 15,
+      maxClusterRadius: 46,
+      iconCreateFunction(cluster) {
+        return L.divIcon({
+          html: `<div><span>${cluster.getChildCount()}</span></div>`,
+          className: 'colon-marker-cluster',
+          iconSize: L.point(50, 50),
+        });
+      },
+    })
+  : null;
+let activeMarkerLayer = markerDirectLayer;
 
 function createIcon(color, emoji) {
   return L.divIcon({
@@ -586,6 +664,52 @@ function createIcon(color, emoji) {
   });
 }
 
+function shouldClusterMarkers() {
+  return Boolean(
+    markerClusterLayer &&
+    !PRELOAD_ID &&
+    !currentCat &&
+    !currentSearch.trim() &&
+    !currentTripType &&
+    !currentIsotipo
+  );
+}
+
+function beginMarkerRender() {
+  markerDirectLayer.clearLayers();
+  if (markerClusterLayer) {
+    markerClusterLayer.clearLayers();
+    if (map.hasLayer(markerClusterLayer)) {
+      map.removeLayer(markerClusterLayer);
+    }
+  }
+
+  if (shouldClusterMarkers()) {
+    if (map.hasLayer(markerDirectLayer)) {
+      map.removeLayer(markerDirectLayer);
+    }
+    activeMarkerLayer = markerClusterLayer;
+    markerClusterLayer.addTo(map);
+  } else {
+    activeMarkerLayer = markerDirectLayer;
+    if (!map.hasLayer(markerDirectLayer)) {
+      markerDirectLayer.addTo(map);
+    }
+  }
+
+  markers = [];
+}
+
+function addPoiMarker(poi, emoji) {
+  if (!poi.lat || !poi.lng) return;
+  const marker = L.marker([poi.lat, poi.lng], {
+    icon: createIcon(poi.category_color || '#f97316', emoji),
+  });
+  marker.on('click', () => showPOI(poi));
+  activeMarkerLayer.addLayer(marker);
+  markers.push(marker);
+}
+
 function loadPOIs() {
   const params = new URLSearchParams({ category: currentCat, q: currentSearch });
   fetch(`${ROUTE_BASE}/mapa/poi?${params}`)
@@ -595,27 +719,18 @@ function loadPOIs() {
       allPois = pois.filter(p => p.category_slug !== 'punto-de-referencia');
       allRefPoints = pois.filter(p => p.category_slug === 'punto-de-referencia');
 
-      markers.forEach(m => map.removeLayer(m));
-      markers = [];
+      beginMarkerRender();
 
       // Always add reference points with their own TIPO DE LUGAR (isotipo) icon
       allRefPoints.forEach(poi => {
-        if (!poi.lat || !poi.lng) return;
         const refEmoji = isotipoToEmoji(poi.isotipo) || iconToEmoji(poi.category_icon);
-        const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#f97316', refEmoji) });
-        m.addTo(map);
-        m.on('click', () => showPOI(poi));
-        markers.push(m);
+        addPoiMarker(poi, refEmoji);
       });
 
       // Add filtered POIs - also use TIPO DE LUGAR (isotipo) icon
       allPois.forEach(poi => {
-        if (!poi.lat || !poi.lng) return;
         const poiEmoji = isotipoToEmoji(poi.isotipo);
-        const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#f97316', poiEmoji) });
-        m.addTo(map);
-        m.on('click', () => showPOI(poi));
-        markers.push(m);
+        addPoiMarker(poi, poiEmoji);
       });
 
       if (PRELOAD_ID) {
@@ -830,28 +945,18 @@ function filterTripType(tripType) {
   if (currentTripType) {
     filtered = allPois.filter(poi => poi.trip_types && poi.trip_types.includes(currentTripType));
   }
-  // Clear existing markers
-  markers.forEach(m => map.removeLayer(m));
-  markers = [];
+  beginMarkerRender();
 
   // Always add reference points with their own TIPO DE LUGAR (isotipo) icon
   allRefPoints.forEach(poi => {
-    if (!poi.lat || !poi.lng) return;
     const refEmoji = isotipoToEmoji(poi.isotipo) || iconToEmoji(poi.category_icon);
-    const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#f97316', refEmoji) });
-    m.addTo(map);
-    m.on('click', () => showPOI(poi));
-    markers.push(m);
+    addPoiMarker(poi, refEmoji);
   });
 
   // Add filtered POIs
   filtered.forEach(poi => {
-    if (!poi.lat || !poi.lng) return;
     const poiEmoji = isotipoToEmoji(poi.isotipo);
-    const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#f97316', poiEmoji) });
-    m.addTo(map);
-    m.on('click', () => showPOI(poi));
-    markers.push(m);
+    addPoiMarker(poi, poiEmoji);
   });
 }
 
@@ -862,16 +967,10 @@ function filterIsotipo(isotipo) {
   const filtered = currentIsotipo
     ? allPois.filter(poi => poi.isotipo === currentIsotipo)
     : allPois;
-  // Clear existing markers
-  markers.forEach(m => map.removeLayer(m));
-  markers = [];
+  beginMarkerRender();
   filtered.forEach(poi => {
-    if (!poi.lat || !poi.lng) return;
     const poiEmoji = isotipoToEmoji(poi.isotipo);
-    const m = L.marker([poi.lat, poi.lng], { icon: createIcon(poi.category_color || '#f97316', poiEmoji) });
-    m.addTo(map);
-    m.on('click', () => showPOI(poi));
-    markers.push(m);
+    addPoiMarker(poi, poiEmoji);
   });
 }
 
