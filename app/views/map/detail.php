@@ -47,7 +47,7 @@ require APP_PATH . '/views/layout/head.php';
               <?= e($business['category_name']) ?>
             </span>
             <?php if ((int)($business['is_trusted'] ?? 0) === 1): ?>
-            <span class="ml-2 inline-flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700">
+            <span class="ml-2 inline-flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700" title="Negocio verificado por Turismo Colón">
               Negocio confiable
             </span>
             <?php endif; ?>

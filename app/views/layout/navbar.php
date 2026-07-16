@@ -331,13 +331,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- Flash Messages -->
 <?php if ($flash): ?>
-<div id="flash-msg" class="fixed top-20 right-4 z-50 max-w-sm">
-  <div class="rounded-lg shadow-lg p-4 text-sm font-medium flex items-start gap-3
-    <?= $flash['type'] === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200' ?>">
+<style>
+  #flash-msg button { color: rgba(255,255,255,.82); }
+  #flash-msg button:hover { color: #fff; }
+</style>
+<div id="flash-msg" class="fixed top-24 left-1/2 z-[9999] w-[min(92vw,32rem)]" style="transform: translateX(-50%);">
+  <div class="rounded-2xl shadow-2xl p-4 text-sm font-semibold flex items-start gap-3 border
+    <?= $flash['type'] === 'success' ? 'bg-green-600 text-white border-green-700' : 'bg-red-600 text-white border-red-700' ?>">
     <span><?= $flash['type'] === 'success' ? '✅' : '❌' ?></span>
     <p><?= e($flash['msg']) ?></p>
     <button onclick="this.parentElement.parentElement.remove()" class="ml-auto text-gray-400 hover:text-gray-600">✕</button>
   </div>
 </div>
-<script>setTimeout(()=>{ const m=document.getElementById('flash-msg'); if(m) m.remove(); }, 4000);</script>
+<script>setTimeout(()=>{ const m=document.getElementById('flash-msg'); if(m) m.remove(); }, 7000);</script>
 <?php endif; ?>

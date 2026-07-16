@@ -228,7 +228,33 @@ require APP_PATH . '/views/layout/head.php';
     top: 1rem;
     left: 4.9rem;
     z-index: 20;
-    width: min(13rem, calc(100% - 6rem));
+    width: min(15.5rem, calc(100% - 6rem));
+  }
+  .colon-verified-legend {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.68rem;
+    padding-top: 0.68rem;
+    border-top: 1px solid rgba(226, 232, 240, 0.9);
+    color: #475569;
+    font-size: 0.74rem;
+    line-height: 1.25;
+  }
+  .colon-verified-legend-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.05rem;
+    height: 1.05rem;
+    flex: 0 0 1.05rem;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    background: #16a34a;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 900;
+    box-shadow: 0 2px 7px rgba(22, 163, 74, 0.28);
   }
   .colon-map-bot-card {
     position: fixed;
@@ -487,6 +513,10 @@ require APP_PATH . '/views/layout/head.php';
           <span class="text-gray-600 truncate"><?= e($cat['name']) ?></span>
         </div>
         <?php endforeach; ?>
+      </div>
+      <div class="colon-verified-legend" title="Negocio verificado por Turismo Colón">
+        <span class="colon-verified-legend-icon" aria-hidden="true">✓</span>
+        <span>Negocio verificado por Turismo Col&oacute;n</span>
       </div>
     </div>
 
@@ -894,7 +924,7 @@ function createIcon(color, emoji, trusted = false) {
     className: '',
     html: `<div style="background:${color};width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center">
       <span style="transform:rotate(45deg);font-size:17px;line-height:1">${emoji}</span>
-      ${trusted ? '<span style="position:absolute;right:-7px;top:-7px;width:18px;height:18px;border:2px solid #fff;border-radius:999px;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;transform:rotate(45deg);box-shadow:0 2px 7px rgba(22,163,74,.35)">✓</span>' : ''}
+      ${trusted ? '<span title="Negocio verificado por Turismo Colón" aria-label="Negocio verificado por Turismo Colón" style="position:absolute;right:-7px;top:-7px;width:18px;height:18px;border:2px solid #fff;border-radius:999px;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;transform:rotate(45deg);box-shadow:0 2px 7px rgba(22,163,74,.35)">✓</span>' : ''}
     </div>`,
     iconSize: [34, 34], iconAnchor: [17, 34], popupAnchor: [0, -38],
   });
@@ -1017,7 +1047,7 @@ function showPOI(poi) {
   const categoryEmoji = iconToEmoji(poi.category_icon);
   const isPuntoReferencia = poi.category_slug === 'punto-de-referencia';
   const trustedBadge = (!isPuntoReferencia && poi.is_trusted)
-    ? `<div class="colon-trusted-badge">✓ Negocio confiable<span>${poi.trusted_note || 'Validado por Turismo Colon'}</span></div>`
+    ? `<div class="colon-trusted-badge" title="Negocio verificado por Turismo Colón" aria-label="Negocio verificado por Turismo Colón">✓ Negocio confiable<span>${poi.trusted_note || 'Validado por Turismo Colon'}</span></div>`
     : '';
 
   // Build trip type badges HTML
