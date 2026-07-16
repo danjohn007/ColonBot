@@ -11,7 +11,7 @@ require APP_PATH . '/views/layout/head.php';
 <main class="colon-auth-page">
   <div class="colon-auth-shell">
     <section class="colon-auth-copy">
-      <img src="<?= asset('img/cristo-bot-nino-small.png') ?>" alt="Cristo Bot Colón" class="colon-auth-logo mb-6" width="160" height="160" decoding="async">
+      <img src="<?= asset('img/Colon_logins.png') ?>" alt="Cristo Bot Colón" class="colon-auth-logo mb-6" width="160" height="160" decoding="async">
       <p class="colon-eyebrow">Panel de administración</p>
       <h1>Turismo en Colón</h1>
       <p>Administra a los negocios turísticos, promociones y eventos para los turistas de Colón, Querétaro</p>

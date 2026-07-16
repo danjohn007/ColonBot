@@ -10,7 +10,7 @@ require APP_PATH . '/views/layout/head.php';
 <main class="colon-auth-page">
   <div class="colon-auth-shell">
     <section class="colon-auth-copy">
-      <img src="<?= asset('img/cristo-bot-nino-small.png') ?>" alt="Cristo Bot Colón" class="colon-auth-logo mb-6" width="160" height="160" decoding="async">
+      <img src="<?= asset('img/Colon_logins.png') ?>" alt="Cristo Bot Colón" class="colon-auth-logo mb-6" width="160" height="160" decoding="async">
       <p class="colon-eyebrow">Prestadores turísticos</p>
       <h1>Haz visible tu negocio</h1>
       <p>Un espacio profesional para recibir visitantes, administrar tu presencia turística y conectar con personas que ya están explorando Colón.</p>
