@@ -288,9 +288,13 @@ class DashboardController extends Controller
     public function businesses(): void
     {
         $this->requireAuth('colaborador_admin');
-        $businesses = $this->businesses->allWithCategory();
+        $validationMode = ($_GET['validacion'] ?? '') === '1';
+        $businesses = $validationMode
+            ? $this->businesses->verificationCandidates()
+            : $this->businesses->allWithCategory();
+        $validationCandidatesCount = $validationMode ? count($businesses) : count($this->businesses->verificationCandidates());
         $user = currentUser();
-        $this->view('dashboard.businesses', compact('businesses', 'user') + ['csrf' => $this->csrf()]);
+        $this->view('dashboard.businesses', compact('businesses', 'user', 'validationMode', 'validationCandidatesCount') + ['csrf' => $this->csrf()]);
     }
 
     public function approveBusiness(string $id): void
@@ -331,7 +335,10 @@ class DashboardController extends Controller
         $this->businesses->setTrusted((int)$id, $trusted, $userId, $note);
         $this->logAction($trusted ? 'trust_business' : 'untrust_business', 'businesses', (int)$id, $business['name']);
         $this->flash('success', $trusted ? 'Negocio marcado como confiable.' : 'Verificacion de confianza retirada.');
-        $this->redirect('superadmin/negocios');
+        $redirectPath = ($_POST['return_to'] ?? '') === 'validation'
+            ? 'superadmin/negocios?validacion=1'
+            : 'superadmin/negocios';
+        $this->redirect($redirectPath);
     }
 
     public function deleteBusiness(string $id): void

@@ -1,13 +1,29 @@
 <?php
 $pageTitle = 'Negocios – SuperAdmin';
 $viewerRole = $user['role'] ?? '';
+$validationMode = $validationMode ?? false;
+$validationCandidatesCount = (int)($validationCandidatesCount ?? 0);
 require APP_PATH . '/views/layout/head.php';
 ?>
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
 <main class="max-w-7xl mx-auto px-4 py-8 mb-20">
   <h1 class="text-2xl font-bold text-gray-900 mb-6">🏢 Gestión de Negocios</h1>
 
-  <div class="flex justify-end mb-4">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+    <div class="flex flex-wrap items-center gap-2">
+      <?php if ($validationMode): ?>
+      <a href="<?= url('superadmin/negocios') ?>" class="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
+        Ver todos los negocios
+      </a>
+      <span class="text-sm text-orange-700 font-semibold bg-orange-50 border border-orange-200 rounded-xl px-3 py-2">
+        Mostrando candidatos para validar
+      </span>
+      <?php else: ?>
+      <a href="<?= url('superadmin/negocios?validacion=1') ?>" class="inline-flex items-center justify-center rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 transition">
+        Ver negocios disponibles para validar<?= $validationCandidatesCount > 0 ? ' (' . $validationCandidatesCount . ')' : '' ?>
+      </a>
+      <?php endif; ?>
+    </div>
     <a href="<?= url('admin/negocio/crear') ?>" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition">
       + Nuevo negocio
     </a>
@@ -15,7 +31,7 @@ require APP_PATH . '/views/layout/head.php';
 
   <div class="admin-table-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="overflow-x-auto">
-    <table class="admin-readable-table w-full min-w-[920px] text-sm">
+    <table class="admin-readable-table w-full min-w-[1120px] text-sm">
       <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
         <tr>
           <th class="px-4 py-3 text-left">Nombre</th>
@@ -23,11 +39,43 @@ require APP_PATH . '/views/layout/head.php';
           <th class="px-4 py-3 text-left">Propietario</th>
           <th class="px-4 py-3 text-left">Estado</th>
           <th class="px-4 py-3 text-left">Visitas</th>
+          <th class="px-4 py-3 text-left">Validaci&oacute;n</th>
           <th class="px-4 py-3 text-left">Acciones</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-100">
         <?php foreach ($businesses as $b): ?>
+        <?php
+          $reviewsCount = (int)($b['reviews_count'] ?? 0);
+          $reviewsAvg = (float)($b['reviews_avg'] ?? 0);
+          $profileScore = (int)($b['verification_profile_score'] ?? 0);
+          $lowReviewsCount = (int)($b['low_reviews_count'] ?? 0);
+          $isTrusted = (int)($b['is_trusted'] ?? 0) === 1;
+          $isSuggested = (int)($b['verification_suggested'] ?? 0) === 1;
+
+          if ($isTrusted) {
+              $validationLabel = 'Ya verificado';
+              $validationClass = 'bg-green-100 text-green-700 border-green-200';
+          } elseif (($b['status'] ?? '') !== 'published') {
+              $validationLabel = 'Publicar antes de validar';
+              $validationClass = 'bg-gray-100 text-gray-600 border-gray-200';
+          } elseif ($reviewsCount < 3) {
+              $validationLabel = 'Faltan rese&ntilde;as';
+              $validationClass = 'bg-yellow-50 text-yellow-700 border-yellow-200';
+          } elseif ($reviewsAvg < 4.3) {
+              $validationLabel = 'Promedio insuficiente';
+              $validationClass = 'bg-yellow-50 text-yellow-700 border-yellow-200';
+          } elseif ($lowReviewsCount > 0) {
+              $validationLabel = 'Revisar rese&ntilde;as bajas';
+              $validationClass = 'bg-red-50 text-red-700 border-red-200';
+          } elseif ($profileScore < 3) {
+              $validationLabel = 'Completar perfil';
+              $validationClass = 'bg-yellow-50 text-yellow-700 border-yellow-200';
+          } else {
+              $validationLabel = 'Sugerido para validar';
+              $validationClass = 'bg-orange-100 text-orange-700 border-orange-200';
+          }
+        ?>
         <tr class="hover:bg-gray-50 transition">
           <td class="px-4 py-3 font-medium text-gray-800">
             <a href="<?= url('lugar/' . $b['slug']) ?>" class="hover:text-blue-600" target="_blank"><?= e($b['name']) ?></a>
@@ -52,6 +100,17 @@ require APP_PATH . '/views/layout/head.php';
           </td>
           <td class="px-4 py-3 text-gray-600"><?= number_format($b['visits']) ?></td>
           <td class="px-4 py-3">
+            <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold <?= $validationClass ?>">
+              <?= $validationLabel ?>
+            </span>
+            <div class="mt-1 text-xs text-gray-500 leading-relaxed">
+              <?= number_format($reviewsAvg, 1) ?> estrellas &middot; <?= $reviewsCount ?> rese&ntilde;as &middot; Perfil <?= $profileScore ?>/4
+            </div>
+            <?php if ($isSuggested): ?>
+            <div class="mt-1 text-xs font-medium text-orange-700">Listo para revisi&oacute;n manual.</div>
+            <?php endif; ?>
+          </td>
+          <td class="px-4 py-3">
             <div class="admin-table-actions flex gap-1.5 flex-wrap">
               <a href="<?= url('admin/negocio/' . $b['id']) ?>"
                 class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-lg hover:bg-blue-200 transition">✎ Editar</a>
@@ -69,6 +128,9 @@ require APP_PATH . '/views/layout/head.php';
               <?php endif; ?>
               <form method="POST" action="<?= url('superadmin/negocios/' . $b['id'] . '/confiable') ?>" class="inline">
                 <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
+                <?php if ($validationMode): ?>
+                <input type="hidden" name="return_to" value="validation">
+                <?php endif; ?>
                 <?php if ((int)($b['is_trusted'] ?? 0) === 1): ?>
                 <input type="hidden" name="trusted" value="0">
                 <button type="submit" class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg hover:bg-gray-200 transition">Quitar confiable</button>
@@ -92,7 +154,9 @@ require APP_PATH . '/views/layout/head.php';
       </tbody>
     </table>
     </div>
-    <?php if (empty($businesses)): ?>
+    <?php if (empty($businesses) && $validationMode): ?>
+    <div class="p-12 text-center text-gray-400">No hay negocios que cumplan los criterios de validaci&oacute;n por ahora.</div>
+    <?php elseif (empty($businesses)): ?>
     <div class="p-12 text-center text-gray-400">Sin negocios registrados aún.</div>
     <?php endif; ?>
   </div>

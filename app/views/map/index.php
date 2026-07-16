@@ -268,7 +268,7 @@ require APP_PATH . '/views/layout/head.php';
     gap: 0.75rem;
     width: min(24rem, calc(100% - 2rem));
     min-height: 5.1rem;
-    padding: 0.78rem 5rem 0.78rem 0.92rem;
+    padding: 0.78rem 5.8rem 0.78rem 0.92rem;
     border: 1px solid rgba(249, 115, 22, 0.24);
     border-radius: 18px;
     background: rgba(255, 255, 255, 0.94);
@@ -297,14 +297,15 @@ require APP_PATH . '/views/layout/head.php';
   }
   .colon-map-bot-card img {
     position: absolute;
-    right: -0.55rem;
-    bottom: -0.52rem;
-    width: 96px;
-    height: 96px;
-    border-radius: 999px 999px 18px 999px;
-    object-fit: cover;
-    border: 3px solid #fff;
-    box-shadow: 0 8px 20px rgba(124, 45, 18, 0.18);
+    right: -0.78rem;
+    bottom: -0.62rem;
+    width: 112px;
+    height: 112px;
+    border-radius: 0;
+    object-fit: contain;
+    border: 0;
+    box-shadow: none;
+    filter: drop-shadow(0 10px 16px rgba(124, 45, 18, 0.22));
     transform: rotate(-4deg);
     transform-origin: center bottom;
   }
@@ -356,7 +357,7 @@ require APP_PATH . '/views/layout/head.php';
       width: min(19rem, calc(100% - 1.5rem));
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 0.62rem;
-      padding: 0.62rem 4.1rem 0.62rem 0.72rem;
+      padding: 0.62rem 4.8rem 0.62rem 0.72rem;
       min-height: 4.45rem;
     }
     .colon-map-bot-card.is-docked-to-map {
@@ -371,10 +372,10 @@ require APP_PATH . '/views/layout/head.php';
       right: var(--bot-docked-right, 0.75rem);
     }
     .colon-map-bot-card img {
-      right: -0.38rem;
-      bottom: -0.35rem;
-      width: 76px;
-      height: 76px;
+      right: -0.55rem;
+      bottom: -0.42rem;
+      width: 88px;
+      height: 88px;
     }
     .colon-map-bot-card strong {
       font-size: 0.82rem;
@@ -545,10 +546,10 @@ require APP_PATH . '/views/layout/head.php';
 <div id="map-bot-card" class="colon-map-bot-card is-hidden-before-map">
   <div>
     <strong>Hola, soy CristoBot</strong>
-    <span>Soy tu gu&iacute;a de turismo en Col&oacute;n.</span>
+    <span>Vamos juntos a descubrir Colón</span>
     <a href="<?= e($chatbotMapUrl) ?>" <?= $chatbotPhone ? 'target="_blank" rel="noopener"' : '' ?>>Habla conmigo</a>
   </div>
-  <img src="<?= asset('img/cristo-bot-nino-small.png') ?>" alt="CristoBot, gu&iacute;a de turismo" loading="lazy" decoding="async">
+  <img src="<?= asset('img/ColonBot-explora-transparent.png') ?>" alt="CristoBot, gu&iacute;a de turismo" loading="lazy" decoding="async">
 </div>
 
 <!-- Mis Favoritos modal -->
