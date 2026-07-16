@@ -407,7 +407,7 @@ require APP_PATH . '/views/layout/head.php';
     <p class="colon-hero-copy reveal-up">Combina el estilo de visita que quieras realizar con la ruta ideal y encuentra la mejor hospitalidad de los Colonenses.</p>
     <div class="colon-hero-actions reveal-up">
       <a href="#explorar-mapa" class="colon-btn colon-btn-primary">Explorar rutas</a>
-      <a href="#cristo-bot" class="colon-btn colon-btn-ghost">Conocer a CristoBot <img src="<?= asset('img/colón_botón.png') ?>" alt="" class="inline-block h-6 w-6 rounded-full ml-1.5" loading="lazy" decoding="async"></a>
+      <a href="#cristo-bot" class="colon-btn colon-btn-ghost">Conocer a CristoBot <img src="<?= asset('img/Colon_boton.png') ?>" alt="" class="inline-block h-6 w-6 rounded-full ml-1.5" loading="lazy" decoding="async"></a>
     </div>
   </div>
   <div class="colon-slide-dots" aria-label="Controles del carrusel">
@@ -637,7 +637,7 @@ require APP_PATH . '/views/layout/head.php';
 
 <section id="cristo-bot" class="colon-bot-section">
   <div class="colon-bot-visual reveal-scale" aria-hidden="true">
-    <span class="colon-bot-badge"><img src="<?= asset('img/Colon_sección.png') ?>" alt="" loading="lazy" decoding="async"></span>
+    <span class="colon-bot-badge"><img src="<?= asset('img/Colon_seccion.png') ?>" alt="" loading="lazy" decoding="async"></span>
   </div>
   <div class="colon-bot-content reveal-up">
     <p class="colon-eyebrow">WhatsApp</p>
