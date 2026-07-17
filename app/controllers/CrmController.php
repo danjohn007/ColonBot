@@ -14,7 +14,8 @@ class CrmController extends Controller
     {
         $this->requireAuth('prestador');
         $user = currentUser();
-        $businesses = ($user['role'] === 'superadmin' || $this->normalizeRole($user['role'] ?? '') === 'colaborador_admin')
+        $userRole = $this->normalizeRole($user['role'] ?? '');
+        $businesses = ($userRole === 'superadmin' || $userRole === 'colaborador_admin')
             ? $this->businesses->allWithCategory()
             : $this->businesses->byUser((int)$user['id']);
 
@@ -235,10 +236,28 @@ class CrmController extends Controller
     private function ownerOrAdmin(array $business): void
     {
         $user = currentUser();
-        // Prestador, colaborador_admin y superadmin pueden gestionar contactos de los negocios
-        if (in_array($this->normalizeRole($user['role'] ?? ''), ['prestador', 'colaborador_admin', 'superadmin'], true)) {
+        $userRole = $this->normalizeRole($user['role'] ?? '');
+        
+        // SuperAdmin tiene acceso completo a todos los negocios
+        if ($userRole === 'superadmin') {
             return;
         }
+        
+        // Colaborador Admin tiene acceso completo a todos los negocios
+        if ($userRole === 'colaborador_admin') {
+            return;
+        }
+        
+        // Prestador solo puede gestionar contactos de sus propios negocios
+        if ($userRole === 'prestador') {
+            if ((int)$business['user_id'] !== (int)$user['id']) {
+                http_response_code(403);
+                $this->json(['error' => 'No tienes permiso para gestionar contactos de este negocio.'], 403);
+            }
+            return;
+        }
+
+        // Cualquier otro rol: verificar si es propietario
         if ((int)$business['user_id'] !== (int)$user['id']) {
             http_response_code(403);
             $this->json(['error' => 'No tienes permiso'], 403);
