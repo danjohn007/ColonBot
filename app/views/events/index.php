@@ -11,7 +11,7 @@ require APP_PATH . '/views/layout/head.php';
       <button onclick="openCreateModal()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition">
         + Nuevo Evento
       </button>
-      <button onclick="toggleDeleteMode()" id="btn-delete-events" class="bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-700 transition">
+      <button id="btn-delete-events" class="bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-700 transition">
         Eliminar Eventos
       </button>
     </div>
@@ -335,64 +335,60 @@ function authorizeBot(id) {
 
 let deleteMode = false;
 
-function toggleDeleteMode() {
-  deleteMode = !deleteMode;
-  const checkboxes = document.querySelectorAll('.delete-checkbox');
-  const btn = document.getElementById('btn-delete-events');
+const deleteBtn = document.getElementById('btn-delete-events');
 
-  checkboxes.forEach(el => el.classList.toggle('hidden', !deleteMode));
+deleteBtn.addEventListener('click', function(e) {
+  e.preventDefault();
 
-  if (deleteMode) {
-    btn.textContent = 'Confirmar Eliminación';
-    btn.classList.remove('bg-red-600', 'hover:bg-red-700');
-    btn.classList.add('bg-orange-600', 'hover:bg-orange-700');
-  } else {
-    btn.textContent = 'Eliminar Eventos';
-    btn.classList.remove('bg-orange-600', 'hover:bg-orange-700');
-    btn.classList.add('bg-red-600', 'hover:bg-red-700');
-    document.querySelectorAll('.event-delete-check').forEach(cb => cb.checked = false);
+  if (!deleteMode) {
+    // Enter delete mode
+    deleteMode = true;
+    document.querySelectorAll('.delete-checkbox').forEach(el => el.classList.remove('hidden'));
+    deleteBtn.textContent = 'Confirmar Eliminación';
+    deleteBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+    deleteBtn.classList.add('bg-orange-600', 'hover:bg-orange-700');
+    return;
   }
-}
 
-document.getElementById('btn-delete-events').addEventListener('click', function(e) {
-  if (deleteMode) {
-    e.preventDefault();
-    const selected = Array.from(document.querySelectorAll('.event-delete-check:checked')).map(cb => cb.value);
-    if (selected.length === 0) {
-      alert('Selecciona al menos un evento para eliminar.');
-      return;
-    }
-    if (!confirm(`¿Eliminar ${selected.length} evento(s)? Esta acción no se puede deshacer.`)) return;
+  // Already in delete mode → perform deletion
+  const selected = Array.from(document.querySelectorAll('.event-delete-check:checked')).map(cb => cb.value);
+  if (selected.length === 0) {
+    alert('Selecciona al menos un evento para eliminar.');
+    return;
+  }
+  if (!confirm(`¿Eliminar ${selected.length} evento(s)? Esta acción no se puede deshacer.`)) return;
 
-    let completed = 0;
-    let errors = 0;
+  let completed = 0;
+  let errors = 0;
 
-    selected.forEach(id => {
-      const body = new URLSearchParams({ _csrf: CSRF });
-      fetch(`${APP_URL}/admin/eventos/${id}/eliminar`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: body.toString(),
-      })
-      .then(r => r.json())
-      .then(d => {
-        if (d.ok) {
-          completed++;
-        } else {
-          errors++;
+  selected.forEach(id => {
+    const body = new URLSearchParams({ _csrf: CSRF });
+    fetch(`${APP_URL}/admin/eventos/${id}/eliminar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString(),
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok) { completed++; }
+      else { errors++; }
+    })
+    .catch(() => errors++)
+    .finally(() => {
+      if (completed + errors === selected.length) {
+        if (errors > 0) {
+          alert(`Se eliminaron ${completed} evento(s). ${errors} error(es).`);
         }
-      })
-      .catch(() => errors++)
-      .finally(() => {
-        if (completed + errors === selected.length) {
-          if (errors > 0) {
-            alert(`Se eliminaron ${completed} evento(s). ${errors} error(es).`);
-          }
-          location.reload();
-        }
-      });
+        deleteMode = false;
+        document.querySelectorAll('.delete-checkbox').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.event-delete-check').forEach(cb => cb.checked = false);
+        deleteBtn.textContent = 'Eliminar Eventos';
+        deleteBtn.classList.remove('bg-orange-600', 'hover:bg-orange-700');
+        deleteBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+        location.reload();
+      }
     });
-  }
+  });
 });
 </script>
 
