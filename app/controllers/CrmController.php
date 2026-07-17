@@ -131,31 +131,108 @@ class CrmController extends Controller
         $this->requireAuth('prestador');
         $this->verifyCsrf();
 
-        $contact = $this->contacts->find((int)$id);
-        if (!$contact) { $this->json(['error' => 'not found'], 404); }
-
-        $business = $this->businesses->find($contact['business_id']);
-        $this->ownerOrAdmin($business);
-
-        $name = trim($_POST['name'] ?? $contact['name']);
+        $contactId = (int)$id;
+        $contact = $this->contacts->find($contactId);
+        $contactName = trim($_POST['name'] ?? '');
+        $contactEmail = trim($_POST['email'] ?? '');
         $amount = (float)($_POST['amount'] ?? 0);
         $products = trim($_POST['products'] ?? '');
-        $email = trim($_POST['email'] ?? $contact['email'] ?? '');
         $notes = trim($_POST['notes'] ?? '');
 
         if ($products === '') {
             $this->json(['error' => 'Captura el producto o servicio vendido para convertirlo en cliente.'], 422);
+            return;
         }
 
-        // Update contact info
-        $this->contacts->update((int)$id, [
-            'name' => $name,
-            'email' => $email ?: $contact['email'],
-        ]);
+        // ────────────────────────────────────────────────────────
+        // CASO 1: No se encontró en contacts → buscar en chatbot_sessions
+        // ────────────────────────────────────────────────────────
+        if (!$contact) {
+            $db = Database::getInstance();
 
-        $this->contacts->upgradeToCliente((int)$id, $amount, $products, $notes);
+            $stmt = $db->prepare('SELECT wa_id, category, session_count FROM chatbot_sessions WHERE id = ? LIMIT 1');
+            $stmt->execute([$contactId]);
+            $session = $stmt->fetch();
 
-        $this->logAction('upgrade_contact', 'contacts', (int)$id, "Contacto {$name} upgrade a cliente");
+            if (!$session) {
+                $this->json(['error' => 'not found'], 404);
+                return;
+            }
+
+            $waId = trim($session['wa_id'] ?? '');
+
+            // 1a) Buscar si ya existe un contacto con ese mismo wa_id
+            if ($waId !== '') {
+                $stmtContact = $db->prepare('SELECT id, business_id, name, email FROM contacts WHERE wa_id = ? LIMIT 1');
+                $stmtContact->execute([$waId]);
+                $existingContact = $stmtContact->fetch();
+
+                if ($existingContact) {
+                    $contactId = (int)$existingContact['id'];
+                    $business = $this->businesses->find((int)$existingContact['business_id']);
+                    $this->ownerOrAdmin($business);
+
+                    $name = $contactName ?: $existingContact['name'];
+                    $email = $contactEmail ?: $existingContact['email'] ?? '';
+
+                    $this->contacts->update($contactId, ['name' => $name, 'email' => $email]);
+                    $this->contacts->upgradeToCliente($contactId, $amount, $products, $notes);
+                    $this->logAction('upgrade_contact', 'contacts', $contactId, "Contacto {$name} upgrade a cliente");
+                    $this->json(['ok' => true]);
+                    return;
+                }
+
+                // 1b) Obtener business_id desde consultas (tabla que sí tiene business_id + wa_id)
+                $stmtBusiness = $db->prepare(
+                    'SELECT business_id FROM consultas WHERE wa_id = ? AND business_id IS NOT NULL LIMIT 1'
+                );
+                $stmtBusiness->execute([$waId]);
+                $businessRow = $stmtBusiness->fetch();
+
+                if ($businessRow && !empty($businessRow['business_id'])) {
+                    $businessId = (int)$businessRow['business_id'];
+                } else {
+                    $businessId = (int)($_POST['business_id'] ?? 0);
+                }
+            } else {
+                $businessId = (int)($_POST['business_id'] ?? 0);
+            }
+
+            if ($businessId <= 0) {
+                $this->json(['error' => 'No se pudo determinar el negocio para este contacto de chatbot.'], 422);
+                return;
+            }
+
+            $business = $this->businesses->find($businessId);
+            if (!$business) { $this->json(['error' => 'not found'], 404); return; }
+            $this->ownerOrAdmin($business);
+
+            $name = $contactName ?: 'Prospecto WhatsApp';
+            $email = $contactEmail ?: '';
+
+            // Crear el contacto y registrar compra
+            $newContact = $this->contacts->createOrUpdate($businessId, $name, $waId, $waId, $email, 'whatsapp');
+            $contactId = (int)$newContact['id'];
+            $this->contacts->addPurchase($contactId, $businessId, $amount, $products, $notes);
+
+            $this->logAction('upgrade_contact', 'contacts', $contactId, "Contacto {$name} upgrade a cliente desde chatbot");
+            $this->json(['ok' => true]);
+            return;
+        }
+
+        // ────────────────────────────────────────────────────────
+        // CASO 2: Contacto normal encontrado en la tabla contacts
+        // ────────────────────────────────────────────────────────
+        $business = $this->businesses->find($contact['business_id']);
+        $this->ownerOrAdmin($business);
+
+        $name = $contactName ?: $contact['name'];
+        $email = $contactEmail ?: $contact['email'] ?? '';
+
+        $this->contacts->update($contactId, ['name' => $name, 'email' => $email]);
+        $this->contacts->upgradeToCliente($contactId, $amount, $products, $notes);
+
+        $this->logAction('upgrade_contact', 'contacts', $contactId, "Contacto {$name} upgrade a cliente");
         $this->json(['ok' => true]);
     }
 
