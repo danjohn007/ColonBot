@@ -226,6 +226,24 @@ class PromotionController extends Controller
         $this->json(['ok' => true]);
     }
 
+    public function delete(string $id): void
+    {
+        $this->requireAuth('prestador');
+        $this->verifyCsrf();
+
+        $promo = $this->promotions->find((int)$id);
+        if (!$promo) { $this->json(['error' => 'not found'], 404); }
+
+        if ($promo['business_id']) {
+            $business = $this->businesses->find($promo['business_id']);
+            $this->ownerOrAdmin($business);
+        }
+
+        $this->promotions->delete((int)$id);
+        $this->logAction('delete_promotion', 'promotions', (int)$id, $promo['title']);
+        $this->json(['ok' => true]);
+    }
+
     public function sendHistory(string $id): void
     {
         $this->requireAuth('prestador');

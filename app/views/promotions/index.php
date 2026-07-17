@@ -7,9 +7,14 @@ require APP_PATH . '/views/layout/head.php';
 <main class="max-w-6xl mx-auto px-4 py-8 mb-24">
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold text-gray-900">🏷️ Promociones</h1>
-    <button onclick="openCreateModal()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition">
-      + Nueva Promoción
-    </button>
+    <div class="flex gap-2">
+      <button onclick="openCreateModal()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition">
+        + Nueva Promoción
+      </button>
+      <button onclick="toggleDeleteMode()" id="btn-delete-promos" class="bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-700 transition">
+        Eliminar Promociones
+      </button>
+    </div>
   </div>
 
   <!-- Promotions list -->
@@ -23,7 +28,10 @@ require APP_PATH . '/views/layout/head.php';
     </div>
     <?php else: ?>
     <?php foreach ($promotions as $p): ?>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative">
+      <div class="delete-checkbox hidden absolute top-4 left-4 z-10">
+        <input type="checkbox" value="<?= $p['id'] ?>" class="promo-delete-check w-5 h-5 accent-red-600 cursor-pointer">
+      </div>
       <div class="flex items-start justify-between gap-4">
         <div class="flex-1">
           <div class="flex items-center gap-2 mb-2">
@@ -267,6 +275,70 @@ document.getElementById('target-all')?.addEventListener('change', function() {
   document.querySelectorAll('.target-checkbox').forEach(cb => {
     if (cb.id !== 'target-all') cb.checked = this.checked;
   });
+});
+
+let deleteMode = false;
+
+function toggleDeleteMode() {
+  deleteMode = !deleteMode;
+  const checkboxes = document.querySelectorAll('.delete-checkbox');
+  const btn = document.getElementById('btn-delete-promos');
+
+  checkboxes.forEach(el => el.classList.toggle('hidden', !deleteMode));
+
+  if (deleteMode) {
+    btn.textContent = 'Confirmar Eliminación';
+    btn.classList.remove('bg-red-600', 'hover:bg-red-700');
+    btn.classList.add('bg-orange-600', 'hover:bg-orange-700');
+  } else {
+    btn.textContent = 'Eliminar Promociones';
+    btn.classList.remove('bg-orange-600', 'hover:bg-orange-700');
+    btn.classList.add('bg-red-600', 'hover:bg-red-700');
+    // Uncheck all
+    document.querySelectorAll('.promo-delete-check').forEach(cb => cb.checked = false);
+  }
+}
+
+// Make the button a toggle: if in delete mode and clicked, confirm deletion
+document.getElementById('btn-delete-promos').addEventListener('click', function(e) {
+  if (deleteMode) {
+    e.preventDefault();
+    const selected = Array.from(document.querySelectorAll('.promo-delete-check:checked')).map(cb => cb.value);
+    if (selected.length === 0) {
+      alert('Selecciona al menos una promoción para eliminar.');
+      return;
+    }
+    if (!confirm(`¿Eliminar ${selected.length} promoción(es)? Esta acción no se puede deshacer.`)) return;
+
+    let completed = 0;
+    let errors = 0;
+
+    selected.forEach(id => {
+      const body = new URLSearchParams({ _csrf: CSRF });
+      fetch(`${BASE_URL}/admin/promociones/${id}/eliminar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body.toString(),
+      })
+      .then(r => r.json())
+      .then(d => {
+        if (d.ok) {
+          completed++;
+        } else {
+          errors++;
+        }
+      })
+      .catch(() => errors++)
+      .finally(() => {
+        if (completed + errors === selected.length) {
+          if (errors > 0) {
+            alert(`Se eliminaron ${completed} promoción(es). ${errors} error(es).`);
+          }
+          location.reload();
+        }
+      });
+    });
+  }
 });
 </script>
 
