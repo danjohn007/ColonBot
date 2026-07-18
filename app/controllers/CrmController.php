@@ -104,9 +104,6 @@ class CrmController extends Controller
             if (in_array($requestedCategory, ['prospecto', 'prospecto_sin_historial', 'prospecto_recurrente'], true)) {
                 $data['category'] = $requestedCategory === 'prospecto' ? 'prospecto_sin_historial' : $requestedCategory;
             } elseif ($requestedCategory === 'cliente') {
-                if ($this->contacts->purchaseCount((int)$id) < 1) {
-                    $this->json(['error' => 'Para convertir a cliente primero registra una compra.'], 422);
-                }
                 $data['category'] = 'cliente';
             } elseif ($requestedCategory === 'lovemark') {
                 if ($this->contacts->purchaseCount((int)$id) < 4) {
