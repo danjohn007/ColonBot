@@ -229,8 +229,8 @@ function loadContacts() {
           <td class="px-4 py-3 text-gray-400 text-xs">${lastContact}</td>
           <td class="px-4 py-3">
             <div class="flex gap-1">
-              ${c.category !== 'cliente' && c.category !== 'lovemark' ? `<button onclick="openUpgradeModal(${c.id}, this.dataset.name)" data-name="${escHtml(c.name)}" class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" title="Registrar compra y convertir a cliente">⬆</button>` : ''}
-              ${c.category === 'cliente' || c.category === 'lovemark' ? `<button onclick="openPurchaseModal(${c.id}, this.dataset.name)" data-name="${escHtml(c.name)}" class="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100" title="Registrar compra">💰</button>` : ''}
+              ${c.category !== 'cliente' && c.category !== 'lovemark' ? `<button onclick="openUpgradeModal(${c.id}, JSON.parse(this.dataset.name))" data-name='${JSON.stringify(c.name)}' class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" title="Registrar compra y convertir a cliente">⬆</button>` : ''}
+              ${c.category === 'cliente' || c.category === 'lovemark' ? `<button onclick="openPurchaseModal(${c.id}, JSON.parse(this.dataset.name))" data-name='${JSON.stringify(c.name)}' class="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100" title="Registrar compra">💰</button>` : ''}
               ${phone !== '—' ? `<a href="https://wa.me/${phone.replace(/\D/g,'')}" target="_blank" class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" title="WhatsApp">💬</a>` : ''}
             </div>
           </td>
