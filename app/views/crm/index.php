@@ -185,8 +185,8 @@ function escHtml(str) {
 }
 
 function loadContacts() {
-  const businessId = document.getElementById('business-select').value;
-  const tbody = document.getElementById('contacts-tbody');
+  var businessId = document.getElementById('business-select').value;
+  var tbody = document.getElementById('contacts-tbody');
   if (!businessId) {
     tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-400">Selecciona un negocio para ver sus contactos</td></tr>';
     document.getElementById('add-business-id').value = '';
@@ -195,15 +195,16 @@ function loadContacts() {
 
   document.getElementById('add-business-id').value = businessId;
 
-  const url = BASE_URL + '/admin/crm/' + businessId + '/list?category=' + currentCategory;
-  fetch(url)
-    .then(r => r.json())
-    .then(contacts => {
+  fetch(BASE_URL + '/admin/crm/' + businessId + '/list?category=' + currentCategory)
+    .then(function(r) { return r.json(); })
+    .then(function(contacts) {
       if (contacts.length === 0) {
         tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-400">No hay contactos en esta categor\u00eda</td></tr>';
         return;
       }
-      tbody.innerHTML = contacts.map(function(c) {
+      var html = '';
+      for (var i = 0; i < contacts.length; i++) {
+        var c = contacts[i];
         var categoryLabel, categoryClass;
         if (c.category === 'lovemark') {
           categoryLabel = '\u2B50 Lovemark';
@@ -212,32 +213,31 @@ function loadContacts() {
           categoryLabel = '\u2705 Cliente';
           categoryClass = 'text-green-600 bg-green-50';
         } else if (c.category === 'prospecto_recurrente') {
-          categoryLabel = '\U0001F504 Prospecto recurrente';
+          categoryLabel = '\ud83d\udd04 Prospecto recurrente';
           categoryClass = 'text-orange-600 bg-orange-50';
         } else if (c.category === 'prospecto_sin_historial' || c.category === 'prospecto') {
-          categoryLabel = c.is_chatbot ? '\U0001F195 WhatsApp' : '\U0001F4CB Prospecto';
+          categoryLabel = c.is_chatbot ? '\ud83d\udc65 WhatsApp' : '\ud83d\udccb Prospecto';
           categoryClass = 'text-purple-600 bg-purple-50';
         } else {
-          categoryLabel = '\U0001F4CB Prospecto';
+          categoryLabel = '\ud83d\udccb Prospecto';
           categoryClass = 'text-purple-600 bg-purple-50';
         }
-        var sourceIcon = c.source === 'whatsapp' ? '\U0001F4F1' : c.source === 'mapa' ? '\U0001F5FA\uFE0F' : '\u270D\uFE0F';
+        var sourceIcon = c.source === 'whatsapp' ? '\ud83d\udcf1' : c.source === 'mapa' ? '\ud83d\uddfa\ufe0f' : '\u270d\ufe0f';
         var lastContact = c.last_contact_at ? new Date(c.last_contact_at).toLocaleDateString('es-MX') : '\u2014';
         var phone = c.phone || c.wa_id || '\u2014';
-        var nameEncoded = encodeURIComponent(c.name);
         var upgradeBtn = '';
         var purchaseBtn = '';
         var waBtn = '';
         if (c.category !== 'cliente' && c.category !== 'lovemark') {
-          upgradeBtn = '<button data-id="' + c.id + '" data-name="' + nameEncoded + '" onclick="openUpgradeModal(this.dataset.id, decodeURIComponent(this.dataset.name))" class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" title="Registrar compra y convertir a cliente">\u2B06</button>';
+          upgradeBtn = '<button data-id="' + c.id + '" data-name="' + encodeURIComponent(c.name) + '" class="upgrade-btn text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" title="Registrar compra y convertir a cliente">\u2B06</button>';
         }
         if (c.category === 'cliente' || c.category === 'lovemark') {
-          purchaseBtn = '<button data-id="' + c.id + '" data-name="' + nameEncoded + '" onclick="openPurchaseModal(this.dataset.id, decodeURIComponent(this.dataset.name))" class="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100" title="Registrar compra">\U0001F4B0</button>';
+          purchaseBtn = '<button data-id="' + c.id + '" data-name="' + encodeURIComponent(c.name) + '" class="purchase-btn text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100" title="Registrar compra">\ud83d\udcb0</button>';
         }
         if (phone !== '\u2014') {
-          waBtn = '<a href="https://wa.me/' + phone.replace(/\D/g,'') + '" target="_blank" class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" title="WhatsApp">\U0001F4AC</a>';
+          waBtn = '<a href="https://wa.me/' + phone.replace(/\D/g,'') + '" target="_blank" class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" title="WhatsApp">\ud83d\udcac</a>';
         }
-        return '<tr class="hover:bg-gray-50">' +
+        html += '<tr class="hover:bg-gray-50">' +
           '<td class="px-4 py-3 font-medium text-gray-800">' + escHtml(c.name) + '</td>' +
           '<td class="px-4 py-3 text-gray-500">' + escHtml(phone) + '</td>' +
           '<td class="px-4 py-3 text-gray-500">' + escHtml(c.email || '\u2014') + '</td>' +
@@ -248,25 +248,41 @@ function loadContacts() {
           '<td class="px-4 py-3 text-gray-400 text-xs">' + lastContact + '</td>' +
           '<td class="px-4 py-3"><div class="flex gap-1">' + upgradeBtn + purchaseBtn + waBtn + '</div></td>' +
           '</tr>';
-      }).join('');
+      }
+      tbody.innerHTML = html;
+
+      // Attach event listeners for upgrade and purchase buttons
+      var ups = document.querySelectorAll('.upgrade-btn');
+      for (var j = 0; j < ups.length; j++) {
+        ups[j].addEventListener('click', function() {
+          openUpgradeModal(this.dataset.id, decodeURIComponent(this.dataset.name));
+        });
+      }
+      var pcs = document.querySelectorAll('.purchase-btn');
+      for (var k = 0; k < pcs.length; k++) {
+        pcs[k].addEventListener('click', function() {
+          openPurchaseModal(this.dataset.id, decodeURIComponent(this.dataset.name));
+        });
+      }
     });
 }
 
 function filterCategory(cat) {
   currentCategory = cat;
-  document.querySelectorAll('.cat-filter').forEach(function(b) {
+  var filters = document.querySelectorAll('.cat-filter');
+  for (var i = 0; i < filters.length; i++) {
+    var b = filters[i];
     var active = b.dataset.cat === cat;
     b.classList.toggle('bg-blue-600', active);
     b.classList.toggle('text-white', active);
     b.classList.toggle('bg-gray-100', !active);
     b.classList.toggle('text-gray-700', !active);
-  });
+  }
   loadContacts();
 }
 
 function openAddModal() {
-  var businessId = document.getElementById('business-select').value;
-  if (!businessId) { alert('Primero selecciona un negocio.'); return; }
+  if (!document.getElementById('business-select').value) { alert('Primero selecciona un negocio.'); return; }
   document.getElementById('add-modal').classList.remove('hidden');
 }
 
