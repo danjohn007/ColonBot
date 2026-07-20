@@ -178,6 +178,12 @@ const CSRF = '<?= e($csrf) ?>';
 const BASE_URL = '<?= BASE_URL ?>';
 let currentCategory = '';
 
+function escHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = String(str);
+  return d.innerHTML;
+}
+
 function loadContacts() {
   const businessId = document.getElementById('business-select').value;
   const tbody = document.getElementById('contacts-tbody');
@@ -189,60 +195,67 @@ function loadContacts() {
 
   document.getElementById('add-business-id').value = businessId;
 
-  const url = `${BASE_URL}/admin/crm/${businessId}/list?category=${currentCategory}`;
+  const url = BASE_URL + '/admin/crm/' + businessId + '/list?category=' + currentCategory;
   fetch(url)
     .then(r => r.json())
     .then(contacts => {
       if (contacts.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-400">No hay contactos en esta categoría</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-400">No hay contactos en esta categor\u00eda</td></tr>';
         return;
       }
-      tbody.innerHTML = contacts.map(c => {
-        let categoryLabel, categoryClass;
+      tbody.innerHTML = contacts.map(function(c) {
+        var categoryLabel, categoryClass;
         if (c.category === 'lovemark') {
-          categoryLabel = '⭐ Lovemark';
+          categoryLabel = '\u2B50 Lovemark';
           categoryClass = 'text-pink-600 bg-pink-50';
         } else if (c.category === 'cliente') {
-          categoryLabel = '✅ Cliente';
+          categoryLabel = '\u2705 Cliente';
           categoryClass = 'text-green-600 bg-green-50';
         } else if (c.category === 'prospecto_recurrente') {
-          categoryLabel = '🔄 Prospecto recurrente';
+          categoryLabel = '\U0001F504 Prospecto recurrente';
           categoryClass = 'text-orange-600 bg-orange-50';
         } else if (c.category === 'prospecto_sin_historial' || c.category === 'prospecto') {
-          categoryLabel = c.is_chatbot ? '🆕 WhatsApp' : '📋 Prospecto';
+          categoryLabel = c.is_chatbot ? '\U0001F195 WhatsApp' : '\U0001F4CB Prospecto';
           categoryClass = 'text-purple-600 bg-purple-50';
         } else {
-          categoryLabel = '📋 Prospecto';
+          categoryLabel = '\U0001F4CB Prospecto';
           categoryClass = 'text-purple-600 bg-purple-50';
         }
-        const sourceIcon = c.source === 'whatsapp' ? '📱' : c.source === 'mapa' ? '🗺️' : '✍️';
-        const lastContact = c.last_contact_at ? new Date(c.last_contact_at).toLocaleDateString('es-MX') : '—';
-        const phone = c.phone || c.wa_id || '—';
-        return `<tr class="hover:bg-gray-50">
-          <td class="px-4 py-3 font-medium text-gray-800">${escHtml(c.name)}</td>
-          <td class="px-4 py-3 text-gray-500">${escHtml(phone)}</td>
-          <td class="px-4 py-3 text-gray-500">${escHtml(c.email || '—')}</td>
-          <td class="px-4 py-3"><span class="text-xs px-2 py-1 rounded-full font-medium ${categoryClass}">${categoryLabel}</span></td>
-          <td class="px-4 py-3">${c.total_visits}</td>
-          <td class="px-4 py-3">$${parseFloat(c.total_spent || 0).toFixed(2)}</td>
-          <td class="px-4 py-3 text-gray-400">${sourceIcon}</td>
-          <td class="px-4 py-3 text-gray-400 text-xs">${lastContact}</td>
-          <td class="px-4 py-3">
-            <div class="flex gap-1">
-              ${c.category !== 'cliente' && c.category !== 'lovemark' ? `<button onclick="openUpgradeModal(${c.id}, JSON.parse(this.dataset.name))" data-name='${JSON.stringify(c.name)}' class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" title="Registrar compra y convertir a cliente">⬆</button>` : ''}
-              ${c.category === 'cliente' || c.category === 'lovemark' ? `<button onclick="openPurchaseModal(${c.id}, JSON.parse(this.dataset.name))" data-name='${JSON.stringify(c.name)}' class="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100" title="Registrar compra">💰</button>` : ''}
-              ${phone !== '—' ? `<a href="https://wa.me/${phone.replace(/\D/g,'')}" target="_blank" class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" title="WhatsApp">💬</a>` : ''}
-            </div>
-          </td>
-        </tr>`;
+        var sourceIcon = c.source === 'whatsapp' ? '\U0001F4F1' : c.source === 'mapa' ? '\U0001F5FA\uFE0F' : '\u270D\uFE0F';
+        var lastContact = c.last_contact_at ? new Date(c.last_contact_at).toLocaleDateString('es-MX') : '\u2014';
+        var phone = c.phone || c.wa_id || '\u2014';
+        var nameEncoded = encodeURIComponent(c.name);
+        var upgradeBtn = '';
+        var purchaseBtn = '';
+        var waBtn = '';
+        if (c.category !== 'cliente' && c.category !== 'lovemark') {
+          upgradeBtn = '<button data-id="' + c.id + '" data-name="' + nameEncoded + '" onclick="openUpgradeModal(this.dataset.id, decodeURIComponent(this.dataset.name))" class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" title="Registrar compra y convertir a cliente">\u2B06</button>';
+        }
+        if (c.category === 'cliente' || c.category === 'lovemark') {
+          purchaseBtn = '<button data-id="' + c.id + '" data-name="' + nameEncoded + '" onclick="openPurchaseModal(this.dataset.id, decodeURIComponent(this.dataset.name))" class="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100" title="Registrar compra">\U0001F4B0</button>';
+        }
+        if (phone !== '\u2014') {
+          waBtn = '<a href="https://wa.me/' + phone.replace(/\D/g,'') + '" target="_blank" class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" title="WhatsApp">\U0001F4AC</a>';
+        }
+        return '<tr class="hover:bg-gray-50">' +
+          '<td class="px-4 py-3 font-medium text-gray-800">' + escHtml(c.name) + '</td>' +
+          '<td class="px-4 py-3 text-gray-500">' + escHtml(phone) + '</td>' +
+          '<td class="px-4 py-3 text-gray-500">' + escHtml(c.email || '\u2014') + '</td>' +
+          '<td class="px-4 py-3"><span class="text-xs px-2 py-1 rounded-full font-medium ' + categoryClass + '">' + categoryLabel + '</span></td>' +
+          '<td class="px-4 py-3">' + c.total_visits + '</td>' +
+          '<td class="px-4 py-3">$' + parseFloat(c.total_spent || 0).toFixed(2) + '</td>' +
+          '<td class="px-4 py-3 text-gray-400">' + sourceIcon + '</td>' +
+          '<td class="px-4 py-3 text-gray-400 text-xs">' + lastContact + '</td>' +
+          '<td class="px-4 py-3"><div class="flex gap-1">' + upgradeBtn + purchaseBtn + waBtn + '</div></td>' +
+          '</tr>';
       }).join('');
     });
 }
 
 function filterCategory(cat) {
   currentCategory = cat;
-  document.querySelectorAll('.cat-filter').forEach(b => {
-    const active = b.dataset.cat === cat;
+  document.querySelectorAll('.cat-filter').forEach(function(b) {
+    var active = b.dataset.cat === cat;
     b.classList.toggle('bg-blue-600', active);
     b.classList.toggle('text-white', active);
     b.classList.toggle('bg-gray-100', !active);
@@ -252,7 +265,7 @@ function filterCategory(cat) {
 }
 
 function openAddModal() {
-  const businessId = document.getElementById('business-select').value;
+  var businessId = document.getElementById('business-select').value;
   if (!businessId) { alert('Primero selecciona un negocio.'); return; }
   document.getElementById('add-modal').classList.remove('hidden');
 }
@@ -263,27 +276,26 @@ function closeAddModal() {
 
 function saveContact(e) {
   e.preventDefault();
-  const businessId = document.getElementById('add-business-id').value;
-  const name = document.getElementById('add-name').value.trim();
+  var businessId = document.getElementById('add-business-id').value;
+  var name = document.getElementById('add-name').value.trim();
   if (!name) return;
 
-  const body = new URLSearchParams({
-    _csrf: CSRF,
-    business_id: businessId,
-    name,
-    phone: document.getElementById('add-phone').value.trim(),
-    email: document.getElementById('add-email').value.trim(),
-    category: document.getElementById('add-category').value,
-    notes: document.getElementById('add-notes').value.trim(),
-  });
+  var body = new URLSearchParams();
+  body.append('_csrf', CSRF);
+  body.append('business_id', businessId);
+  body.append('name', name);
+  body.append('phone', document.getElementById('add-phone').value.trim());
+  body.append('email', document.getElementById('add-email').value.trim());
+  body.append('category', document.getElementById('add-category').value);
+  body.append('notes', document.getElementById('add-notes').value.trim());
 
-  fetch(`${BASE_URL}/admin/crm/crear`, {
+  fetch(BASE_URL + '/admin/crm/crear', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),
   })
-  .then(r => r.json())
-  .then(d => {
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
     if (d.ok) {
       closeAddModal();
       document.getElementById('add-name').value = '';
@@ -294,13 +306,14 @@ function saveContact(e) {
     } else {
       alert(d.error || 'Error al guardar');
     }
-  });
+  })
+  .catch(function(err) { alert('Error: ' + err.message); });
 }
 
 function openUpgradeModal(id, name) {
   document.getElementById('upgrade-contact-id').value = id;
   document.getElementById('upgrade-name').value = name;
-  document.getElementById('upgrade-contact-name').textContent = `Convertir a "${name}" a cliente`;
+  document.getElementById('upgrade-contact-name').textContent = 'Convertir a "' + name + '" a cliente';
   document.getElementById('upgrade-modal').classList.remove('hidden');
 }
 
@@ -310,23 +323,27 @@ function closeUpgradeModal() {
 
 function upgradeToCliente(e) {
   e.preventDefault();
-  const id = document.getElementById('upgrade-contact-id').value;
-  const body = new URLSearchParams({
-    _csrf: CSRF,
-    name: document.getElementById('upgrade-name').value.trim(),
-    email: document.getElementById('upgrade-email').value.trim(),
-    amount: document.getElementById('upgrade-amount').value || '0',
-    products: document.getElementById('upgrade-products').value.trim(),
-    notes: document.getElementById('upgrade-notes').value.trim(),
-  });
+  var id = document.getElementById('upgrade-contact-id').value;
+  var body = new URLSearchParams();
+  body.append('_csrf', CSRF);
+  body.append('name', document.getElementById('upgrade-name').value.trim());
+  body.append('email', document.getElementById('upgrade-email').value.trim());
+  body.append('amount', document.getElementById('upgrade-amount').value || '0');
+  body.append('products', document.getElementById('upgrade-products').value.trim());
+  body.append('notes', document.getElementById('upgrade-notes').value.trim());
 
-  fetch(`${BASE_URL}/admin/crm/${id}/upgrade`, {
+  fetch(BASE_URL + '/admin/crm/' + id + '/upgrade', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),
   })
-  .then(r => r.json())
-  .then(d => {
+  .then(function(r) {
+    if (!r.ok) {
+      return r.text().then(function(t) { throw new Error(t || 'Error del servidor'); });
+    }
+    return r.json();
+  })
+  .then(function(d) {
     if (d.ok) {
       closeUpgradeModal();
       document.getElementById('upgrade-amount').value = '';
@@ -334,15 +351,16 @@ function upgradeToCliente(e) {
       document.getElementById('upgrade-notes').value = '';
       loadContacts();
     } else {
-      alert(d.error || 'Error');
+      alert(d.error || 'Error al convertir');
     }
-  });
+  })
+  .catch(function(err) { alert('Error: ' + err.message); });
 }
 
 function openPurchaseModal(id, name) {
   document.getElementById('purchase-contact-id').value = id;
   document.getElementById('purchase-name').value = name;
-  document.getElementById('purchase-contact-name').textContent = `Registrar compra para "${name}"`;
+  document.getElementById('purchase-contact-name').textContent = 'Registrar compra para "' + name + '"';
   document.getElementById('purchase-modal').classList.remove('hidden');
 }
 
@@ -352,23 +370,27 @@ function closePurchaseModal() {
 
 function addPurchase(e) {
   e.preventDefault();
-  const id = document.getElementById('purchase-contact-id').value;
-  const body = new URLSearchParams({
-    _csrf: CSRF,
-    name: document.getElementById('purchase-name').value.trim(),
-    email: document.getElementById('purchase-email').value.trim(),
-    amount: document.getElementById('purchase-amount').value || '0',
-    products: document.getElementById('purchase-products').value.trim(),
-    notes: document.getElementById('purchase-notes').value.trim(),
-  });
+  var id = document.getElementById('purchase-contact-id').value;
+  var body = new URLSearchParams();
+  body.append('_csrf', CSRF);
+  body.append('name', document.getElementById('purchase-name').value.trim());
+  body.append('email', document.getElementById('purchase-email').value.trim());
+  body.append('amount', document.getElementById('purchase-amount').value || '0');
+  body.append('products', document.getElementById('purchase-products').value.trim());
+  body.append('notes', document.getElementById('purchase-notes').value.trim());
 
-  fetch(`${BASE_URL}/admin/crm/${id}/compra`, {
+  fetch(BASE_URL + '/admin/crm/' + id + '/compra', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),
   })
-  .then(r => r.json())
-  .then(d => {
+  .then(function(r) {
+    if (!r.ok) {
+      return r.text().then(function(t) { throw new Error(t || 'Error del servidor'); });
+    }
+    return r.json();
+  })
+  .then(function(d) {
     if (d.ok) {
       closePurchaseModal();
       document.getElementById('purchase-name').value = '';
@@ -378,15 +400,10 @@ function addPurchase(e) {
       document.getElementById('purchase-notes').value = '';
       loadContacts();
     } else {
-      alert(d.error || 'Error');
+      alert(d.error || 'Error al registrar compra');
     }
-  });
-}
-
-function escHtml(str) {
-  const d = document.createElement('div');
-  d.textContent = String(str);
-  return d.innerHTML;
+  })
+  .catch(function(err) { alert('Error: ' + err.message); });
 }
 </script>
 
