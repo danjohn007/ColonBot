@@ -35,9 +35,9 @@ require APP_PATH . '/views/layout/head.php';
   </div>
 
   <!-- Contacts table -->
-  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
     <div class="overflow-x-auto">
-      <table class="w-full text-sm" id="contacts-table">
+      <table class="text-sm min-w-[900px] w-full" id="contacts-table">
         <thead class="bg-gray-50">
           <tr class="text-left text-xs text-gray-500 uppercase tracking-wide">
             <th class="px-4 py-3">Nombre</th>
