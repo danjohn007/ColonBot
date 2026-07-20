@@ -29,9 +29,9 @@ require APP_PATH . '/views/layout/head.php';
     </a>
   </div>
 
-  <div class="admin-table-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-    <div class="overflow-x-auto">
-    <table class="admin-readable-table w-full min-w-[1120px] text-sm">
+  <div class="admin-table-card bg-white rounded-2xl shadow-sm border border-gray-100">
+    <div class="overflow-x-auto overflow-y-visible">
+    <table class="admin-readable-table min-w-[1120px] text-sm w-auto">
       <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
         <tr>
           <th class="px-4 py-3 text-left">Nombre</th>
