@@ -188,28 +188,106 @@ class PromotionController extends Controller
 
         $via = $_POST['via'] ?? 'whatsapp';
 
-        // If sending to promotions loaded in chatbot, just log it
+        // Build the promotion message
+        $promoInfo = "{$promo['title']}";
+        if ($promo['description']) {
+            $promoInfo .= "\n{$promo['description']}";
+        }
+        if ($promo['price']) {
+            $promoInfo .= "\n💰 Precio: \${$promo['price']}";
+        }
+        if ($promo['presale_price']) {
+            $promoInfo .= "\n🏷️ Precio promocional: \${$promo['presale_price']}";
+        }
+        if ($promo['conditions']) {
+            $promoInfo .= "\n📋 Condiciones: {$promo['conditions']}";
+        }
+        if ($promo['public_url']) {
+            $promoInfo .= "\n\n🔗 Más información: {$promo['public_url']}";
+        }
+        if ($promo['start_date']) {
+            $promoInfo .= "\n📅 Inicio: " . date('d/m/Y', strtotime($promo['start_date']));
+        }
+        if ($promo['end_date']) {
+            $promoInfo .= "\n⏰ Fin: " . date('d/m/Y', strtotime($promo['end_date']));
+        }
+
+        $messageText = "Te informamos sobre nuestra gran promoción:\n\n{$promoInfo}";
+
+        // Log the general send
         $this->promotions->logSend((int)$id, null, $via);
 
-        // If sending via WhatsApp, get target contacts and generate wa links
+        // Get target contacts with chatbot_sessions wa_id
         $targets = $this->promotions->getTargetContacts((int)$id);
-        $links = [];
-        $msg = urlencode("🎉 *{$promo['title']}*\n\n{$promo['description']}" . ($promo['public_url'] ? "\n\nMás info: {$promo['public_url']}" : ''));
+        $sent = 0;
+        $errors = 0;
 
         foreach ($targets as $target) {
-            $phone = $target['phone'] ?: $target['wa_id'];
-            if ($phone) {
-                $links[] = [
-                    'contact_id' => $target['id'],
-                    'contact_name' => $target['name'],
-                    'phone' => $phone,
-                    'url' => waLink($phone, $msg),
-                ];
+            // Use session_wa_id from chatbot_sessions if available, otherwise use contact wa_id or phone
+            $waId = $target['session_wa_id'] ?: ($target['wa_id'] ?: $target['phone']);
+            if (!$waId) continue;
+
+            $success = $this->sendWhatsAppMessage($waId, $messageText);
+            if ($success) {
                 $this->promotions->logSend((int)$id, (int)$target['id'], $via);
+                $sent++;
+            } else {
+                $errors++;
             }
         }
 
-        $this->json(['ok' => true, 'links' => $links]);
+        $this->json([
+            'ok' => true,
+            'sent' => $sent,
+            'errors' => $errors,
+            'message' => "Mensaje enviado a {$sent} prospectos" . ($errors ? " ({$errors} errores)" : ""),
+        ]);
+    }
+
+    /**
+     * Send a WhatsApp text message via Meta API
+     */
+    private function sendWhatsAppMessage(string $to, string $message): bool
+    {
+        $token = setting('wa_token');
+        $phoneId = setting('wa_phone_id');
+
+        if (!$token || !$phoneId) {
+            logError('WhatsApp API not configured for promotion send', __FILE__, __LINE__, 'warning');
+            return false;
+        }
+
+        $payload = [
+            'messaging_product' => 'whatsapp',
+            'to' => $to,
+            'type' => 'text',
+            'text' => ['body' => $message],
+        ];
+
+        $waVersion = setting('wa_api_version', 'v19.0');
+        $url = "https://graph.facebook.com/{$waVersion}/{$phoneId}/messages";
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => json_encode($payload),
+            CURLOPT_HTTPHEADER     => [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token,
+            ],
+            CURLOPT_TIMEOUT        => 15,
+        ]);
+        $response = curl_exec($ch);
+        $code     = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($code >= 400) {
+            logError('WhatsApp API error sending promotion: ' . $response, __FILE__, __LINE__, 'warning');
+            return false;
+        }
+
+        return true;
     }
 
     public function approve(string $id): void

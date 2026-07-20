@@ -239,7 +239,7 @@ function toggleStatus(id, status) {
 }
 
 function sendPromotion(id) {
-  if (!confirm('¿Enviar esta promoción a los contactos segmentados?')) return;
+  if (!confirm('¿Enviar esta promoción a los prospectos seleccionados por WhatsApp?')) return;
   const body = new URLSearchParams({ _csrf: CSRF, via: 'whatsapp' });
   fetch(`${BASE_URL}/admin/promociones/${id}/enviar`, {
     method: 'POST',
@@ -248,15 +248,14 @@ function sendPromotion(id) {
   })
   .then(r => r.json())
   .then(d => {
-    if (d.ok && d.links) {
-      alert(`Enlace generado para ${d.links.length} contactos. Se abrirá WhatsApp en una nueva ventana.`);
-      if (d.links.length > 0) {
-        window.open(d.links[0].url, '_blank');
-      }
+    if (d.ok) {
+      alert(d.message || `Mensaje enviado correctamente a ${d.sent || 0} prospectos.`);
+      location.reload();
     } else {
-      alert('Error al enviar');
+      alert(d.error || 'Error al enviar la promoción');
     }
-  });
+  })
+  .catch(() => alert('Error de conexión al enviar la promoción'));
 }
 
 function approvePromotion(id) {
