@@ -101,15 +101,18 @@ class CrmController extends Controller
         if (isset($_POST['notes'])) $data['notes'] = trim($_POST['notes']);
         if (isset($_POST['category'])) {
             $requestedCategory = $_POST['category'];
-            if (in_array($requestedCategory, ['prospecto', 'prospecto_sin_historial', 'prospecto_recurrente'], true)) {
-                $data['category'] = $requestedCategory === 'prospecto' ? 'prospecto_sin_historial' : $requestedCategory;
-            } elseif ($requestedCategory === 'cliente') {
-                $data['category'] = 'cliente';
-            } elseif ($requestedCategory === 'lovemark') {
-                if ($this->contacts->purchaseCount((int)$id) < 4) {
-                    $this->json(['error' => 'Cliente recurrente requiere mas de 3 compras registradas.'], 422);
+            $validCategories = ['prospecto', 'prospecto_sin_historial', 'prospecto_recurrente', 'cliente', 'lovemark'];
+            if (in_array($requestedCategory, $validCategories, true)) {
+                if ($requestedCategory === 'prospecto') {
+                    $data['category'] = 'prospecto_sin_historial';
+                } elseif ($requestedCategory === 'lovemark') {
+                    if ($this->contacts->purchaseCount((int)$id) < 4) {
+                        $this->json(['error' => 'Cliente recurrente requiere mas de 3 compras registradas.'], 422);
+                    }
+                    $data['category'] = 'lovemark';
+                } else {
+                    $data['category'] = $requestedCategory;
                 }
-                $data['category'] = 'lovemark';
             }
         }
 

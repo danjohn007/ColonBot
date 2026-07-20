@@ -31,7 +31,7 @@ require APP_PATH . '/views/layout/head.php';
 
   <div class="admin-table-card bg-white rounded-2xl shadow-sm border border-gray-100">
     <div class="overflow-x-auto overflow-y-visible">
-    <table class="admin-readable-table min-w-[1120px] text-sm w-auto">
+    <table class="admin-readable-table min-w-[1120px] text-sm w-full">
       <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
         <tr>
           <th class="px-4 py-3 text-left">Nombre</th>
