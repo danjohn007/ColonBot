@@ -354,8 +354,10 @@ function upgradeToCliente(e) {
   const products = document.getElementById('upgrade-products').value.trim();
   if (!products) { alert('Captura el producto o servicio vendido'); return; }
 
+  const businessId = document.getElementById('business-select').value;
   const body = new URLSearchParams();
   body.append('_csrf', CSRF);
+  body.append('business_id', businessId);
   body.append('name', document.getElementById('upgrade-name').value.trim());
   body.append('email', document.getElementById('upgrade-email').value.trim());
   body.append('amount', document.getElementById('upgrade-amount').value || '0');

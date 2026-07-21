@@ -145,7 +145,7 @@ class ContactModel extends Model
 
     public function purchaseCount(int $contactId): int
     {
-        $stmt = $this->db->prepare('SELECT COUNT(*) FROM contact_purchases WHERE contact_id = ?');
+        $stmt = $this->db->prepare('SELECT total_visits FROM contacts WHERE id = ?');
         $stmt->execute([$contactId]);
         return (int)$stmt->fetchColumn();
     }
