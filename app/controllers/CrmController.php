@@ -43,7 +43,7 @@ class CrmController extends Controller
             // Filter chatbot contacts by the requested category
             $filteredChatbot = array_filter($chatbotContacts, function($c) use ($category) {
                 if ($category === 'cliente_frecuente') {
-                    return $c['category'] === 'lovemark' || ($c['purchase_count'] ?? 0) >= 4;
+                    return $c['category'] === 'lovemark' || ($c['purchase_count'] ?? 0) >= 3;
                 }
                 return $c['category'] === $category;
             });
@@ -106,8 +106,8 @@ class CrmController extends Controller
                 if ($requestedCategory === 'prospecto') {
                     $data['category'] = 'prospecto_sin_historial';
                 } elseif ($requestedCategory === 'lovemark') {
-                    if ($this->contacts->purchaseCount((int)$id) < 4) {
-                        $this->json(['error' => 'Cliente recurrente requiere mas de 3 compras registradas.'], 422);
+                    if ($this->contacts->purchaseCount((int)$id) < 3) {
+                        $this->json(['error' => 'Cliente recurrente requiere al menos 3 compras registradas.'], 422);
                     }
                     $data['category'] = 'lovemark';
                 } else {

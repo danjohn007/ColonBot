@@ -2,7 +2,7 @@
 class ContactModel extends Model
 {
     protected string $table = 'contacts';
-    private const CLIENTE_RECURRENTE_MIN_PURCHASES = 4;
+    private const CLIENTE_RECURRENTE_MIN_PURCHASES = 3;
 
     public function byBusiness(int $businessId, string $category = ''): array
     {
