@@ -30,24 +30,24 @@ class CrmController extends Controller
         $this->ownerOrAdmin($business);
 
         $category = $_GET['category'] ?? '';
+
+        // 1. Get contacts from database with dynamic_category computed directly from contact_purchases
         $contacts = $this->contacts->byBusiness((int)$businessId, $category);
 
-        // Add chatbot contacts with automatic classification based on chatbot sessions
+        // 2. Get chatbot contacts
         $chatbotContacts = $this->contacts->classifyByChatbotSessions((int)$businessId);
 
-        // Merge chatbot contacts
+        // 3. Merge: database contacts FIRST so they take priority over chatbot contacts
         if (empty($category)) {
-            // Show all: merge chatbot contacts with regular contacts
-            $contacts = array_merge($chatbotContacts, $contacts);
+            $contacts = array_merge($contacts, $chatbotContacts);
         } elseif (in_array($category, ['prospecto', 'prospecto_sin_historial', 'prospecto_recurrente', 'cliente', 'lovemark', 'cliente_frecuente'])) {
-            // Filter chatbot contacts by the requested category
             $filteredChatbot = array_filter($chatbotContacts, function($c) use ($category) {
                 if ($category === 'cliente_frecuente') {
                     return $c['category'] === 'lovemark' || ($c['purchase_count'] ?? 0) >= 3;
                 }
                 return $c['category'] === $category;
             });
-            $contacts = array_merge($filteredChatbot, $contacts);
+            $contacts = array_merge($contacts, $filteredChatbot);
         }
 
         $this->json($this->uniqueContacts($contacts));
