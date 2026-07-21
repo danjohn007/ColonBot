@@ -8,7 +8,12 @@ class ContactModel extends Model
     {
         $sql = 'SELECT c.*,
                 (SELECT COUNT(*) FROM contact_purchases cp WHERE cp.contact_id = c.id) AS purchase_count,
-                (SELECT COALESCE(SUM(cp.amount), 0) FROM contact_purchases cp WHERE cp.contact_id = c.id) AS total_spent
+                (SELECT COALESCE(SUM(cp.amount), 0) FROM contact_purchases cp WHERE cp.contact_id = c.id) AS total_spent,
+                CASE
+                    WHEN (SELECT COUNT(*) FROM contact_purchases cp WHERE cp.contact_id = c.id) >= ' . self::CLIENTE_RECURRENTE_MIN_PURCHASES . ' THEN \'lovemark\'
+                    WHEN (SELECT COUNT(*) FROM contact_purchases cp WHERE cp.contact_id = c.id) >= 1 THEN \'cliente\'
+                    ELSE c.category
+                END AS dynamic_category
                 FROM contacts c WHERE c.business_id = ?';
         $params = [$businessId];
 
@@ -18,7 +23,11 @@ class ContactModel extends Model
             } elseif ($category === 'prospecto_recurrente') {
                 $sql .= " AND c.category = 'prospecto_recurrente'";
             } elseif ($category === 'cliente_frecuente') {
-                $sql .= " AND (c.category = 'lovemark' OR (SELECT COUNT(*) FROM contact_purchases cp WHERE cp.contact_id = c.id) >= " . self::CLIENTE_RECURRENTE_MIN_PURCHASES . ")";
+                $sql .= " AND (SELECT COUNT(*) FROM contact_purchases cp WHERE cp.contact_id = c.id) >= " . self::CLIENTE_RECURRENTE_MIN_PURCHASES;
+            } elseif ($category === 'cliente') {
+                $sql .= " AND (SELECT COUNT(*) FROM contact_purchases cp WHERE cp.contact_id = c.id) BETWEEN 1 AND 2";
+            } elseif ($category === 'lovemark') {
+                $sql .= " AND (SELECT COUNT(*) FROM contact_purchases cp WHERE cp.contact_id = c.id) >= " . self::CLIENTE_RECURRENTE_MIN_PURCHASES;
             } else {
                 $sql .= ' AND c.category = ?';
                 $params[] = $category;

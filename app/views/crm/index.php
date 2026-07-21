@@ -215,17 +215,19 @@ function loadContacts() {
         return;
       }
       tbody.innerHTML = contacts.map(c => {
+        // Use dynamic_category from contact_purchases if available, otherwise fallback to static category
+        const effectiveCategory = c.dynamic_category || c.category;
         let categoryLabel, categoryClass;
-        if (c.category === 'lovemark') {
+        if (effectiveCategory === 'lovemark') {
           categoryLabel = '⭐ Lovemark';
           categoryClass = 'text-pink-600 bg-pink-50';
-        } else if (c.category === 'cliente') {
+        } else if (effectiveCategory === 'cliente') {
           categoryLabel = '✅ Cliente';
           categoryClass = 'text-green-600 bg-green-50';
-        } else if (c.category === 'prospecto_recurrente') {
+        } else if (effectiveCategory === 'prospecto_recurrente') {
           categoryLabel = '🔄 Prospecto recurrente';
           categoryClass = 'text-orange-600 bg-orange-50';
-        } else if (c.category === 'prospecto_sin_historial' || c.category === 'prospecto') {
+        } else if (effectiveCategory === 'prospecto_sin_historial' || effectiveCategory === 'prospecto') {
           categoryLabel = c.is_chatbot ? '🆕 WhatsApp' : '📋 Prospecto';
           categoryClass = 'text-purple-600 bg-purple-50';
         } else {
@@ -236,13 +238,14 @@ function loadContacts() {
         const lastContact = c.last_contact_at ? new Date(c.last_contact_at).toLocaleDateString('es-MX') : '—';
         const phone = c.phone || c.wa_id || '—';
         const encodedName = encodeURIComponent(c.name);
-        let upgradeBtn = '';
-        let purchaseBtn = '';
-        let waBtn = '';
-        if (c.category !== 'cliente' && c.category !== 'lovemark') {
+        // Determine if upgrade or purchase buttons are needed based on dynamic category
+        const isDynamicCliente = effectiveCategory === 'cliente';
+        const isDynamicLovemark = effectiveCategory === 'lovemark';
+        let upgradeBtn = '', purchaseBtn = '', waBtn = '';
+        if (!isDynamicCliente && !isDynamicLovemark) {
           upgradeBtn = '<button class="btn-upgrade text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" data-cid="' + c.id + '" data-cname="' + encodedName + '" type="button" title="Registrar compra y convertir a cliente">⬆</button>';
         }
-        if (c.category === 'cliente' || c.category === 'lovemark') {
+        if (isDynamicCliente || isDynamicLovemark) {
           purchaseBtn = '<button class="btn-purchase text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100" data-cid="' + c.id + '" data-cname="' + encodedName + '" type="button" title="Registrar compra">💰</button>';
         }
         if (phone !== '—') {
