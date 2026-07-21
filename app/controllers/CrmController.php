@@ -149,7 +149,7 @@ class CrmController extends Controller
         }
 
         // ────────────────────────────────────────────────────────
-        // CASO 1: No se encontró en contacts → buscar en chatbot_sessions
+        // CASO 1: No se encontró en contacts (ID viene de chatbot_sessions)
         // ────────────────────────────────────────────────────────
         if (!$contact) {
             $db = Database::getInstance();
@@ -165,41 +165,17 @@ class CrmController extends Controller
 
             $waId = trim($session['wa_id'] ?? '');
 
-            // 1a) Buscar si ya existe un contacto con ese mismo wa_id
-            if ($waId !== '') {
-                $stmtContact = $db->prepare('SELECT id, business_id, name, email FROM contacts WHERE wa_id = ? LIMIT 1');
-                $stmtContact->execute([$waId]);
-                $existingContact = $stmtContact->fetch();
-
-                if ($existingContact) {
-                    $contactId = (int)$existingContact['id'];
-                    $business = $this->businesses->find((int)$existingContact['business_id']);
-                    $this->ownerOrAdmin($business);
-
-                    $name = $contactName ?: $existingContact['name'];
-                    $email = $contactEmail ?: $existingContact['email'] ?? '';
-
-                    $this->contacts->update($contactId, ['name' => $name, 'email' => $email]);
-                    $this->contacts->upgradeToCliente($contactId, $amount, $products, $notes);
-                    $this->logAction('upgrade_contact', 'contacts', $contactId, "Contacto {$name} upgrade a cliente");
-                    $this->json(['ok' => true]);
-                    return;
-                }
-
-                // 1b) Obtener business_id desde consultas (tabla que sí tiene business_id + wa_id)
+            // Determinar el negocio: primero desde POST, luego desde consultas
+            $businessId = (int)($_POST['business_id'] ?? 0);
+            if ($businessId <= 0 && $waId !== '') {
                 $stmtBusiness = $db->prepare(
                     'SELECT business_id FROM consultas WHERE wa_id = ? AND business_id IS NOT NULL LIMIT 1'
                 );
                 $stmtBusiness->execute([$waId]);
                 $businessRow = $stmtBusiness->fetch();
-
                 if ($businessRow && !empty($businessRow['business_id'])) {
                     $businessId = (int)$businessRow['business_id'];
-                } else {
-                    $businessId = (int)($_POST['business_id'] ?? 0);
                 }
-            } else {
-                $businessId = (int)($_POST['business_id'] ?? 0);
             }
 
             if ($businessId <= 0) {
@@ -214,7 +190,23 @@ class CrmController extends Controller
             $name = $contactName ?: 'Prospecto WhatsApp';
             $email = $contactEmail ?: '';
 
-            // Crear el contacto y registrar compra
+            // Buscar contacto del MISMO negocio por wa_id (business_id ya definido arriba)
+            if ($waId !== '') {
+                $stmtContact = $db->prepare('SELECT id, business_id, name, email FROM contacts WHERE wa_id = ? AND business_id = ? LIMIT 1');
+                $stmtContact->execute([$waId, $businessId]);
+                $existingContact = $stmtContact->fetch();
+
+                if ($existingContact) {
+                    $contactId = (int)$existingContact['id'];
+                    $this->contacts->update($contactId, ['name' => $name, 'email' => $email]);
+                    $this->contacts->upgradeToCliente($contactId, $amount, $products, $notes);
+                    $this->logAction('upgrade_contact', 'contacts', $contactId, "Contacto {$name} upgrade a cliente");
+                    $this->json(['ok' => true]);
+                    return;
+                }
+            }
+
+            // No existe contacto de este wa_id en este negocio → crear nuevo contacto y registrar compra
             $newContact = $this->contacts->createOrUpdate($businessId, $name, $waId, $waId, $email, 'whatsapp');
             $contactId = (int)$newContact['id'];
             $this->contacts->addPurchase($contactId, $businessId, $amount, $products, $notes);
