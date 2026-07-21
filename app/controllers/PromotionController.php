@@ -224,12 +224,14 @@ class PromotionController extends Controller
 
         foreach ($targets as $target) {
             // Use session_wa_id from chatbot_sessions if available, otherwise use contact wa_id or phone
-            $waId = $target['session_wa_id'] ?: ($target['wa_id'] ?: $target['phone']);
+            $waId = $target['session_wa_id'] ?: ($target['wa_id'] ?: ($target['phone'] ?? ''));
             if (!$waId) continue;
 
             $success = $this->sendWhatsAppMessage($waId, $messageText);
             if ($success) {
-                $this->promotions->logSend((int)$id, (int)$target['id'], $via);
+                // For chatbot-only contacts (not in contacts table), contact_id can be null
+                $contactId = isset($target['id']) ? (int)$target['id'] : null;
+                $this->promotions->logSend((int)$id, $contactId, $via);
                 $sent++;
             } else {
                 $errors++;

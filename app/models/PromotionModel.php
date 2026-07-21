@@ -107,33 +107,84 @@ class PromotionModel extends Model
         $segments = explode(',', $promo['target_segment']);
         $businessId = $promo['business_id'];
 
+        // ──────────────────────────────────────────────────────────
+        // 1. Get contacts from DB joined with chatbot_sessions
+        //    to obtain session_wa_id needed for sending WhatsApp msgs
+        // ──────────────────────────────────────────────────────────
         if (in_array('todos', $segments)) {
-            return $this->query(
-                "SELECT * FROM contacts WHERE business_id = ? ORDER BY created_at DESC",
-                [$businessId]
-            );
+            $sql = "SELECT c.*, cs.wa_id AS session_wa_id, cs.session_count, cs.purchase_count, cs.has_purchased
+                    FROM contacts c
+                    LEFT JOIN chatbot_sessions cs ON cs.wa_id = c.wa_id OR cs.wa_id = c.phone
+                    WHERE c.business_id = ?
+                    ORDER BY c.created_at DESC";
+            $contacts = $this->query($sql, [$businessId]);
+        } else {
+            $conditions = [];
+            $params = [$businessId];
+
+            if (in_array('clientes_frecuentes', $segments)) {
+                $conditions[] = "(c.category = 'lovemark' OR (SELECT COUNT(*) FROM contact_purchases cp WHERE cp.contact_id = c.id) >= 4)";
+            }
+            if (in_array('clientes', $segments)) {
+                $conditions[] = "c.category = 'cliente'";
+            }
+            if (in_array('prospectos_recurrentes', $segments)) {
+                $conditions[] = "c.category = 'prospecto_recurrente'";
+            }
+            if (in_array('prospectos_sin_historial', $segments)) {
+                $conditions[] = "c.category IN ('prospecto', 'prospecto_sin_historial')";
+            }
+
+            if (empty($conditions)) return [];
+
+            $sql = "SELECT c.*, cs.wa_id AS session_wa_id, cs.session_count, cs.purchase_count, cs.has_purchased
+                    FROM contacts c
+                    LEFT JOIN chatbot_sessions cs ON cs.wa_id = c.wa_id OR cs.wa_id = c.phone
+                    WHERE c.business_id = ? AND (" . implode(' OR ', $conditions) . ")
+                    ORDER BY c.created_at DESC";
+            $contacts = $this->query($sql, $params);
         }
 
-        $conditions = [];
-        $params = [$businessId];
+        // ──────────────────────────────────────────────────────────
+        // 2. Get chatbot sessions NOT yet synced to contacts table
+        //    (chatbot_sessions has NO business_id, it's global per wa_id)
+        //    Exclude sessions whose wa_id/phone already exists as contact
+        // ──────────────────────────────────────────────────────────
+        $includeProspectosSinHistorial = in_array('todos', $segments) || in_array('prospectos_sin_historial', $segments);
+        $includeProspectosRecurrentes  = in_array('todos', $segments) || in_array('prospectos_recurrentes', $segments);
 
-        if (in_array('clientes_frecuentes', $segments)) {
-            $conditions[] = "(c.category = 'lovemark' OR (SELECT COUNT(*) FROM contact_purchases cp WHERE cp.contact_id = c.id) >= 4)";
-        }
-        if (in_array('clientes', $segments)) {
-            $conditions[] = "c.category = 'cliente'";
-        }
-        if (in_array('prospectos_recurrentes', $segments)) {
-            $conditions[] = "c.category = 'prospecto_recurrente'";
-        }
-        if (in_array('prospectos_sin_historial', $segments)) {
-            $conditions[] = "c.category IN ('prospecto', 'prospecto_sin_historial')";
+        if ($includeProspectosSinHistorial || $includeProspectosRecurrentes) {
+            $chatbotSql = "SELECT cs.wa_id AS session_wa_id, cs.session_count, cs.purchase_count, cs.has_purchased,
+                                  cs.wa_id AS phone, cs.wa_id, cs.category AS name,
+                                  cs.updated_at AS last_contact_at
+                           FROM chatbot_sessions cs
+                           WHERE cs.wa_id NOT IN (
+                              SELECT COALESCE(c.wa_id, '') FROM contacts c WHERE c.business_id = ?
+                           )
+                           AND cs.wa_id NOT IN (
+                              SELECT COALESCE(c.phone, '') FROM contacts c WHERE c.business_id = ?
+                           )";
+
+            $chatbotParams = [$businessId, $businessId];
+
+            // When targeting specific segment (not 'todos'), filter by session properties
+            if (!in_array('todos', $segments)) {
+                if ($includeProspectosRecurrentes && !$includeProspectosSinHistorial) {
+                    // Only recurring prospects: sessions with >1 interaction or has purchased
+                    $chatbotSql .= " AND (cs.session_count > 1 OR cs.purchase_count > 0)";
+                } elseif (!$includeProspectosRecurrentes && $includeProspectosSinHistorial) {
+                    // Only sin historial: sessions with <=1 interaction and no purchase
+                    $chatbotSql .= " AND (cs.session_count <= 1 AND (cs.purchase_count IS NULL OR cs.purchase_count = 0))";
+                }
+            }
+
+            $chatbotSql .= " ORDER BY cs.updated_at DESC";
+            $chatbotOnly = $this->query($chatbotSql, $chatbotParams);
+
+            $contacts = array_merge($contacts, $chatbotOnly);
         }
 
-        if (empty($conditions)) return [];
-
-        $sql = "SELECT * FROM contacts c WHERE c.business_id = ? AND (" . implode(' OR ', $conditions) . ") ORDER BY c.created_at DESC";
-        return $this->query($sql, $params);
+        return $contacts;
     }
 
     public function logSend(int $promotionId, ?int $contactId, string $via = 'whatsapp'): void
