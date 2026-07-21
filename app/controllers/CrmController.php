@@ -31,11 +31,30 @@ class CrmController extends Controller
 
         $category = $_GET['category'] ?? '';
 
-        // Get contacts directly from contact_purchases data
-        // dynamic_category is computed in SQL using subqueries against contact_purchases
+        // 1. Get contacts directly from contact_purchases data via LEFT JOIN
+        //    dynamic_category is computed from contact_purchases:
+        //    0 purchases → uses c.category static value
+        //    1-2 purchases → 'cliente'
+        //    3+ purchases → 'lovemark'
         $contacts = $this->contacts->byBusiness((int)$businessId, $category);
 
-        $this->json($contacts);
+        // 2. Get chatbot contacts for prospect classification (prospecto_sin_historial, prospecto_recurrente)
+        $chatbotContacts = $this->contacts->classifyByChatbotSessions((int)$businessId);
+
+        // 3. Merge: database contacts FIRST so they take priority for clients/lovemarks already in DB
+        if (empty($category)) {
+            $contacts = array_merge($contacts, $chatbotContacts);
+        } elseif (in_array($category, ['prospecto', 'prospecto_sin_historial', 'prospecto_recurrente', 'cliente', 'lovemark', 'cliente_frecuente'])) {
+            $filteredChatbot = array_filter($chatbotContacts, function($c) use ($category) {
+                if ($category === 'cliente_frecuente') {
+                    return $c['category'] === 'lovemark' || ($c['purchase_count'] ?? 0) >= 3;
+                }
+                return $c['category'] === $category;
+            });
+            $contacts = array_merge($contacts, $filteredChatbot);
+        }
+
+        $this->json($this->uniqueContacts($contacts));
     }
 
     public function add(): void
