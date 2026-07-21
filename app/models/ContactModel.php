@@ -7,22 +7,14 @@ class ContactModel extends Model
     public function byBusiness(int $businessId, string $category = ''): array
     {
         $sql = 'SELECT c.*,
-                COALESCE(cp_stats.purchase_count, 0) AS purchase_count,
-                COALESCE(cp_stats.total_spent, 0) AS total_spent,
+                c.total_visits AS purchase_count,
+                c.total_purchases AS total_spent,
                 CASE
-                    WHEN COALESCE(cp_stats.purchase_count, 0) >= ' . self::CLIENTE_RECURRENTE_MIN_PURCHASES . ' THEN \'lovemark\'
-                    WHEN COALESCE(cp_stats.purchase_count, 0) >= 1 THEN \'cliente\'
+                    WHEN c.total_visits >= ' . self::CLIENTE_RECURRENTE_MIN_PURCHASES . ' THEN \'lovemark\'
+                    WHEN c.total_visits >= 1 THEN \'cliente\'
                     ELSE c.category
                 END AS dynamic_category
                 FROM contacts c
-                LEFT JOIN (
-                    SELECT
-                        contact_id,
-                        COUNT(*) AS purchase_count,
-                        COALESCE(SUM(amount), 0) AS total_spent
-                    FROM contact_purchases
-                    GROUP BY contact_id
-                ) cp_stats ON cp_stats.contact_id = c.id
                 WHERE c.business_id = ?';
         $params = [$businessId];
 
@@ -32,11 +24,11 @@ class ContactModel extends Model
             } elseif ($category === 'prospecto_recurrente') {
                 $sql .= " AND c.category = 'prospecto_recurrente'";
             } elseif ($category === 'cliente_frecuente') {
-                $sql .= " AND COALESCE(cp_stats.purchase_count, 0) >= " . self::CLIENTE_RECURRENTE_MIN_PURCHASES;
+                $sql .= " AND c.total_visits >= " . self::CLIENTE_RECURRENTE_MIN_PURCHASES;
             } elseif ($category === 'cliente') {
-                $sql .= " AND COALESCE(cp_stats.purchase_count, 0) BETWEEN 1 AND 2";
+                $sql .= " AND c.total_visits BETWEEN 1 AND 2";
             } elseif ($category === 'lovemark') {
-                $sql .= " AND COALESCE(cp_stats.purchase_count, 0) >= " . self::CLIENTE_RECURRENTE_MIN_PURCHASES;
+                $sql .= " AND c.total_visits >= " . self::CLIENTE_RECURRENTE_MIN_PURCHASES;
             } else {
                 $sql .= ' AND c.category = ?';
                 $params[] = $category;
@@ -120,17 +112,27 @@ class ContactModel extends Model
 
     public function addPurchase(int $contactId, int $businessId, float $amount, string $products = '', string $notes = ''): void
     {
-        $this->execute(
-            'INSERT INTO contact_purchases (contact_id, business_id, amount, products, notes) VALUES (?,?,?,?,?)',
-            [$contactId, $businessId, $amount, $products, $notes]
-        );
+        // Get current contact data to determine new total_visits
+        $contact = $this->find($contactId);
+        if (!$contact) return;
 
-        $this->execute(
-            'UPDATE contacts SET total_visits = total_visits + 1, total_purchases = total_purchases + ? WHERE id = ?',
-            [$amount, $contactId]
-        );
+        $newVisits = (int)$contact['total_visits'] + 1;
+        $newTotalPurchases = (float)$contact['total_purchases'] + $amount;
 
-        $this->refreshCategoryFromPurchases($contactId);
+        // Determine new category based on visit count
+        $newCategory = 'cliente';
+        if ($newVisits >= self::CLIENTE_RECURRENTE_MIN_PURCHASES) {
+            $newCategory = 'lovemark';
+        }
+
+        $this->update($contactId, [
+            'total_visits' => $newVisits,
+            'total_purchases' => $newTotalPurchases,
+            'products' => $products ?: $contact['products'],
+            'notes' => $notes ?: $contact['notes'],
+            'category' => $newCategory,
+            'last_contact_at' => date('Y-m-d H:i:s'),
+        ]);
     }
 
     public function upgradeToCliente(int $contactId, float $amount = 0, string $products = '', string $notes = ''): void
