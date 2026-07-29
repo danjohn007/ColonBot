@@ -388,11 +388,11 @@
 }
 
 .colon-facebook-inner {
-  max-width: 1440px;
+  max-width: 1320px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, .95fr) minmax(420px, 660px);
-  gap: clamp(30px, 6vw, 86px);
+  grid-template-columns: minmax(0, .95fr) minmax(300px, 520px);
+  gap: clamp(24px, 5vw, 64px);
   align-items: center;
 }
 
@@ -468,16 +468,16 @@
 }
 
 .colon-facebook-widget {
-  width: min(660px, 100%);
+  width: min(520px, 100%);
   justify-self: end;
 }
 
 .colon-facebook-card {
   position: relative;
   overflow: hidden;
-  padding: clamp(14px, 2vw, 22px);
+  padding: 12px;
   border: 1px solid rgba(226, 232, 240, .95);
-  border-radius: 34px;
+  border-radius: 26px;
   background:
     linear-gradient(#fff, #fff) padding-box,
     linear-gradient(145deg, rgba(255, 127, 65, .5), rgba(124, 58, 237, .3), rgba(226, 232, 240, .8)) border-box;
@@ -489,11 +489,11 @@
 .colon-facebook-card::before {
   content: "";
   position: absolute;
-  inset: -80px -90px auto auto;
-  width: 210px;
-  height: 210px;
+  inset: -120px -120px auto auto;
+  width: 190px;
+  height: 190px;
   border-radius: 999px;
-  background: rgba(255, 127, 65, .16);
+  background: rgba(255, 127, 65, .10);
   filter: blur(2px);
 }
 
@@ -502,7 +502,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 10px 14px;
+  padding: 4px 8px 12px;
 }
 
 .colon-facebook-live-dot {
@@ -521,7 +521,7 @@
 
 .colon-facebook-card-head strong {
   color: var(--colon-ink);
-  font-size: .96rem;
+  font-size: .9rem;
   font-weight: 900;
   line-height: 1.1;
 }
@@ -536,8 +536,8 @@
 }
 
 .colon-facebook-brand {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   margin-left: auto;
   color: #1877f2;
   fill: currentColor;
@@ -546,8 +546,8 @@
 
 .colon-facebook-feed {
   position: relative;
-  height: 640px;
-  min-height: 640px;
+  height: 520px;
+  min-height: 520px;
   overflow: hidden;
   border: 1px solid rgba(226, 232, 240, .9);
   border-radius: 22px;
@@ -569,7 +569,7 @@
   display: block;
   width: 100%;
   max-width: 100%;
-  min-height: 640px;
+  min-height: 520px;
   border: 0;
   background: #fff;
 }
@@ -1459,18 +1459,18 @@
   }
 
   .colon-facebook-card {
-    padding: 10px;
+    padding: 8px;
     border-radius: 24px;
   }
 
   .colon-facebook-feed {
-    height: 540px;
-    min-height: 540px;
+    height: 500px;
+    min-height: 500px;
   }
 
   .colon-facebook-feed iframe,
   .colon-facebook-fallback {
-    min-height: 540px;
+    min-height: 500px;
   }
 
   .colon-auth-page {
