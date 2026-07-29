@@ -391,13 +391,15 @@
   max-width: 1320px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 524px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 524px);
   gap: clamp(24px, 5vw, 64px);
   align-items: center;
 }
 
 .colon-facebook-copy {
   position: relative;
+  width: 100%;
+  min-width: 0;
   max-width: 780px;
 }
 
@@ -468,13 +470,17 @@
 }
 
 .colon-facebook-widget {
-  width: 524px;
+  width: 100%;
+  min-width: 0;
+  max-width: 524px;
   justify-self: end;
 }
 
 .colon-facebook-card {
   position: relative;
-  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   padding: 12px;
   border: 1px solid rgba(226, 232, 240, .95);
   border-radius: 26px;
@@ -489,7 +495,8 @@
 
 .colon-facebook-feed {
   position: relative;
-  width: 500px;
+  width: 100%;
+  max-width: 500px;
   height: 520px;
   min-height: 520px;
   margin-inline: auto;
@@ -511,7 +518,8 @@
 
 .colon-facebook-feed iframe {
   display: block;
-  width: 500px;
+  width: 100%;
+  max-width: 500px;
   height: 520px;
   min-height: 0;
   border: 0;
@@ -1254,9 +1262,11 @@
   }
 
   .colon-facebook-widget {
-    width: min(524px, 100%);
-    justify-self: center;
-  }
+  width: 100%;
+  min-width: 0;
+  max-width: 524px;
+  justify-self: end;
+}
 
   .colon-route-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

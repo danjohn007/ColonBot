@@ -555,7 +555,7 @@ require APP_PATH . '/views/layout/head.php';
     'width' => '500',
     'height' => '520',
     'small_header' => 'true',
-    'adapt_container_width' => 'false',
+    'adapt_container_width' => 'true',
     'hide_cover' => 'true',
     'show_facepile' => 'false',
     'locale' => 'es_LA',
@@ -566,7 +566,7 @@ require APP_PATH . '/views/layout/head.php';
   <div class="colon-facebook-inner">
     <div class="colon-facebook-copy reveal-up">
       <p class="colon-eyebrow">Actualidad</p>
-      <h2>Actualidad de Col&oacute;n</h2>
+      <h2><span>Actualidad</span> <span>de Col&oacute;n</span></h2>
       <p>Eventos, avisos y novedades publicados por Col&oacute;n te conquistar&aacute;.</p>
       <a href="<?= e($facebookPageUrl) ?>" class="colon-facebook-link" target="_blank" rel="noopener">
         <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
