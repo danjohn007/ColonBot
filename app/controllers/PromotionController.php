@@ -193,9 +193,25 @@ class PromotionController extends Controller
         $sent = 0;
 
         foreach ($targets as $target) {
-            // Register the send in promotion_sends with the real current timestamp
-            $contactId = isset($target['id']) ? (int)$target['id'] : null;
-            $this->promotions->logSend((int)$id, $contactId, $via);
+            $contactId = null;
+            $waId = null;
+
+            if (isset($target['id'])) {
+                // It's a contact from the contacts table
+                $category = $target['category'] ?? '';
+                // Clients (clientes / clientes_frecuentes): save contact_id
+                // Prospects (prospectos_recurrentes / prospectos_sin_historial): save wa_id
+                if (in_array($category, ['cliente', 'lovemark'], true)) {
+                    $contactId = (int)$target['id'];
+                } else {
+                    $waId = $target['wa_id'] ?? $target['session_wa_id'] ?? null;
+                }
+            } else {
+                // It's a chatbot session not yet synced to contacts table → prospect
+                $waId = $target['session_wa_id'] ?? $target['wa_id'] ?? null;
+            }
+
+            $this->promotions->logSend((int)$id, $contactId, $via, $waId);
             $sent++;
         }
 
