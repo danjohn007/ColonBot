@@ -12,7 +12,12 @@ require APP_PATH . '/views/layout/head.php';
 <main class="max-w-5xl mx-auto px-4 py-8 mb-20">
   <!-- Breadcrumb -->
   <nav class="text-sm text-gray-500 mb-4">
-    <a href="<?= url($backPath) ?>" class="hover:text-blue-600">← Volver</a>
+    <a href="<?= url($backPath) ?>" class="inline-flex items-center gap-1.5 hover:text-blue-600" aria-label="Volver">
+      <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 18 9 12l6-6"/>
+      </svg>
+      Volver
+    </a>
   </nav>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">

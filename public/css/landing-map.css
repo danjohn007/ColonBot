@@ -93,10 +93,14 @@
 .colon-hero-title {
   max-width: 980px;
   margin: 18px 0 20px;
-  font-size: clamp(3.3rem, 9vw, 9rem);
+  font-size: clamp(3rem, 7.2vw, 7rem);
   line-height: .88;
   font-weight: 900;
   text-transform: uppercase;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+  text-wrap: balance;
 }
 
 .colon-hero-copy {
@@ -120,6 +124,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   min-height: 48px;
   padding: 0 22px;
   border: 1px solid transparent;
@@ -129,6 +134,13 @@
   text-transform: uppercase;
   letter-spacing: .09em;
   transition: transform .25s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease;
+}
+
+.colon-btn svg,
+.colon-public-btn svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: 0 0 auto;
 }
 
 .colon-btn:hover,
@@ -1065,10 +1077,11 @@
 
   .colon-hero-title {
     max-width: 100%;
-    font-size: clamp(2.5rem, 12vw, 4.35rem);
+    font-size: clamp(2.35rem, 10.5vw, 4.1rem);
     line-height: .94;
     overflow-wrap: normal;
     word-break: normal;
+    hyphens: none;
   }
 
   .colon-hero-copy {

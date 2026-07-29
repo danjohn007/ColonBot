@@ -406,8 +406,18 @@ require APP_PATH . '/views/layout/head.php';
     <h1 class="colon-hero-title reveal-up">Colón te conquistará</h1>
     <p class="colon-hero-copy reveal-up">Combina el estilo de visita que quieras realizar con la ruta ideal y encuentra la mejor hospitalidad de los Colonenses.</p>
     <div class="colon-hero-actions reveal-up">
-      <a href="#explorar-mapa" class="colon-btn colon-btn-primary">Explorar rutas</a>
-      <a href="#cristo-bot" class="colon-btn colon-btn-ghost">Conocer a CristoBot <img src="<?= asset('img/cristo-bot-nino-small.png') ?>" alt="" class="inline-block h-6 w-6 rounded-full ml-1.5" loading="lazy" decoding="async"></a>
+      <a href="#explorar-mapa" class="colon-btn colon-btn-primary">
+        <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5-2V5l5 2m0 13 6-2m-6 2V7m6 11 5 2V7l-5-2m0 13V5"/>
+        </svg>
+        Explorar rutas
+      </a>
+      <a href="#cristo-bot" class="colon-btn colon-btn-ghost">
+        <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h8m-8 4h5m8-2a8 8 0 0 1-11.4 7.25L4 20l.75-5.6A8 8 0 1 1 21 12Z"/>
+        </svg>
+        Conocer a CristoBot
+      </a>
     </div>
   </div>
   <div class="colon-slide-dots" aria-label="Controles del carrusel">
@@ -1074,6 +1084,14 @@ function showPOI(poi) {
         : `<a href="${VISITOR_LOGIN_URL}" class="block mb-3 rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-sm font-semibold text-orange-700 hover:bg-orange-100 transition">Inicia sesión como visitante para opinar</a>`))
     : '';
 
+  const iconReview = '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m12 3 2.7 5.47 6.03.88-4.37 4.25 1.03 6-5.39-2.84L6.61 19.6l1.03-6-4.37-4.25 6.03-.88L12 3Z"/></svg>';
+  const iconMessage = '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h8m-8 4h5m8-2a8 8 0 0 1-11.4 7.25L4 20l.75-5.6A8 8 0 1 1 21 12Z"/></svg>';
+  const iconBag = '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 8h12l-1 12H7L6 8Zm3 0a3 3 0 0 1 6 0"/></svg>';
+  const iconList = '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>';
+  const iconAmenity = '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 11h16M5 11V7a3 3 0 0 1 3-3h1a3 3 0 0 1 3 3v4m7 0v8M5 11v8m0-4h14"/></svg>';
+  const iconCalendar = '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 3v3m8-3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z"/></svg>';
+  const iconMapPin = '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21s7-4.7 7-11a7 7 0 1 0-14 0c0 6.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5" stroke-width="2"/></svg>';
+
   const html = `
     <img src="${poi.cover}" class="w-full h-40 object-cover rounded-xl mb-3" onerror="this.src='<?= asset('img/placeholder.svg') ?>'">
     <div class="flex items-start justify-between gap-2 mb-2">
@@ -1102,38 +1120,38 @@ function showPOI(poi) {
     <div class="grid grid-cols-2 gap-2">
       ${!isPuntoReferencia ? `
       <a href="${poi.url}#valoraciones" class="col-span-2 flex items-center justify-center gap-2 bg-orange-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-orange-700 transition">
-        Ver detalle y calificar
+        ${iconReview} Ver detalle y calificar
       </a>
       ` : ''}
       ${!isPuntoReferencia ? (CHATBOT_ACTIVE && CHATBOT_WA_NUMBER
         ? `<a href="https://wa.me/${CHATBOT_WA_NUMBER}?text=${encodeURIComponent('Hola, quiero ver las opciones para ' + poi.name)}" target="_blank"
             class="col-span-2 flex items-center justify-center gap-2 bg-orange-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-orange-700 transition">
-            \u{1F4AC} Reservar por Whatsapp
+            ${iconMessage} Reservar por Whatsapp
           </a>`
         : `<button type="button" onclick="toggleReservarMenu(this)"
             class="col-span-2 flex items-center justify-center gap-2 bg-orange-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-orange-700 transition">
-            \u{1F4AC} Reservar por Whatsapp
+            ${iconMessage} Reservar por Whatsapp
           </button>
           <div class="col-span-2 hidden reservar-menu">
             <div class="grid grid-cols-2 gap-2 mt-1">
               <a href="${poi.url}#productos" class="flex items-center justify-center gap-1.5 bg-orange-50 text-orange-700 border border-orange-200 py-2 rounded-xl text-sm font-medium hover:bg-orange-100 transition">
-                \u{1F6CD}\u{FE0F} Productos
+                ${iconBag} Productos
               </a>
               <a href="${poi.url}#servicios" class="flex items-center justify-center gap-1.5 bg-orange-50 text-orange-700 border border-orange-200 py-2 rounded-xl text-sm font-medium hover:bg-orange-100 transition">
-                \u{1F4CB} Servicios
+                ${iconList} Servicios
               </a>
               <a href="${poi.url}#amenidades" class="flex items-center justify-center gap-1.5 bg-orange-50 text-orange-700 border border-orange-200 py-2 rounded-xl text-sm font-medium hover:bg-orange-100 transition">
-                \u{1F6CE}\u{FE0F} Amenidades
+                ${iconAmenity} Amenidades
               </a>
               <a href="${poi.url}#eventos" class="flex items-center justify-center gap-1.5 bg-orange-50 text-orange-700 border border-orange-200 py-2 rounded-xl text-sm font-medium hover:bg-orange-100 transition">
-                \u{1F389} Eventos
+                ${iconCalendar} Eventos
               </a>
             </div>
           </div>`) : ''}
 
       <a href="https://www.google.com/maps/dir/?api=1&destination=${poi.lat},${poi.lng}" target="_blank"
         class="flex items-center justify-center gap-1.5 bg-orange-500 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-orange-600 transition">
-        \u{1F5FA}\u{FE0F} C\u00F3mo llegar
+        ${iconMapPin} C\u00F3mo llegar
       </a>
     </div>
   `;
