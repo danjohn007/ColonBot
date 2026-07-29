@@ -188,61 +188,21 @@ class PromotionController extends Controller
 
         $via = $_POST['via'] ?? 'whatsapp';
 
-        // Build the promotion message
-        $promoInfo = "{$promo['title']}";
-        if ($promo['description']) {
-            $promoInfo .= "\n{$promo['description']}";
-        }
-        if ($promo['price']) {
-            $promoInfo .= "\n💰 Precio: \${$promo['price']}";
-        }
-        if ($promo['presale_price']) {
-            $promoInfo .= "\n🏷️ Precio promocional: \${$promo['presale_price']}";
-        }
-        if ($promo['conditions']) {
-            $promoInfo .= "\n📋 Condiciones: {$promo['conditions']}";
-        }
-        if ($promo['public_url']) {
-            $promoInfo .= "\n\n🔗 Más información: {$promo['public_url']}";
-        }
-        if ($promo['start_date']) {
-            $promoInfo .= "\n📅 Inicio: " . date('d/m/Y', strtotime($promo['start_date']));
-        }
-        if ($promo['end_date']) {
-            $promoInfo .= "\n⏰ Fin: " . date('d/m/Y', strtotime($promo['end_date']));
-        }
-
-        $messageText = "Te informamos sobre nuestra gran promoción:\n\n{$promoInfo}";
-
-        // Log the general send
-        $this->promotions->logSend((int)$id, null, $via);
-
-        // Get target contacts with chatbot_sessions wa_id
+        // Get target contacts
         $targets = $this->promotions->getTargetContacts((int)$id);
         $sent = 0;
-        $errors = 0;
 
         foreach ($targets as $target) {
-            // Use session_wa_id from chatbot_sessions if available, otherwise use contact wa_id or phone
-            $waId = $target['session_wa_id'] ?: ($target['wa_id'] ?: ($target['phone'] ?? ''));
-            if (!$waId) continue;
-
-            $success = $this->sendWhatsAppMessage($waId, $messageText);
-            if ($success) {
-                // For chatbot-only contacts (not in contacts table), contact_id can be null
-                $contactId = isset($target['id']) ? (int)$target['id'] : null;
-                $this->promotions->logSend((int)$id, $contactId, $via);
-                $sent++;
-            } else {
-                $errors++;
-            }
+            // Register the send in promotion_sends with the real current timestamp
+            $contactId = isset($target['id']) ? (int)$target['id'] : null;
+            $this->promotions->logSend((int)$id, $contactId, $via);
+            $sent++;
         }
 
         $this->json([
             'ok' => true,
             'sent' => $sent,
-            'errors' => $errors,
-            'message' => "Mensaje enviado a {$sent} prospectos" . ($errors ? " ({$errors} errores)" : ""),
+            'message' => "Promoción registrada exitosamente para {$sent} prospectos.",
         ]);
     }
 

@@ -189,9 +189,10 @@ class PromotionModel extends Model
 
     public function logSend(int $promotionId, ?int $contactId, string $via = 'whatsapp'): void
     {
+        $now = date('Y-m-d H:i:s');
         $this->execute(
-            'INSERT INTO promotion_sends (promotion_id, contact_id, sent_via) VALUES (?,?,?)',
-            [$promotionId, $contactId, $via]
+            'INSERT INTO promotion_sends (promotion_id, contact_id, sent_via, sent_at) VALUES (?,?,?,?)',
+            [$promotionId, $contactId, $via, $now]
         );
     }
 
