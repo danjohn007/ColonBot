@@ -553,10 +553,10 @@ require APP_PATH . '/views/layout/head.php';
     'href' => $facebookPageUrl,
     'tabs' => 'timeline',
     'width' => '500',
-    'height' => '420',
-    'small_header' => 'true',
+    'height' => '560',
+    'small_header' => 'false',
     'adapt_container_width' => 'true',
-    'hide_cover' => 'true',
+    'hide_cover' => 'false',
     'show_facepile' => 'false',
     'locale' => 'es_LA',
   ], '', '&', PHP_QUERY_RFC3986);
@@ -576,22 +576,36 @@ require APP_PATH . '/views/layout/head.php';
       </a>
     </div>
     <div class="colon-facebook-widget reveal-up">
-      <div class="colon-facebook-feed">
-        <iframe
-          title="Publicaciones de Facebook de Col&oacute;n te conquistar&aacute;"
-          src="<?= e($facebookPluginUrl) ?>"
-          width="500"
-          height="420"
-          style="border:none;overflow:hidden"
-          scrolling="no"
-          frameborder="0"
-          allowfullscreen="true"
-          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-          loading="lazy"></iframe>
-        <p class="colon-facebook-help">
-          <span>Si las publicaciones no aparecen, Facebook puede estar bloqueando la inserci&oacute;n.</span>
-          <a href="<?= e($facebookPageUrl) ?>" target="_blank" rel="noopener">Abrir Facebook</a>
-        </p>
+      <div class="colon-facebook-card">
+        <div class="colon-facebook-card-head">
+          <span class="colon-facebook-live-dot" aria-hidden="true"></span>
+          <div>
+            <strong>Publicaciones recientes</strong>
+            <span>Desde Facebook</span>
+          </div>
+          <svg aria-hidden="true" class="colon-facebook-brand" viewBox="0 0 24 24">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+        </div>
+        <div class="colon-facebook-feed">
+          <iframe
+            title="Publicaciones de Facebook de Col&oacute;n te conquistar&aacute;"
+            src="<?= e($facebookPluginUrl) ?>"
+            width="500"
+            height="560"
+            style="border:none;overflow:hidden"
+            scrolling="no"
+            frameborder="0"
+            allowfullscreen="true"
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            loading="lazy"></iframe>
+        </div>
+        <a href="<?= e($facebookPageUrl) ?>" class="colon-facebook-card-link" target="_blank" rel="noopener">
+          Abrir la p&aacute;gina completa
+          <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17 17 7M9 7h8v8"/>
+          </svg>
+        </a>
       </div>
     </div>
   </div>
