@@ -553,10 +553,10 @@ require APP_PATH . '/views/layout/head.php';
     'href' => $facebookPageUrl,
     'tabs' => 'timeline',
     'width' => '500',
-    'height' => '560',
-    'small_header' => 'false',
+    'height' => '640',
+    'small_header' => 'true',
     'adapt_container_width' => 'true',
-    'hide_cover' => 'false',
+    'hide_cover' => 'true',
     'show_facepile' => 'false',
     'locale' => 'es_LA',
   ], '', '&', PHP_QUERY_RFC3986);
@@ -577,24 +577,14 @@ require APP_PATH . '/views/layout/head.php';
     </div>
     <div class="colon-facebook-widget reveal-up">
       <div class="colon-facebook-card">
-        <div class="colon-facebook-card-head">
-          <span class="colon-facebook-live-dot" aria-hidden="true"></span>
-          <div>
-            <strong>Publicaciones recientes</strong>
-            <span>Desde Facebook</span>
-          </div>
-          <svg aria-hidden="true" class="colon-facebook-brand" viewBox="0 0 24 24">
-            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-          </svg>
-        </div>
         <div class="colon-facebook-feed">
           <iframe
             title="Publicaciones de Facebook de Col&oacute;n te conquistar&aacute;"
             src="<?= e($facebookPluginUrl) ?>"
             width="500"
-            height="560"
+            height="640"
             style="border:none;overflow:hidden"
-            scrolling="no"
+            scrolling="yes"
             frameborder="0"
             allowfullscreen="true"
             allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"

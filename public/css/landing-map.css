@@ -388,10 +388,10 @@
 }
 
 .colon-facebook-inner {
-  max-width: 1320px;
+  max-width: 1440px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 540px);
+  grid-template-columns: minmax(0, .95fr) minmax(420px, 660px);
   gap: clamp(30px, 6vw, 86px);
   align-items: center;
 }
@@ -468,16 +468,16 @@
 }
 
 .colon-facebook-widget {
-  width: min(540px, 100%);
+  width: min(660px, 100%);
   justify-self: end;
 }
 
 .colon-facebook-card {
   position: relative;
   overflow: hidden;
-  padding: 12px;
+  padding: clamp(14px, 2vw, 22px);
   border: 1px solid rgba(226, 232, 240, .95);
-  border-radius: 30px;
+  border-radius: 34px;
   background:
     linear-gradient(#fff, #fff) padding-box,
     linear-gradient(145deg, rgba(255, 127, 65, .5), rgba(124, 58, 237, .3), rgba(226, 232, 240, .8)) border-box;
@@ -546,7 +546,8 @@
 
 .colon-facebook-feed {
   position: relative;
-  min-height: 560px;
+  height: 640px;
+  min-height: 640px;
   overflow: hidden;
   border: 1px solid rgba(226, 232, 240, .9);
   border-radius: 22px;
@@ -568,7 +569,7 @@
   display: block;
   width: 100%;
   max-width: 100%;
-  min-height: 560px;
+  min-height: 640px;
   border: 0;
   background: #fff;
 }
@@ -1458,18 +1459,18 @@
   }
 
   .colon-facebook-card {
-    padding: 9px;
+    padding: 10px;
     border-radius: 24px;
   }
 
-  .colon-facebook-card-head {
-    padding: 8px 8px 12px;
+  .colon-facebook-feed {
+    height: 540px;
+    min-height: 540px;
   }
 
-  .colon-facebook-feed,
   .colon-facebook-feed iframe,
   .colon-facebook-fallback {
-    min-height: 460px;
+    min-height: 540px;
   }
 
   .colon-auth-page {
