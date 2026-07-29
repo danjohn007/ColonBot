@@ -187,12 +187,12 @@ class PromotionModel extends Model
         return $contacts;
     }
 
-    public function logSend(int $promotionId, ?int $contactId, string $via = 'whatsapp', ?string $waId = null): void
+    public function logSend(int $promotionId, string $via = 'whatsapp', ?string $waId = null): void
     {
         $now = date('Y-m-d H:i:s');
         $this->execute(
-            'INSERT INTO promotion_sends (promotion_id, contact_id, wa_id, sent_via, sent_at) VALUES (?,?,?,?,?)',
-            [$promotionId, $contactId, $waId, $via, $now]
+            'INSERT INTO promotion_sends (promotion_id, wa_id, sent_via, sent_at) VALUES (?,?,?,?)',
+            [$promotionId, $waId, $via, $now]
         );
     }
 
@@ -201,7 +201,7 @@ class PromotionModel extends Model
         return $this->query(
             'SELECT ps.*, c.name AS contact_name, c.phone AS contact_phone 
              FROM promotion_sends ps 
-             LEFT JOIN contacts c ON c.id = ps.contact_id 
+             LEFT JOIN contacts c ON c.wa_id = ps.wa_id
              WHERE ps.promotion_id = ? 
              ORDER BY ps.sent_at DESC',
             [$promotionId]
