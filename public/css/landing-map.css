@@ -391,7 +391,7 @@
   max-width: 1320px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, .95fr) minmax(300px, 520px);
+  grid-template-columns: minmax(0, 1fr) 524px;
   gap: clamp(24px, 5vw, 64px);
   align-items: center;
 }
@@ -468,12 +468,13 @@
 }
 
 .colon-facebook-widget {
-  width: min(520px, 100%);
+  width: 524px;
   justify-self: end;
 }
 
 .colon-facebook-card {
   position: relative;
+  overflow-x: auto;
   padding: 12px;
   border: 1px solid rgba(226, 232, 240, .95);
   border-radius: 26px;
@@ -488,11 +489,11 @@
 
 .colon-facebook-feed {
   position: relative;
-  width: min(500px, 100%);
+  width: 500px;
   height: 520px;
   min-height: 520px;
   margin-inline: auto;
-  overflow: visible;
+  overflow: hidden;
   border: 1px solid rgba(226, 232, 240, .9);
   border-radius: 18px;
   background: #fff;
@@ -510,7 +511,7 @@
 
 .colon-facebook-feed iframe {
   display: block;
-  width: 100%;
+  width: 500px;
   height: 520px;
   min-height: 0;
   border: 0;
@@ -1243,7 +1244,7 @@
   }
 }
 
-@media (max-width: 1040px) {
+@media (max-width: 1180px) {
   .colon-map-intro,
   .colon-section-head,
   .colon-facebook-inner,
@@ -1253,7 +1254,8 @@
   }
 
   .colon-facebook-widget {
-    justify-self: stretch;
+    width: min(524px, 100%);
+    justify-self: center;
   }
 
   .colon-route-grid {
