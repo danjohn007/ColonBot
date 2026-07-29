@@ -474,7 +474,6 @@
 
 .colon-facebook-card {
   position: relative;
-  overflow: hidden;
   padding: 12px;
   border: 1px solid rgba(226, 232, 240, .95);
   border-radius: 26px;
@@ -486,71 +485,16 @@
     0 10px 28px rgba(255, 127, 65, .10);
 }
 
-.colon-facebook-card::before {
-  content: "";
-  position: absolute;
-  inset: -120px -120px auto auto;
-  width: 190px;
-  height: 190px;
-  border-radius: 999px;
-  background: rgba(255, 127, 65, .10);
-  filter: blur(2px);
-}
-
-.colon-facebook-card-head {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 4px 8px 12px;
-}
-
-.colon-facebook-live-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  background: #22c55e;
-  box-shadow: 0 0 0 6px rgba(34, 197, 94, .13);
-  flex: 0 0 auto;
-}
-
-.colon-facebook-card-head strong,
-.colon-facebook-card-head span {
-  display: block;
-}
-
-.colon-facebook-card-head strong {
-  color: var(--colon-ink);
-  font-size: .9rem;
-  font-weight: 900;
-  line-height: 1.1;
-}
-
-.colon-facebook-card-head span {
-  margin-top: 2px;
-  color: #64748b;
-  font-size: .76rem;
-  font-weight: 750;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-}
-
-.colon-facebook-brand {
-  width: 26px;
-  height: 26px;
-  margin-left: auto;
-  color: #1877f2;
-  fill: currentColor;
-  filter: drop-shadow(0 8px 16px rgba(24, 119, 242, .18));
-}
 
 .colon-facebook-feed {
   position: relative;
+  width: min(500px, 100%);
   height: 520px;
   min-height: 520px;
-  overflow: hidden;
+  margin-inline: auto;
+  overflow: visible;
   border: 1px solid rgba(226, 232, 240, .9);
-  border-radius: 22px;
+  border-radius: 18px;
   background: #fff;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.85);
 }
@@ -564,12 +508,11 @@
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.55);
 }
 
-.colon-facebook-feed .fb-page,
 .colon-facebook-feed iframe {
   display: block;
   width: 100%;
-  max-width: 100%;
-  min-height: 520px;
+  height: 520px;
+  min-height: 0;
   border: 0;
   background: #fff;
 }
@@ -1470,7 +1413,8 @@
 
   .colon-facebook-feed iframe,
   .colon-facebook-fallback {
-    min-height: 500px;
+    height: 500px;
+    min-height: 0;
   }
 
   .colon-auth-page {
