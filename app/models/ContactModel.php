@@ -2,14 +2,20 @@
 class ContactModel extends Model
 {
     protected string $table = 'contacts';
-    private const CLIENTE_RECURRENTE_MIN_PURCHASES = 4;
+    private const CLIENTE_RECURRENTE_MIN_PURCHASES = 3;
 
     public function byBusiness(int $businessId, string $category = ''): array
     {
         $sql = 'SELECT c.*,
-                (SELECT COUNT(*) FROM contact_purchases cp WHERE cp.contact_id = c.id) AS purchase_count,
-                (SELECT COALESCE(SUM(cp.amount), 0) FROM contact_purchases cp WHERE cp.contact_id = c.id) AS total_spent
-                FROM contacts c WHERE c.business_id = ?';
+                c.total_visits AS purchase_count,
+                c.total_purchases AS total_spent,
+                CASE
+                    WHEN c.total_visits >= ' . self::CLIENTE_RECURRENTE_MIN_PURCHASES . ' THEN \'lovemark\'
+                    WHEN c.total_visits >= 1 THEN \'cliente\'
+                    ELSE c.category
+                END AS dynamic_category
+                FROM contacts c
+                WHERE c.business_id = ?';
         $params = [$businessId];
 
         if ($category && in_array($category, ['prospecto', 'cliente', 'lovemark', 'prospecto_sin_historial', 'prospecto_recurrente', 'cliente_frecuente'], true)) {
@@ -18,7 +24,11 @@ class ContactModel extends Model
             } elseif ($category === 'prospecto_recurrente') {
                 $sql .= " AND c.category = 'prospecto_recurrente'";
             } elseif ($category === 'cliente_frecuente') {
-                $sql .= " AND (c.category = 'lovemark' OR (SELECT COUNT(*) FROM contact_purchases cp WHERE cp.contact_id = c.id) >= " . self::CLIENTE_RECURRENTE_MIN_PURCHASES . ")";
+                $sql .= " AND c.total_visits >= " . self::CLIENTE_RECURRENTE_MIN_PURCHASES;
+            } elseif ($category === 'cliente') {
+                $sql .= " AND c.total_visits BETWEEN 1 AND 2";
+            } elseif ($category === 'lovemark') {
+                $sql .= " AND c.total_visits >= " . self::CLIENTE_RECURRENTE_MIN_PURCHASES;
             } else {
                 $sql .= ' AND c.category = ?';
                 $params[] = $category;
@@ -102,17 +112,27 @@ class ContactModel extends Model
 
     public function addPurchase(int $contactId, int $businessId, float $amount, string $products = '', string $notes = ''): void
     {
-        $this->execute(
-            'INSERT INTO contact_purchases (contact_id, business_id, amount, products, notes) VALUES (?,?,?,?,?)',
-            [$contactId, $businessId, $amount, $products, $notes]
-        );
+        // Get current contact data to determine new total_visits
+        $contact = $this->find($contactId);
+        if (!$contact) return;
 
-        $this->execute(
-            'UPDATE contacts SET total_visits = total_visits + 1, total_purchases = total_purchases + ? WHERE id = ?',
-            [$amount, $contactId]
-        );
+        $newVisits = (int)$contact['total_visits'] + 1;
+        $newTotalPurchases = (float)$contact['total_purchases'] + $amount;
 
-        $this->refreshCategoryFromPurchases($contactId);
+        // Determine new category based on visit count
+        $newCategory = 'cliente';
+        if ($newVisits >= self::CLIENTE_RECURRENTE_MIN_PURCHASES) {
+            $newCategory = 'lovemark';
+        }
+
+        $this->update($contactId, [
+            'total_visits' => $newVisits,
+            'total_purchases' => $newTotalPurchases,
+            'products' => $products ?: $contact['products'],
+            'notes' => $notes ?: $contact['notes'],
+            'category' => $newCategory,
+            'last_contact_at' => date('Y-m-d H:i:s'),
+        ]);
     }
 
     public function upgradeToCliente(int $contactId, float $amount = 0, string $products = '', string $notes = ''): void
@@ -125,7 +145,7 @@ class ContactModel extends Model
 
     public function purchaseCount(int $contactId): int
     {
-        $stmt = $this->db->prepare('SELECT COUNT(*) FROM contact_purchases WHERE contact_id = ?');
+        $stmt = $this->db->prepare('SELECT total_visits FROM contacts WHERE id = ?');
         $stmt->execute([$contactId]);
         return (int)$stmt->fetchColumn();
     }

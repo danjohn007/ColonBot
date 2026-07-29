@@ -287,6 +287,7 @@ CREATE TABLE IF NOT EXISTS `contacts` (
   `category` ENUM('prospecto','prospecto_sin_historial','prospecto_recurrente','cliente','lovemark') NOT NULL DEFAULT 'prospecto_sin_historial',
   `source` ENUM('whatsapp','mapa','manual') NOT NULL DEFAULT 'manual',
   `notes` TEXT DEFAULT NULL,
+  `products` VARCHAR(255) DEFAULT NULL COMMENT 'Último producto/servicio registrado',
   `total_visits` INT UNSIGNED NOT NULL DEFAULT 0,
   `total_purchases` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
   `last_contact_at` DATETIME DEFAULT NULL,

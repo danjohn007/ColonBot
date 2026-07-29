@@ -23,7 +23,7 @@ END
 WHERE COALESCE(pc.purchase_count, 0) = 0
   AND c.category IN ('prospecto', 'cliente', 'lovemark');
 
--- Una a tres compras: cliente.
+-- Una a dos compras: cliente.
 UPDATE contacts c
 JOIN (
   SELECT contact_id, COUNT(*) AS purchase_count
@@ -31,9 +31,9 @@ JOIN (
   GROUP BY contact_id
 ) pc ON pc.contact_id = c.id
 SET c.category = 'cliente'
-WHERE pc.purchase_count BETWEEN 1 AND 3;
+WHERE pc.purchase_count BETWEEN 1 AND 2;
 
--- Mas de tres compras: cliente recurrente / Lovemark.
+-- Tres o mas compras: cliente recurrente / Lovemark.
 UPDATE contacts c
 JOIN (
   SELECT contact_id, COUNT(*) AS purchase_count
@@ -41,4 +41,4 @@ JOIN (
   GROUP BY contact_id
 ) pc ON pc.contact_id = c.id
 SET c.category = 'lovemark'
-WHERE pc.purchase_count >= 4;
+WHERE pc.purchase_count >= 3;

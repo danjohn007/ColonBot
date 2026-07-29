@@ -10,7 +10,7 @@ require APP_PATH . '/views/layout/head.php';
 <main class="colon-auth-page">
   <div class="colon-auth-shell">
     <section class="colon-auth-copy">
-      <img src="<?= asset('img/cristo-bot-nino-small.png') ?>" alt="Cristo Bot Col&oacute;n" class="colon-auth-logo mb-6" width="160" height="160" decoding="async">
+      <img src="<?= asset('img/Colon_logins.png') ?>" alt="Cristo Bot Col&oacute;n" class="colon-auth-logo mb-6" width="160" height="160" decoding="async">
       <p class="colon-eyebrow">Visitantes</p>
       <h1>Explora Col&oacute;n mejor</h1>
       <p>Guarda lugares, descubre beneficios y participa con comentarios que ayudan a otros viajeros a vivir una ruta m&aacute;s completa.</p>

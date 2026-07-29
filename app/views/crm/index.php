@@ -35,9 +35,9 @@ require APP_PATH . '/views/layout/head.php';
   </div>
 
   <!-- Contacts table -->
-  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
     <div class="overflow-x-auto">
-      <table class="w-full text-sm" id="contacts-table">
+      <table class="text-sm min-w-[900px] w-full" id="contacts-table">
         <thead class="bg-gray-50">
           <tr class="text-left text-xs text-gray-500 uppercase tracking-wide">
             <th class="px-4 py-3">Nombre</th>
@@ -105,7 +105,7 @@ require APP_PATH . '/views/layout/head.php';
     <h2 class="text-lg font-bold text-gray-900 mb-1">Convertir PROSPECTO a CLIENTE</h2>
     <p class="text-xs text-gray-500 mb-4">Customer Journey: un prospecto se convierte en cliente solo al registrar una compra.</p>
     <p class="text-sm text-gray-500 mb-4" id="upgrade-contact-name"></p>
-    <form onsubmit="upgradeToCliente(event)" class="space-y-4">
+    <form id="upgrade-form" class="space-y-4">
       <input type="hidden" id="upgrade-contact-id" value="">
       <div>
         <label class="label block text-sm font-medium text-gray-700 mb-1">Nombre del Cliente *</label>
@@ -135,6 +135,7 @@ require APP_PATH . '/views/layout/head.php';
     </form>
   </div>
 </div>
+
 <!-- Purchase Modal (Customer Journey - Etapa B → C seguimiento) -->
 <div id="purchase-modal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-40 flex items-center justify-center px-4">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 relative">
@@ -142,7 +143,7 @@ require APP_PATH . '/views/layout/head.php';
     <h2 class="text-lg font-bold text-gray-900 mb-1">Registrar Nueva Compra</h2>
     <p class="text-xs text-gray-500 mb-4">Customer Journey: mas de 3 compras = cliente recurrente / Lovemark.</p>
     <p class="text-sm text-gray-500 mb-4" id="purchase-contact-name"></p>
-    <form onsubmit="addPurchase(event)" class="space-y-4">
+    <form id="purchase-form" class="space-y-4">
       <input type="hidden" id="purchase-contact-id" value="">
       <div>
         <label class="label block text-sm font-medium text-gray-700 mb-1">Nombre del Cliente *</label>
@@ -178,6 +179,22 @@ const CSRF = '<?= e($csrf) ?>';
 const BASE_URL = '<?= BASE_URL ?>';
 let currentCategory = '';
 
+function escHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = String(str);
+  return d.innerHTML;
+}
+
+// Attach form submit handlers after DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('upgrade-form').addEventListener('submit', function(e) {
+    upgradeToCliente(e);
+  });
+  document.getElementById('purchase-form').addEventListener('submit', function(e) {
+    addPurchaseEvent(e);
+  });
+});
+
 function loadContacts() {
   const businessId = document.getElementById('business-select').value;
   const tbody = document.getElementById('contacts-tbody');
@@ -189,26 +206,28 @@ function loadContacts() {
 
   document.getElementById('add-business-id').value = businessId;
 
-  const url = `${BASE_URL}/admin/crm/${businessId}/list?category=${currentCategory}`;
+  const url = BASE_URL + '/admin/crm/' + businessId + '/list?category=' + currentCategory;
   fetch(url)
     .then(r => r.json())
     .then(contacts => {
       if (contacts.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-400">No hay contactos en esta categoría</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-400">No hay contactos en esta categor\u00eda</td></tr>';
         return;
       }
       tbody.innerHTML = contacts.map(c => {
+        // Use dynamic_category from contact_purchases if available, otherwise fallback to static category
+        const effectiveCategory = c.dynamic_category || c.category;
         let categoryLabel, categoryClass;
-        if (c.category === 'lovemark') {
+        if (effectiveCategory === 'lovemark') {
           categoryLabel = '⭐ Lovemark';
           categoryClass = 'text-pink-600 bg-pink-50';
-        } else if (c.category === 'cliente') {
+        } else if (effectiveCategory === 'cliente') {
           categoryLabel = '✅ Cliente';
           categoryClass = 'text-green-600 bg-green-50';
-        } else if (c.category === 'prospecto_recurrente') {
+        } else if (effectiveCategory === 'prospecto_recurrente') {
           categoryLabel = '🔄 Prospecto recurrente';
           categoryClass = 'text-orange-600 bg-orange-50';
-        } else if (c.category === 'prospecto_sin_historial' || c.category === 'prospecto') {
+        } else if (effectiveCategory === 'prospecto_sin_historial' || effectiveCategory === 'prospecto') {
           categoryLabel = c.is_chatbot ? '🆕 WhatsApp' : '📋 Prospecto';
           categoryClass = 'text-purple-600 bg-purple-50';
         } else {
@@ -218,24 +237,43 @@ function loadContacts() {
         const sourceIcon = c.source === 'whatsapp' ? '📱' : c.source === 'mapa' ? '🗺️' : '✍️';
         const lastContact = c.last_contact_at ? new Date(c.last_contact_at).toLocaleDateString('es-MX') : '—';
         const phone = c.phone || c.wa_id || '—';
-        return `<tr class="hover:bg-gray-50">
-          <td class="px-4 py-3 font-medium text-gray-800">${escHtml(c.name)}</td>
-          <td class="px-4 py-3 text-gray-500">${escHtml(phone)}</td>
-          <td class="px-4 py-3 text-gray-500">${escHtml(c.email || '—')}</td>
-          <td class="px-4 py-3"><span class="text-xs px-2 py-1 rounded-full font-medium ${categoryClass}">${categoryLabel}</span></td>
-          <td class="px-4 py-3">${c.total_visits}</td>
-          <td class="px-4 py-3">$${parseFloat(c.total_spent || 0).toFixed(2)}</td>
-          <td class="px-4 py-3 text-gray-400">${sourceIcon}</td>
-          <td class="px-4 py-3 text-gray-400 text-xs">${lastContact}</td>
-          <td class="px-4 py-3">
-            <div class="flex gap-1">
-              ${c.category !== 'cliente' && c.category !== 'lovemark' ? `<button onclick="openUpgradeModal(${c.id}, '${escHtml(c.name)}')" class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" title="Registrar compra y convertir a cliente">⬆</button>` : ''}
-              ${c.category === 'cliente' || c.category === 'lovemark' ? `<button onclick="openPurchaseModal(${c.id}, '${escHtml(c.name)}')" class="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100" title="Registrar compra">💰</button>` : ''}
-              ${phone !== '—' ? `<a href="https://wa.me/${phone.replace(/\D/g,'')}" target="_blank" class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" title="WhatsApp">💬</a>` : ''}
-            </div>
-          </td>
-        </tr>`;
+        const encodedName = encodeURIComponent(c.name);
+        // Determine if upgrade or purchase buttons are needed based on dynamic category
+        const isDynamicCliente = effectiveCategory === 'cliente';
+        const isDynamicLovemark = effectiveCategory === 'lovemark';
+        let upgradeBtn = '', purchaseBtn = '', waBtn = '';
+        if (!isDynamicCliente && !isDynamicLovemark) {
+          upgradeBtn = '<button class="btn-upgrade text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" data-cid="' + c.id + '" data-cname="' + encodedName + '" type="button" title="Registrar compra y convertir a cliente">⬆</button>';
+        }
+        if (isDynamicCliente || isDynamicLovemark) {
+          purchaseBtn = '<button class="btn-purchase text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100" data-cid="' + c.id + '" data-cname="' + encodedName + '" type="button" title="Registrar compra">💰</button>';
+        }
+        if (phone !== '—') {
+          waBtn = '<a href="https://wa.me/' + phone.replace(/\D/g,'') + '" target="_blank" class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100" title="WhatsApp">💬</a>';
+        }
+        return '<tr class="hover:bg-gray-50">' +
+          '<td class="px-4 py-3 font-medium text-gray-800">' + escHtml(c.name) + '</td>' +
+          '<td class="px-4 py-3 text-gray-500">' + escHtml(phone) + '</td>' +
+          '<td class="px-4 py-3 text-gray-500">' + escHtml(c.email || '—') + '</td>' +
+          '<td class="px-4 py-3"><span class="text-xs px-2 py-1 rounded-full font-medium ' + categoryClass + '">' + categoryLabel + '</span></td>' +
+          '<td class="px-4 py-3">' + c.total_visits + '</td>' +
+          '<td class="px-4 py-3">$' + parseFloat(c.total_spent || 0).toFixed(2) + '</td>' +
+          '<td class="px-4 py-3 text-gray-400">' + sourceIcon + '</td>' +
+          '<td class="px-4 py-3 text-gray-400 text-xs">' + lastContact + '</td>' +
+          '<td class="px-4 py-3"><div class="flex gap-1">' + upgradeBtn + purchaseBtn + waBtn + '</div></td>' +
+          '</tr>';
       }).join('');
+
+      document.querySelectorAll('.btn-upgrade').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          openUpgradeModal(this.dataset.cid, decodeURIComponent(this.dataset.cname));
+        });
+      });
+      document.querySelectorAll('.btn-purchase').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          openPurchaseModal(this.dataset.cid, decodeURIComponent(this.dataset.cname));
+        });
+      });
     });
 }
 
@@ -265,19 +303,18 @@ function saveContact(e) {
   e.preventDefault();
   const businessId = document.getElementById('add-business-id').value;
   const name = document.getElementById('add-name').value.trim();
-  if (!name) return;
+  if (!name) { alert('El nombre es requerido'); return; }
 
-  const body = new URLSearchParams({
-    _csrf: CSRF,
-    business_id: businessId,
-    name,
-    phone: document.getElementById('add-phone').value.trim(),
-    email: document.getElementById('add-email').value.trim(),
-    category: document.getElementById('add-category').value,
-    notes: document.getElementById('add-notes').value.trim(),
-  });
+  const body = new URLSearchParams();
+  body.append('_csrf', CSRF);
+  body.append('business_id', businessId);
+  body.append('name', name);
+  body.append('phone', document.getElementById('add-phone').value.trim());
+  body.append('email', document.getElementById('add-email').value.trim());
+  body.append('category', document.getElementById('add-category').value);
+  body.append('notes', document.getElementById('add-notes').value.trim());
 
-  fetch(`${BASE_URL}/admin/crm/crear`, {
+  fetch(BASE_URL + '/admin/crm/crear', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),
@@ -294,13 +331,14 @@ function saveContact(e) {
     } else {
       alert(d.error || 'Error al guardar');
     }
-  });
+  })
+  .catch(err => alert('Error: ' + err.message));
 }
 
 function openUpgradeModal(id, name) {
   document.getElementById('upgrade-contact-id').value = id;
   document.getElementById('upgrade-name').value = name;
-  document.getElementById('upgrade-contact-name').textContent = `Convertir a "${name}" a cliente`;
+  document.getElementById('upgrade-contact-name').textContent = 'Convertir a "' + name + '" a cliente';
   document.getElementById('upgrade-modal').classList.remove('hidden');
 }
 
@@ -311,21 +349,32 @@ function closeUpgradeModal() {
 function upgradeToCliente(e) {
   e.preventDefault();
   const id = document.getElementById('upgrade-contact-id').value;
-  const body = new URLSearchParams({
-    _csrf: CSRF,
-    name: document.getElementById('upgrade-name').value.trim(),
-    email: document.getElementById('upgrade-email').value.trim(),
-    amount: document.getElementById('upgrade-amount').value || '0',
-    products: document.getElementById('upgrade-products').value.trim(),
-    notes: document.getElementById('upgrade-notes').value.trim(),
-  });
+  if (!id) { alert('Error: ID de contacto no encontrado'); return; }
 
-  fetch(`${BASE_URL}/admin/crm/${id}/upgrade`, {
+  const products = document.getElementById('upgrade-products').value.trim();
+  if (!products) { alert('Captura el producto o servicio vendido'); return; }
+
+  const businessId = document.getElementById('business-select').value;
+  const body = new URLSearchParams();
+  body.append('_csrf', CSRF);
+  body.append('business_id', businessId);
+  body.append('name', document.getElementById('upgrade-name').value.trim());
+  body.append('email', document.getElementById('upgrade-email').value.trim());
+  body.append('amount', document.getElementById('upgrade-amount').value || '0');
+  body.append('products', products);
+  body.append('notes', document.getElementById('upgrade-notes').value.trim());
+
+  fetch(BASE_URL + '/admin/crm/' + id + '/upgrade', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),
   })
-  .then(r => r.json())
+  .then(r => {
+    if (!r.ok) {
+      return r.text().then(t => { throw new Error(t); });
+    }
+    return r.json();
+  })
   .then(d => {
     if (d.ok) {
       closeUpgradeModal();
@@ -334,15 +383,16 @@ function upgradeToCliente(e) {
       document.getElementById('upgrade-notes').value = '';
       loadContacts();
     } else {
-      alert(d.error || 'Error');
+      alert(d.error || 'Error al convertir');
     }
-  });
+  })
+  .catch(err => alert('Error del servidor: ' + err.message));
 }
 
 function openPurchaseModal(id, name) {
   document.getElementById('purchase-contact-id').value = id;
   document.getElementById('purchase-name').value = name;
-  document.getElementById('purchase-contact-name').textContent = `Registrar compra para "${name}"`;
+  document.getElementById('purchase-contact-name').textContent = 'Registrar compra para "' + name + '"';
   document.getElementById('purchase-modal').classList.remove('hidden');
 }
 
@@ -350,24 +400,33 @@ function closePurchaseModal() {
   document.getElementById('purchase-modal').classList.add('hidden');
 }
 
-function addPurchase(e) {
+function addPurchaseEvent(e) {
   e.preventDefault();
   const id = document.getElementById('purchase-contact-id').value;
-  const body = new URLSearchParams({
-    _csrf: CSRF,
-    name: document.getElementById('purchase-name').value.trim(),
-    email: document.getElementById('purchase-email').value.trim(),
-    amount: document.getElementById('purchase-amount').value || '0',
-    products: document.getElementById('purchase-products').value.trim(),
-    notes: document.getElementById('purchase-notes').value.trim(),
-  });
+  if (!id) { alert('Error: ID de contacto no encontrado'); return; }
 
-  fetch(`${BASE_URL}/admin/crm/${id}/compra`, {
+  const products = document.getElementById('purchase-products').value.trim();
+  if (!products) { alert('Captura el producto o servicio vendido'); return; }
+
+  const body = new URLSearchParams();
+  body.append('_csrf', CSRF);
+  body.append('name', document.getElementById('purchase-name').value.trim());
+  body.append('email', document.getElementById('purchase-email').value.trim());
+  body.append('amount', document.getElementById('purchase-amount').value || '0');
+  body.append('products', products);
+  body.append('notes', document.getElementById('purchase-notes').value.trim());
+
+  fetch(BASE_URL + '/admin/crm/' + id + '/compra', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),
   })
-  .then(r => r.json())
+  .then(r => {
+    if (!r.ok) {
+      return r.text().then(t => { throw new Error(t); });
+    }
+    return r.json();
+  })
   .then(d => {
     if (d.ok) {
       closePurchaseModal();
@@ -378,15 +437,10 @@ function addPurchase(e) {
       document.getElementById('purchase-notes').value = '';
       loadContacts();
     } else {
-      alert(d.error || 'Error');
+      alert(d.error || 'Error al registrar compra');
     }
-  });
-}
-
-function escHtml(str) {
-  const d = document.createElement('div');
-  d.textContent = String(str);
-  return d.innerHTML;
+  })
+  .catch(err => alert('Error del servidor: ' + err.message));
 }
 </script>
 

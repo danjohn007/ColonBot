@@ -14,7 +14,8 @@ class CrmController extends Controller
     {
         $this->requireAuth('prestador');
         $user = currentUser();
-        $businesses = ($user['role'] === 'superadmin' || $this->normalizeRole($user['role'] ?? '') === 'colaborador_admin')
+        $userRole = $this->normalizeRole($user['role'] ?? '');
+        $businesses = ($userRole === 'superadmin' || $userRole === 'colaborador_admin')
             ? $this->businesses->allWithCategory()
             : $this->businesses->byUser((int)$user['id']);
 
@@ -29,24 +30,28 @@ class CrmController extends Controller
         $this->ownerOrAdmin($business);
 
         $category = $_GET['category'] ?? '';
+
+        // 1. Get contacts directly from contact_purchases data via LEFT JOIN
+        //    dynamic_category is computed from contact_purchases:
+        //    0 purchases → uses c.category static value
+        //    1-2 purchases → 'cliente'
+        //    3+ purchases → 'lovemark'
         $contacts = $this->contacts->byBusiness((int)$businessId, $category);
 
-        // Add chatbot contacts with automatic classification based on chatbot sessions
+        // 2. Get chatbot contacts for prospect classification (prospecto_sin_historial, prospecto_recurrente)
         $chatbotContacts = $this->contacts->classifyByChatbotSessions((int)$businessId);
 
-        // Merge chatbot contacts
+        // 3. Merge: database contacts FIRST so they take priority for clients/lovemarks already in DB
         if (empty($category)) {
-            // Show all: merge chatbot contacts with regular contacts
-            $contacts = array_merge($chatbotContacts, $contacts);
+            $contacts = array_merge($contacts, $chatbotContacts);
         } elseif (in_array($category, ['prospecto', 'prospecto_sin_historial', 'prospecto_recurrente', 'cliente', 'lovemark', 'cliente_frecuente'])) {
-            // Filter chatbot contacts by the requested category
             $filteredChatbot = array_filter($chatbotContacts, function($c) use ($category) {
                 if ($category === 'cliente_frecuente') {
-                    return $c['category'] === 'lovemark' || ($c['purchase_count'] ?? 0) >= 4;
+                    return $c['category'] === 'lovemark' || ($c['purchase_count'] ?? 0) >= 3;
                 }
                 return $c['category'] === $category;
             });
-            $contacts = array_merge($filteredChatbot, $contacts);
+            $contacts = array_merge($contacts, $filteredChatbot);
         }
 
         $this->json($this->uniqueContacts($contacts));
@@ -100,18 +105,18 @@ class CrmController extends Controller
         if (isset($_POST['notes'])) $data['notes'] = trim($_POST['notes']);
         if (isset($_POST['category'])) {
             $requestedCategory = $_POST['category'];
-            if (in_array($requestedCategory, ['prospecto', 'prospecto_sin_historial', 'prospecto_recurrente'], true)) {
-                $data['category'] = $requestedCategory === 'prospecto' ? 'prospecto_sin_historial' : $requestedCategory;
-            } elseif ($requestedCategory === 'cliente') {
-                if ($this->contacts->purchaseCount((int)$id) < 1) {
-                    $this->json(['error' => 'Para convertir a cliente primero registra una compra.'], 422);
+            $validCategories = ['prospecto', 'prospecto_sin_historial', 'prospecto_recurrente', 'cliente', 'lovemark'];
+            if (in_array($requestedCategory, $validCategories, true)) {
+                if ($requestedCategory === 'prospecto') {
+                    $data['category'] = 'prospecto_sin_historial';
+                } elseif ($requestedCategory === 'lovemark') {
+                    if ($this->contacts->purchaseCount((int)$id) < 3) {
+                        $this->json(['error' => 'Cliente recurrente requiere al menos 3 compras registradas.'], 422);
+                    }
+                    $data['category'] = 'lovemark';
+                } else {
+                    $data['category'] = $requestedCategory;
                 }
-                $data['category'] = 'cliente';
-            } elseif ($requestedCategory === 'lovemark') {
-                if ($this->contacts->purchaseCount((int)$id) < 4) {
-                    $this->json(['error' => 'Cliente recurrente requiere mas de 3 compras registradas.'], 422);
-                }
-                $data['category'] = 'lovemark';
             }
         }
 
@@ -130,31 +135,100 @@ class CrmController extends Controller
         $this->requireAuth('prestador');
         $this->verifyCsrf();
 
-        $contact = $this->contacts->find((int)$id);
-        if (!$contact) { $this->json(['error' => 'not found'], 404); }
-
-        $business = $this->businesses->find($contact['business_id']);
-        $this->ownerOrAdmin($business);
-
-        $name = trim($_POST['name'] ?? $contact['name']);
+        $contactId = (int)$id;
+        $contact = $this->contacts->find($contactId);
+        $contactName = trim($_POST['name'] ?? '');
+        $contactEmail = trim($_POST['email'] ?? '');
         $amount = (float)($_POST['amount'] ?? 0);
         $products = trim($_POST['products'] ?? '');
-        $email = trim($_POST['email'] ?? $contact['email'] ?? '');
         $notes = trim($_POST['notes'] ?? '');
 
         if ($products === '') {
             $this->json(['error' => 'Captura el producto o servicio vendido para convertirlo en cliente.'], 422);
+            return;
         }
 
-        // Update contact info
-        $this->contacts->update((int)$id, [
-            'name' => $name,
-            'email' => $email ?: $contact['email'],
-        ]);
+        // ────────────────────────────────────────────────────────
+        // CASO 1: No se encontró en contacts (ID viene de chatbot_sessions)
+        // ────────────────────────────────────────────────────────
+        if (!$contact) {
+            $db = Database::getInstance();
 
-        $this->contacts->upgradeToCliente((int)$id, $amount, $products, $notes);
+            $stmt = $db->prepare('SELECT wa_id, category, session_count FROM chatbot_sessions WHERE id = ? LIMIT 1');
+            $stmt->execute([$contactId]);
+            $session = $stmt->fetch();
 
-        $this->logAction('upgrade_contact', 'contacts', (int)$id, "Contacto {$name} upgrade a cliente");
+            if (!$session) {
+                $this->json(['error' => 'not found'], 404);
+                return;
+            }
+
+            $waId = trim($session['wa_id'] ?? '');
+
+            // Determinar el negocio: primero desde POST, luego desde consultas
+            $businessId = (int)($_POST['business_id'] ?? 0);
+            if ($businessId <= 0 && $waId !== '') {
+                $stmtBusiness = $db->prepare(
+                    'SELECT business_id FROM consultas WHERE wa_id = ? AND business_id IS NOT NULL LIMIT 1'
+                );
+                $stmtBusiness->execute([$waId]);
+                $businessRow = $stmtBusiness->fetch();
+                if ($businessRow && !empty($businessRow['business_id'])) {
+                    $businessId = (int)$businessRow['business_id'];
+                }
+            }
+
+            if ($businessId <= 0) {
+                $this->json(['error' => 'No se pudo determinar el negocio para este contacto de chatbot.'], 422);
+                return;
+            }
+
+            $business = $this->businesses->find($businessId);
+            if (!$business) { $this->json(['error' => 'not found'], 404); return; }
+            $this->ownerOrAdmin($business);
+
+            $name = $contactName ?: 'Prospecto WhatsApp';
+            $email = $contactEmail ?: '';
+
+            // Buscar contacto del MISMO negocio por wa_id (business_id ya definido arriba)
+            if ($waId !== '') {
+                $stmtContact = $db->prepare('SELECT id, business_id, name, email FROM contacts WHERE wa_id = ? AND business_id = ? LIMIT 1');
+                $stmtContact->execute([$waId, $businessId]);
+                $existingContact = $stmtContact->fetch();
+
+                if ($existingContact) {
+                    $contactId = (int)$existingContact['id'];
+                    $this->contacts->update($contactId, ['name' => $name, 'email' => $email]);
+                    $this->contacts->upgradeToCliente($contactId, $amount, $products, $notes);
+                    $this->logAction('upgrade_contact', 'contacts', $contactId, "Contacto {$name} upgrade a cliente");
+                    $this->json(['ok' => true]);
+                    return;
+                }
+            }
+
+            // No existe contacto de este wa_id en este negocio → crear nuevo contacto y registrar compra
+            $newContact = $this->contacts->createOrUpdate($businessId, $name, $waId, $waId, $email, 'whatsapp');
+            $contactId = (int)$newContact['id'];
+            $this->contacts->addPurchase($contactId, $businessId, $amount, $products, $notes);
+
+            $this->logAction('upgrade_contact', 'contacts', $contactId, "Contacto {$name} upgrade a cliente desde chatbot");
+            $this->json(['ok' => true]);
+            return;
+        }
+
+        // ────────────────────────────────────────────────────────
+        // CASO 2: Contacto normal encontrado en la tabla contacts
+        // ────────────────────────────────────────────────────────
+        $business = $this->businesses->find($contact['business_id']);
+        $this->ownerOrAdmin($business);
+
+        $name = $contactName ?: $contact['name'];
+        $email = $contactEmail ?: $contact['email'] ?? '';
+
+        $this->contacts->update($contactId, ['name' => $name, 'email' => $email]);
+        $this->contacts->upgradeToCliente($contactId, $amount, $products, $notes);
+
+        $this->logAction('upgrade_contact', 'contacts', $contactId, "Contacto {$name} upgrade a cliente");
         $this->json(['ok' => true]);
     }
 
@@ -235,10 +309,28 @@ class CrmController extends Controller
     private function ownerOrAdmin(array $business): void
     {
         $user = currentUser();
-        // Prestador, colaborador_admin y superadmin pueden gestionar contactos de los negocios
-        if (in_array($this->normalizeRole($user['role'] ?? ''), ['prestador', 'colaborador_admin', 'superadmin'], true)) {
+        $userRole = $this->normalizeRole($user['role'] ?? '');
+        
+        // SuperAdmin tiene acceso completo a todos los negocios
+        if ($userRole === 'superadmin') {
             return;
         }
+        
+        // Colaborador Admin tiene acceso completo a todos los negocios
+        if ($userRole === 'colaborador_admin') {
+            return;
+        }
+        
+        // Prestador solo puede gestionar contactos de sus propios negocios
+        if ($userRole === 'prestador') {
+            if ((int)$business['user_id'] !== (int)$user['id']) {
+                http_response_code(403);
+                $this->json(['error' => 'No tienes permiso para gestionar contactos de este negocio.'], 403);
+            }
+            return;
+        }
+
+        // Cualquier otro rol: verificar si es propietario
         if ((int)$business['user_id'] !== (int)$user['id']) {
             http_response_code(403);
             $this->json(['error' => 'No tienes permiso'], 403);

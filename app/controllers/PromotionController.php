@@ -188,28 +188,68 @@ class PromotionController extends Controller
 
         $via = $_POST['via'] ?? 'whatsapp';
 
-        // If sending to promotions loaded in chatbot, just log it
-        $this->promotions->logSend((int)$id, null, $via);
-
-        // If sending via WhatsApp, get target contacts and generate wa links
+        // Get target contacts
         $targets = $this->promotions->getTargetContacts((int)$id);
-        $links = [];
-        $msg = urlencode("🎉 *{$promo['title']}*\n\n{$promo['description']}" . ($promo['public_url'] ? "\n\nMás info: {$promo['public_url']}" : ''));
+        $sent = 0;
 
         foreach ($targets as $target) {
-            $phone = $target['phone'] ?: $target['wa_id'];
-            if ($phone) {
-                $links[] = [
-                    'contact_id' => $target['id'],
-                    'contact_name' => $target['name'],
-                    'phone' => $phone,
-                    'url' => waLink($phone, $msg),
-                ];
-                $this->promotions->logSend((int)$id, (int)$target['id'], $via);
-            }
+            // Register the send in promotion_sends with the real current timestamp
+            $contactId = isset($target['id']) ? (int)$target['id'] : null;
+            $this->promotions->logSend((int)$id, $contactId, $via);
+            $sent++;
         }
 
-        $this->json(['ok' => true, 'links' => $links]);
+        $this->json([
+            'ok' => true,
+            'sent' => $sent,
+            'message' => "Promoción registrada exitosamente para {$sent} prospectos.",
+        ]);
+    }
+
+    /**
+     * Send a WhatsApp text message via Meta API
+     */
+    private function sendWhatsAppMessage(string $to, string $message): bool
+    {
+        $token = setting('wa_token');
+        $phoneId = setting('wa_phone_id');
+
+        if (!$token || !$phoneId) {
+            logError('WhatsApp API not configured for promotion send', __FILE__, __LINE__, 'warning');
+            return false;
+        }
+
+        $payload = [
+            'messaging_product' => 'whatsapp',
+            'to' => $to,
+            'type' => 'text',
+            'text' => ['body' => $message],
+        ];
+
+        $waVersion = setting('wa_api_version', 'v19.0');
+        $url = "https://graph.facebook.com/{$waVersion}/{$phoneId}/messages";
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => json_encode($payload),
+            CURLOPT_HTTPHEADER     => [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token,
+            ],
+            CURLOPT_TIMEOUT        => 15,
+        ]);
+        $response = curl_exec($ch);
+        $code     = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($code >= 400) {
+            logError('WhatsApp API error sending promotion: ' . $response, __FILE__, __LINE__, 'warning');
+            return false;
+        }
+
+        return true;
     }
 
     public function approve(string $id): void
@@ -223,6 +263,24 @@ class PromotionController extends Controller
             $this->notifyVisitorsForPromotion((int)$id, $promo['title'], $promo['business_id'] ? (int)$promo['business_id'] : null);
         }
         $this->logAction('approve_promotion', 'promotions', (int)$id);
+        $this->json(['ok' => true]);
+    }
+
+    public function delete(string $id): void
+    {
+        $this->requireAuth('prestador');
+        $this->verifyCsrf();
+
+        $promo = $this->promotions->find((int)$id);
+        if (!$promo) { $this->json(['error' => 'not found'], 404); }
+
+        if ($promo['business_id']) {
+            $business = $this->businesses->find($promo['business_id']);
+            $this->ownerOrAdmin($business);
+        }
+
+        $this->promotions->delete((int)$id);
+        $this->logAction('delete_promotion', 'promotions', (int)$id, $promo['title']);
         $this->json(['ok' => true]);
     }
 

@@ -200,6 +200,24 @@ class EventController extends Controller
         $this->json(['ok' => true]);
     }
 
+    public function delete(string $id): void
+    {
+        $this->requireAuth('prestador');
+        $this->verifyCsrf();
+
+        $event = $this->events->find((int)$id);
+        if (!$event) { $this->json(['error' => 'not found'], 404); }
+
+        if ($event['business_id']) {
+            $business = $this->businesses->find($event['business_id']);
+            $this->ownerOrAdmin($business);
+        }
+
+        $this->events->delete((int)$id);
+        $this->logAction('delete_event', 'events', (int)$id, $event['title']);
+        $this->json(['ok' => true]);
+    }
+
     public function approve(string $id): void
     {
         $this->requireAuth('colaborador_admin');
