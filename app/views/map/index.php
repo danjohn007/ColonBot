@@ -547,6 +547,44 @@ require APP_PATH . '/views/layout/head.php';
   </section>
 </main>
 
+<?php $facebookPageUrl = 'https://www.facebook.com/colonteconquistara'; ?>
+<div id="fb-root"></div>
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/es_LA/sdk.js#xfbml=1&version=v23.0"></script>
+
+<section class="colon-facebook-section" aria-label="Actualidad de Col&oacute;n">
+  <div class="colon-facebook-inner">
+    <div class="colon-facebook-copy reveal-up">
+      <p class="colon-eyebrow">Actualidad</p>
+      <h2>Actualidad de Col&oacute;n</h2>
+      <p>Eventos, avisos y novedades publicados por Col&oacute;n te conquistar&aacute;.</p>
+      <a href="<?= e($facebookPageUrl) ?>" class="colon-facebook-link" target="_blank" rel="noopener">
+        <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17 17 7M9 7h8v8"/>
+        </svg>
+        Ver m&aacute;s en Facebook
+      </a>
+    </div>
+    <div class="colon-facebook-widget reveal-up">
+      <div class="colon-facebook-feed">
+        <div class="fb-page"
+          data-href="<?= e($facebookPageUrl) ?>"
+          data-tabs="timeline"
+          data-width="500"
+          data-height="420"
+          data-small-header="true"
+          data-adapt-container-width="true"
+          data-hide-cover="true"
+          data-show-facepile="false">
+          <blockquote cite="<?= e($facebookPageUrl) ?>" class="fb-xfbml-parse-ignore colon-facebook-fallback">
+            <span>No pudimos cargar las publicaciones aqu&iacute;.</span>
+            <a href="<?= e($facebookPageUrl) ?>" target="_blank" rel="noopener">Abrir Facebook</a>
+          </blockquote>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <?php
   $chatbotPhone = preg_replace('/\D/', '', setting('chatbot_wa_number', ''));
   $chatbotMapUrl = $chatbotPhone
