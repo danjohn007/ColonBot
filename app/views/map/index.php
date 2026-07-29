@@ -579,11 +579,8 @@ require APP_PATH . '/views/layout/head.php';
       <div class="colon-facebook-card">
         <div class="colon-facebook-feed">
           <iframe
-            id="colon-facebook-page-plugin"
             title="Publicaciones de Facebook de Col&oacute;n te conquistar&aacute;"
             src="<?= e($facebookPluginUrl) ?>"
-            data-facebook-page-url="<?= e($facebookPageUrl) ?>"
-            data-facebook-plugin-height="520"
             width="500"
             height="520"
             scrolling="yes"
@@ -602,64 +599,6 @@ require APP_PATH . '/views/layout/head.php';
     </div>
   </div>
 </section>
-
-<script>
-  (function () {
-    const iframe = document.getElementById('colon-facebook-page-plugin');
-    if (!iframe) return;
-
-    const feed = iframe.closest('.colon-facebook-feed');
-    const pageUrl = iframe.dataset.facebookPageUrl;
-    const pluginHeight = Number(iframe.dataset.facebookPluginHeight || 520);
-    const minPluginWidth = 280;
-    const maxPluginWidth = 500;
-
-    function clampWidth(width) {
-      return Math.max(minPluginWidth, Math.min(maxPluginWidth, Math.floor(width)));
-    }
-
-    function buildFacebookPluginUrl(width, height) {
-      const params = new URLSearchParams({
-        href: pageUrl,
-        tabs: 'timeline',
-        width: String(width),
-        height: String(height),
-        small_header: 'true',
-        adapt_container_width: 'false',
-        hide_cover: 'true',
-        show_facepile: 'false',
-        locale: 'es_LA'
-      });
-
-      return `https://www.facebook.com/plugins/page.php?${params.toString()}`;
-    }
-
-    function renderFacebookPlugin() {
-      if (!feed || !pageUrl) return;
-
-      const nextWidth = clampWidth(feed.clientWidth || maxPluginWidth);
-      const nextHeight = Math.floor(feed.clientHeight || pluginHeight);
-      const nextSize = `${nextWidth}x${nextHeight}`;
-      if (iframe.dataset.renderedSize === nextSize) return;
-
-      iframe.dataset.renderedSize = nextSize;
-      iframe.width = String(nextWidth);
-      iframe.height = String(nextHeight);
-      iframe.src = buildFacebookPluginUrl(nextWidth, nextHeight);
-    }
-
-    renderFacebookPlugin();
-
-    if ('ResizeObserver' in window && feed) {
-      let resizeFrame = 0;
-      const observer = new ResizeObserver(function () {
-        window.cancelAnimationFrame(resizeFrame);
-        resizeFrame = window.requestAnimationFrame(renderFacebookPlugin);
-      });
-      observer.observe(feed);
-    }
-  })();
-</script>
 
 <?php
   $chatbotPhone = preg_replace('/\D/', '', setting('chatbot_wa_number', ''));
