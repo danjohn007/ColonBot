@@ -200,6 +200,44 @@ class EventController extends Controller
         $this->json(['ok' => true]);
     }
 
+    public function send(string $id): void
+    {
+        $this->requireAuth('prestador');
+        $this->verifyCsrf();
+
+        $event = $this->events->find((int)$id);
+        if (!$event) { $this->json(['error' => 'not found'], 404); }
+
+        if ($event['business_id']) {
+            $business = $this->businesses->find($event['business_id']);
+            $this->ownerOrAdmin($business);
+        }
+
+        $via = $_POST['via'] ?? 'whatsapp';
+
+        // Get target contacts
+        $targets = $this->events->getTargetContacts((int)$id);
+        $sent = 0;
+
+        foreach ($targets as $target) {
+            $waId = $target['wa_id'] ?? $target['session_wa_id'] ?? null;
+
+            // If still no wa_id, try phone as fallback
+            if (!$waId) {
+                $waId = $target['phone'] ?? null;
+            }
+
+            $this->events->logSend((int)$id, $via, $waId);
+            $sent++;
+        }
+
+        $this->json([
+            'ok' => true,
+            'sent' => $sent,
+            'message' => "Evento registrado exitosamente para {$sent} prospectos.",
+        ]);
+    }
+
     public function delete(string $id): void
     {
         $this->requireAuth('prestador');
@@ -216,6 +254,17 @@ class EventController extends Controller
         $this->events->delete((int)$id);
         $this->logAction('delete_event', 'events', (int)$id, $event['title']);
         $this->json(['ok' => true]);
+    }
+
+    public function sendHistory(string $id): void
+    {
+        $this->requireAuth('prestador');
+
+        $event = $this->events->find((int)$id);
+        if (!$event) { $this->json(['error' => 'not found'], 404); }
+
+        $history = $this->events->getSendHistory((int)$id);
+        $this->json($history);
     }
 
     public function approve(string $id): void

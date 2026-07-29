@@ -160,6 +160,109 @@ class EventModel extends Model
         );
     }
 
+    public function getTargetContacts(int $eventId): array
+    {
+        $event = $this->find($eventId);
+        if (!$event) return [];
+
+        $segments = explode(',', $event['target_segment'] ?? 'todos');
+        $businessId = $event['business_id'];
+
+        // ──────────────────────────────────────────────────────────
+        // 1. Get contacts from DB joined with chatbot_sessions
+        // ──────────────────────────────────────────────────────────
+        if (in_array('todos', $segments)) {
+            $sql = "SELECT c.*, cs.wa_id AS session_wa_id, cs.session_count, cs.purchase_count, cs.has_purchased
+                    FROM contacts c
+                    LEFT JOIN chatbot_sessions cs ON cs.wa_id = c.wa_id OR cs.wa_id = c.phone
+                    WHERE c.business_id = ?
+                    ORDER BY c.created_at DESC";
+            $contacts = $this->query($sql, [$businessId]);
+        } else {
+            $conditions = [];
+            $params = [$businessId];
+
+            if (in_array('clientes_frecuentes', $segments)) {
+                $conditions[] = "(c.category = 'lovemark' OR (SELECT COUNT(*) FROM contact_purchases cp WHERE cp.contact_id = c.id) >= 4)";
+            }
+            if (in_array('clientes', $segments)) {
+                $conditions[] = "c.category = 'cliente'";
+            }
+            if (in_array('prospectos_recurrentes', $segments)) {
+                $conditions[] = "c.category = 'prospecto_recurrente'";
+            }
+            if (in_array('prospectos_sin_historial', $segments)) {
+                $conditions[] = "c.category IN ('prospecto', 'prospecto_sin_historial')";
+            }
+
+            if (empty($conditions)) return [];
+
+            $sql = "SELECT c.*, cs.wa_id AS session_wa_id, cs.session_count, cs.purchase_count, cs.has_purchased
+                    FROM contacts c
+                    LEFT JOIN chatbot_sessions cs ON cs.wa_id = c.wa_id OR cs.wa_id = c.phone
+                    WHERE c.business_id = ? AND (" . implode(' OR ', $conditions) . ")
+                    ORDER BY c.created_at DESC";
+            $contacts = $this->query($sql, $params);
+        }
+
+        // ──────────────────────────────────────────────────────────
+        // 2. Get chatbot sessions NOT yet synced to contacts table
+        // ──────────────────────────────────────────────────────────
+        $includeProspectosSinHistorial = in_array('todos', $segments) || in_array('prospectos_sin_historial', $segments);
+        $includeProspectosRecurrentes  = in_array('todos', $segments) || in_array('prospectos_recurrentes', $segments);
+
+        if ($includeProspectosSinHistorial || $includeProspectosRecurrentes) {
+            $chatbotSql = "SELECT cs.wa_id AS session_wa_id, cs.session_count, cs.purchase_count, cs.has_purchased,
+                                  cs.wa_id AS phone, cs.wa_id, cs.category AS name,
+                                  cs.updated_at AS last_contact_at
+                           FROM chatbot_sessions cs
+                           WHERE cs.wa_id NOT IN (
+                              SELECT COALESCE(c.wa_id, '') FROM contacts c WHERE c.business_id = ?
+                           )
+                           AND cs.wa_id NOT IN (
+                              SELECT COALESCE(c.phone, '') FROM contacts c WHERE c.business_id = ?
+                           )";
+
+            $chatbotParams = [$businessId, $businessId];
+
+            if (!in_array('todos', $segments)) {
+                if ($includeProspectosRecurrentes && !$includeProspectosSinHistorial) {
+                    $chatbotSql .= " AND (cs.session_count > 1 OR cs.purchase_count > 0)";
+                } elseif (!$includeProspectosRecurrentes && $includeProspectosSinHistorial) {
+                    $chatbotSql .= " AND (cs.session_count <= 1 AND (cs.purchase_count IS NULL OR cs.purchase_count = 0))";
+                }
+            }
+
+            $chatbotSql .= " ORDER BY cs.updated_at DESC";
+            $chatbotOnly = $this->query($chatbotSql, $chatbotParams);
+
+            $contacts = array_merge($contacts, $chatbotOnly);
+        }
+
+        return $contacts;
+    }
+
+    public function logSend(int $eventId, string $via = 'whatsapp', ?string $waId = null): void
+    {
+        $now = date('Y-m-d H:i:s');
+        $this->execute(
+            'INSERT INTO events_sends (event_id, wa_id, sent_via, sent_at) VALUES (?,?,?,?)',
+            [$eventId, $waId, $via, $now]
+        );
+    }
+
+    public function getSendHistory(int $eventId): array
+    {
+        return $this->query(
+            'SELECT es.*, c.name AS contact_name, c.phone AS contact_phone 
+             FROM events_sends es 
+             LEFT JOIN contacts c ON c.wa_id = es.wa_id
+             WHERE es.event_id = ? 
+             ORDER BY es.sent_at DESC',
+            [$eventId]
+        );
+    }
+
     public function generatePublicUrl(int $id): string
     {
         $event = $this->find($id);

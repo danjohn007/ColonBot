@@ -68,6 +68,7 @@ require APP_PATH . '/views/layout/head.php';
           <button onclick="toggleStatus(<?= $p['id'] ?>, '<?= $p['status'] === 'active' ? 'inactive' : 'active' ?>')" class="text-xs px-3 py-1.5 <?= $p['status'] === 'active' ? 'bg-red-50 text-red-700 hover:bg-red-100' : 'bg-green-50 text-green-700 hover:bg-green-100' ?> rounded-lg transition">
             <?= $p['status'] === 'active' ? 'Desactivar' : 'Activar' ?>
           </button>
+          <button onclick="sendEvent(<?= $p['id'] ?>)" class="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition">Enviar</button>
           <?php if (in_array($user['role'], ['superadmin', 'colaborador_admin'])): ?>
           <button onclick="approveEvent(<?= $p['id'] ?>)" class="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition">Aprobar</button>
           <?php if (!$p['bot_authorized'] && in_array($p['status'], ['active', 'approved'], true)): ?>
@@ -305,6 +306,26 @@ function toggleStatus(id, status) {
   .then(r => r.json())
   .then(d => { if (d.ok) location.reload(); })
   .catch(error => alert(error.message || 'Error al cambiar estado'));
+}
+
+function sendEvent(id) {
+  if (!confirm('¿Enviar este evento a los prospectos seleccionados por WhatsApp?')) return;
+  const body = new URLSearchParams({ _csrf: CSRF, via: 'whatsapp' });
+  fetch(`${APP_URL}/admin/eventos/${id}/enviar`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) {
+      alert(d.message || `Evento enviado correctamente a ${d.sent || 0} prospectos.`);
+      location.reload();
+    } else {
+      alert(d.error || 'Error al enviar el evento');
+    }
+  })
+  .catch(() => alert('Error de conexión al enviar el evento'));
 }
 
 function approveEvent(id) {
