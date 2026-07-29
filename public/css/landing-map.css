@@ -450,7 +450,31 @@
 
 .colon-facebook-feed .fb-page,
 .colon-facebook-feed iframe {
+  display: block;
+  width: 100%;
   max-width: 100%;
+  border: 0;
+}
+
+.colon-facebook-help {
+  margin: 0;
+  padding: 12px 18px 18px;
+  color: #606a7d;
+  font-size: .82rem;
+  font-weight: 700;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.colon-facebook-help span,
+.colon-facebook-help a {
+  display: block;
+}
+
+.colon-facebook-help a {
+  color: var(--colon-orange-700);
+  font-weight: 900;
+  text-decoration: none;
 }
 
 .colon-facebook-fallback {

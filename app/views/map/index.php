@@ -547,9 +547,20 @@ require APP_PATH . '/views/layout/head.php';
   </section>
 </main>
 
-<?php $facebookPageUrl = 'https://www.facebook.com/colonteconquistara'; ?>
-<div id="fb-root"></div>
-<script async defer crossorigin="anonymous" src="https://connect.facebook.net/es_LA/sdk.js#xfbml=1&version=v23.0"></script>
+<?php
+  $facebookPageUrl = 'https://www.facebook.com/colonteconquistara';
+  $facebookPluginUrl = 'https://www.facebook.com/plugins/page.php?' . http_build_query([
+    'href' => $facebookPageUrl,
+    'tabs' => 'timeline',
+    'width' => '500',
+    'height' => '420',
+    'small_header' => 'true',
+    'adapt_container_width' => 'true',
+    'hide_cover' => 'true',
+    'show_facepile' => 'false',
+    'locale' => 'es_LA',
+  ], '', '&', PHP_QUERY_RFC3986);
+?>
 
 <section class="colon-facebook-section" aria-label="Actualidad de Col&oacute;n">
   <div class="colon-facebook-inner">
@@ -566,20 +577,21 @@ require APP_PATH . '/views/layout/head.php';
     </div>
     <div class="colon-facebook-widget reveal-up">
       <div class="colon-facebook-feed">
-        <div class="fb-page"
-          data-href="<?= e($facebookPageUrl) ?>"
-          data-tabs="timeline"
-          data-width="500"
-          data-height="420"
-          data-small-header="true"
-          data-adapt-container-width="true"
-          data-hide-cover="true"
-          data-show-facepile="false">
-          <blockquote cite="<?= e($facebookPageUrl) ?>" class="fb-xfbml-parse-ignore colon-facebook-fallback">
-            <span>No pudimos cargar las publicaciones aqu&iacute;.</span>
-            <a href="<?= e($facebookPageUrl) ?>" target="_blank" rel="noopener">Abrir Facebook</a>
-          </blockquote>
-        </div>
+        <iframe
+          title="Publicaciones de Facebook de Col&oacute;n te conquistar&aacute;"
+          src="<?= e($facebookPluginUrl) ?>"
+          width="500"
+          height="420"
+          style="border:none;overflow:hidden"
+          scrolling="no"
+          frameborder="0"
+          allowfullscreen="true"
+          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+          loading="lazy"></iframe>
+        <p class="colon-facebook-help">
+          <span>Si las publicaciones no aparecen, Facebook puede estar bloqueando la inserci&oacute;n.</span>
+          <a href="<?= e($facebookPageUrl) ?>" target="_blank" rel="noopener">Abrir Facebook</a>
+        </p>
       </div>
     </div>
   </div>
