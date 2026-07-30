@@ -550,15 +550,15 @@ require APP_PATH . '/views/layout/head.php';
 <?php
   $facebookPageUrl = 'https://www.facebook.com/MunicipioColonOficial';
   $facebookPluginWidth = 500;
-  $facebookPluginHeight = 540;
+  $facebookPluginHeight = 560;
   $facebookPluginUrl = 'https://www.facebook.com/plugins/page.php?' . http_build_query([
     'href' => $facebookPageUrl,
     'tabs' => 'timeline',
     'width' => (string) $facebookPluginWidth,
     'height' => (string) $facebookPluginHeight,
-    'small_header' => 'true',
+    'small_header' => 'false',
     'adapt_container_width' => 'true',
-    'hide_cover' => 'true',
+    'hide_cover' => 'false',
     'show_facepile' => 'false',
     'show_posts' => 'true',
     'locale' => 'es_LA',
