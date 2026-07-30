@@ -368,11 +368,12 @@ require APP_PATH . '/views/layout/head.php';
           <label class="label">Agregar más fotos</label>
           <div class="flex gap-2">
             <input type="file" id="extra-image" accept="image/*" class="input flex-1">
-            <button type="button" onclick="uploadExtra()"
+            <button type="button" id="btn-upload-extra" onclick="uploadExtra()"
               class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition">
               Subir
             </button>
           </div>
+          <div id="upload-error" class="hidden mt-2 p-2 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg"></div>
           <div id="extra-gallery" class="flex flex-wrap gap-2 mt-2"></div>
         </div>
         <?php endif; ?>
@@ -875,21 +876,75 @@ function scrollToSection(sectionId, btn) {
   }, 100);
 }
 
-// ── Image upload ─────────────────────────────────────────────────────────────
+// ── Image upload with error handling ─────────────────────────────────────────
+function showUploadError(msg) {
+  const el = document.getElementById('upload-error');
+  if (el) {
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
+}
+
+function hideUploadError() {
+  const el = document.getElementById('upload-error');
+  if (el) {
+    el.classList.add('hidden');
+    el.textContent = '';
+  }
+}
+
 function uploadExtra() {
   const file = document.getElementById('extra-image').files[0];
-  if (!file) return;
+  if (!file) {
+    showUploadError('Selecciona una imagen primero.');
+    return;
+  }
+  
+  hideUploadError();
+  
+  const btn = document.getElementById('btn-upload-extra');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Subiendo...';
+  btn.classList.remove('hover:bg-blue-700');
+  btn.classList.add('opacity-70', 'cursor-not-allowed');
+
   const fd = new FormData();
   fd.append('image', file);
   fd.append('business_id', <?= $business['id'] ?>);
   fd.append('_csrf', CSRF);
+  
   fetch('<?= url('admin/upload') ?>', { method: 'POST', body: fd })
-    .then(r => r.json())
+    .then(r => {
+      if (!r.ok) {
+        // Try to parse error JSON, fallback to status text
+        return r.json().catch(() => {
+          throw new Error('Error del servidor: ' + r.status + ' ' + r.statusText);
+        }).then(errData => {
+          throw new Error(errData.error || 'Error del servidor: ' + r.status);
+        });
+      }
+      return r.json();
+    })
     .then(d => {
-      if (d.path) {
+      if (d.ok && d.path) {
         const div = document.getElementById('extra-gallery');
         div.innerHTML += `<img src="${d.path}" class="h-20 w-20 object-cover rounded-lg">`;
+        // Clear the file input
+        document.getElementById('extra-image').value = '';
+        hideUploadError();
+      } else {
+        showUploadError(d.error || 'Error al subir la imagen. Intenta de nuevo.');
       }
+    })
+    .catch(err => {
+      showUploadError(err.message || 'Error de conexión al subir la imagen.');
+    })
+    .finally(() => {
+      btn.disabled = false;
+      btn.textContent = originalText;
+      btn.classList.remove('opacity-70', 'cursor-not-allowed');
+      btn.classList.add('hover:bg-blue-700');
     });
 }
 

@@ -362,22 +362,52 @@ class BusinessController extends Controller
 
     public function upload(): void
     {
-        $this->requireAuth('prestador');
-        $this->verifyCsrf();
+        // Validate session exists before checking auth to avoid redirect (non-JSON)
+        if (!isset($_SESSION['user'])) {
+            $this->json(['error' => 'Sesión expirada. Inicia sesión de nuevo.'], 401);
+        }
+
+        // Validate CSRF token
+        $token = $_POST['_csrf'] ?? '';
+        if (!hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
+            $this->json(['error' => 'Token de seguridad inválido. Recarga la página e intenta de nuevo.'], 419);
+        }
 
         $businessId = (int)($_POST['business_id'] ?? 0);
         $business   = $this->businesses->find($businessId);
-        if (!$business) { $this->json(['error' => 'not found'], 404); }
+        if (!$business) { $this->json(['error' => 'Negocio no encontrado'], 404); }
 
-        $this->ownerOrAdmin($business);
+        // Validate ownership inline with JSON error
+        $user = currentUser();
+        if ($user['role'] !== 'superadmin' && $user['role'] !== 'colaborador_admin' && (int)$business['user_id'] !== (int)$user['id']) {
+            $this->json(['error' => 'No tienes permiso para modificar este negocio.'], 403);
+        }
 
         if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
-            $this->json(['error' => 'upload error'], 400);
+            $errorMsg = 'Error al subir el archivo';
+            if (isset($_FILES['image'])) {
+                switch ($_FILES['image']['error']) {
+                    case UPLOAD_ERR_INI_SIZE:
+                    case UPLOAD_ERR_FORM_SIZE:
+                        $errorMsg = 'El archivo excede el tamaño máximo permitido (5 MB).';
+                        break;
+                    case UPLOAD_ERR_NO_FILE:
+                        $errorMsg = 'No se seleccionó ningún archivo.';
+                        break;
+                }
+            }
+            $this->json(['error' => $errorMsg], 400);
         }
 
         $path = $this->saveUpload($_FILES['image']);
         if (!$path) {
-            $this->json(['error' => 'invalid file'], 422);
+            $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+            $allowedStr = implode(', ', ALLOWED_IMG_EXT);
+            $errorMsg = 'Archivo inválido. Solo se permiten imágenes: ' . $allowedStr . '.';
+            if ($_FILES['image']['size'] > MAX_FILE_SIZE) {
+                $errorMsg = 'El archivo excede el tamaño máximo permitido (5 MB).';
+            }
+            $this->json(['error' => $errorMsg], 422);
         }
 
         $this->businesses->addImage($businessId, $path, $_POST['caption'] ?? '');
