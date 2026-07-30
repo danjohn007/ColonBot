@@ -354,11 +354,11 @@ require APP_PATH . '/views/layout/head.php';
       left: auto;
       right: 0.75rem;
       bottom: 5.25rem;
-      width: min(19rem, calc(100% - 1.5rem));
+      width: min(16.75rem, calc(100% - 5rem));
       grid-template-columns: minmax(0, 1fr) auto;
-      gap: 0.62rem;
-      padding: 0.62rem 4.8rem 0.62rem 0.72rem;
-      min-height: 4.45rem;
+      gap: 0.48rem;
+      padding: 0.56rem 3.75rem 0.56rem 0.68rem;
+      min-height: 4rem;
     }
     .colon-map-bot-card.is-docked-to-map {
       top: var(--bot-docked-top, 0.75rem);
@@ -374,8 +374,8 @@ require APP_PATH . '/views/layout/head.php';
     .colon-map-bot-card img {
       right: -0.55rem;
       bottom: -0.42rem;
-      width: 88px;
-      height: 88px;
+      width: 70px;
+      height: 70px;
     }
     .colon-map-bot-card strong {
       font-size: 0.82rem;
@@ -548,16 +548,19 @@ require APP_PATH . '/views/layout/head.php';
 </main>
 
 <?php
-  $facebookPageUrl = 'https://www.facebook.com/colonteconquistara';
+  $facebookPageUrl = 'https://www.facebook.com/MunicipioColonOficial';
+  $facebookPluginWidth = 500;
+  $facebookPluginHeight = 540;
   $facebookPluginUrl = 'https://www.facebook.com/plugins/page.php?' . http_build_query([
     'href' => $facebookPageUrl,
     'tabs' => 'timeline',
-    'width' => '500',
-    'height' => '520',
+    'width' => (string) $facebookPluginWidth,
+    'height' => (string) $facebookPluginHeight,
     'small_header' => 'true',
     'adapt_container_width' => 'true',
     'hide_cover' => 'true',
     'show_facepile' => 'false',
+    'show_posts' => 'true',
     'locale' => 'es_LA',
   ], '', '&', PHP_QUERY_RFC3986);
 ?>
@@ -567,7 +570,7 @@ require APP_PATH . '/views/layout/head.php';
     <div class="colon-facebook-copy reveal-up">
       <p class="colon-eyebrow">Actualidad</p>
       <h2><span>Actualidad</span> <span>de Col&oacute;n</span></h2>
-      <p>Eventos, avisos y novedades publicados por Col&oacute;n te conquistar&aacute;.</p>
+      <p>Eventos, avisos y novedades publicados por el Municipio de Col&oacute;n.</p>
       <a href="<?= e($facebookPageUrl) ?>" class="colon-facebook-link" target="_blank" rel="noopener">
         <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17 17 7M9 7h8v8"/>
@@ -578,16 +581,25 @@ require APP_PATH . '/views/layout/head.php';
     <div class="colon-facebook-widget reveal-up">
       <div class="colon-facebook-card">
         <div class="colon-facebook-feed">
+          <div class="colon-facebook-loading" aria-hidden="true">
+            <span>Facebook</span>
+            <strong>Cargando publicaciones...</strong>
+          </div>
           <iframe
-            title="Publicaciones de Facebook de Col&oacute;n te conquistar&aacute;"
+            title="Publicaciones de Facebook del Municipio de Col&oacute;n"
             src="<?= e($facebookPluginUrl) ?>"
-            width="500"
-            height="520"
+            width="<?= (int) $facebookPluginWidth ?>"
+            height="<?= (int) $facebookPluginHeight ?>"
             scrolling="yes"
             frameborder="0"
             allowfullscreen="true"
             allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-            loading="lazy"></iframe>
+            loading="lazy"
+            onload="this.closest('.colon-facebook-feed')?.classList.add('is-loaded')"></iframe>
+          <div class="colon-facebook-fallback">
+            <span>No pudimos mostrar el muro dentro de la p&aacute;gina.</span>
+            <a href="<?= e($facebookPageUrl) ?>" target="_blank" rel="noopener">Abrir publicaciones en Facebook</a>
+          </div>
         </div>
         <a href="<?= e($facebookPageUrl) ?>" class="colon-facebook-card-link" target="_blank" rel="noopener">
           Abrir la p&aacute;gina completa
