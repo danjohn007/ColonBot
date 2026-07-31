@@ -16,7 +16,7 @@ $landingProfiles = [
     'intro' => 'Explora experiencias, productos locales y anfitriones listos para recibirte.',
     'routes_title' => 'Momentos para saborear, caminar y compartir.',
     'routes_copy' => 'Combina recorridos guiados, productos regionales y pausas escénicas en una ruta hecha a tu ritmo.',
-    'slides' => ['queso-vino.jpeg', 'noche-restaurante.jpeg', 'el-chino.jpeg', 'gordita.jpeg'],
+    'slides' => ['colon-vinaltura.jpg', 'colon-vinaltura-1.jpg', 'colon-tierra-alonso.jpg', 'colon-hondonada.jpg'],
   ],
   'turismo-cultural' => [
     'eyebrow' => 'Turismo cultural',
@@ -25,7 +25,7 @@ $landingProfiles = [
     'intro' => 'Encuentra puntos culturales, corredores artesanales y lugares con memoria.',
     'routes_title' => 'Una ruta para mirar Colón con calma.',
     'routes_copy' => 'Conecta arquitectura, oficios locales, historia y encuentros con la comunidad.',
-    'slides' => ['dulces-tradicionales.jpeg', 'el-chino.jpeg', 'noche-restaurante.jpeg', 'queso-vino.jpeg'],
+    'slides' => ['colon-panorama.jpg', 'colon-escuela-telar-2.jpg', 'colon-basilica-detalle.jpg', 'colon-parroquia-san-francisco.jpg'],
   ],
   'ecoturismo-y-aventura' => [
     'eyebrow' => 'Ecoturismo y aventura',
@@ -34,7 +34,7 @@ $landingProfiles = [
     'intro' => 'Filtra lugares para aventura, descanso al aire libre y paisajes abiertos.',
     'routes_title' => 'Aventura con horizonte colonense.',
     'routes_copy' => 'Planea salidas familiares, con amigos o en pareja entre senderos, agua y vistas amplias.',
-    'slides' => ['noche-restaurante.jpeg', 'queso-vino.jpeg', 'dulces-tradicionales.jpeg', 'gordita.jpeg'],
+    'slides' => ['colon-pinal-zamorano.jpg', 'colon-hondonada.jpg', 'colon-paisaje-09932.jpg', 'colon-paisaje-07545.jpg'],
   ],
   'turismo-religioso' => [
     'eyebrow' => 'Turismo religioso',
@@ -43,7 +43,7 @@ $landingProfiles = [
     'intro' => 'Ubica espacios religiosos, fiestas patronales y puntos cercanos para completar tu visita.',
     'routes_title' => 'Tradición espiritual en cada parada.',
     'routes_copy' => 'Crea una ruta serena entre templos, plazas, servicios y experiencias locales.',
-    'slides' => ['el-chino.jpeg', 'dulces-tradicionales.jpeg', 'noche-restaurante.jpeg', 'queso-vino.jpeg'],
+    'slides' => ['colon-basilica-soriano.jpg', 'colon-basilica-atrio.jpg', 'colon-parroquia-san-francisco.jpg', 'colon-basilica-detalle.jpg'],
   ],
   'turismo-gastronomico' => [
     'eyebrow' => 'Turismo gastronómico',
@@ -52,7 +52,7 @@ $landingProfiles = [
     'intro' => 'Encuentra restaurantes, productos locales y paradas ideales para comer bien.',
     'routes_title' => 'Una ruta para probar Colón.',
     'routes_copy' => 'Arma el día entre desayunos, antojitos, sobremesa, dulces y cenas con identidad local.',
-    'slides' => ['gordita.jpeg', 'el-chino.jpeg', 'queso-vino.jpeg', 'dulces-tradicionales.jpeg'],
+    'slides' => ['colon-flor-alfalfa.jpg', 'colon-hondonada.jpg', 'colon-tierra-alonso.jpg', 'colon-vinaltura-2.jpg'],
   ],
 ];
 $landingDefault = [
@@ -62,7 +62,7 @@ $landingDefault = [
   'intro' => 'Explora atractivos, sabores y experiencias desde el mapa interactivo del turismo en Colón.',
   'routes_title' => 'Elige tu forma de vivir Colón.',
   'routes_copy' => 'Descubre atractivos públicos y privados de acuerdo al estilo de visita que quieras realizar: familiar, en pareja, con amigos o pet friendly.',
-  'slides' => ['noche-restaurante.jpeg', 'dulces-tradicionales.jpeg', 'queso-vino.jpeg', 'el-chino.jpeg'],
+  'slides' => ['colon-panorama.jpg', 'colon-hondonada.jpg', 'colon-tierra-alonso.jpg', 'colon-parroquia-san-francisco.jpg'],
 ];
 $landingRouteUrls = [
   'turismo-de-experiencias' => 'https://colon.click/landing/mapa/turismo-de-experiencias',
@@ -74,37 +74,37 @@ $landingRouteUrls = [
 $landingContent = $landingProfiles[$preloadCat ?? ''] ?? $landingDefault;
 $routeCardsBySlug = [
   'turismo-de-experiencias' => [
-    ['label' => 'Producto local', 'title' => 'Queso, vino y sabores de origen', 'copy' => 'Paradas para probar, comprar y conversar con anfitriones locales.', 'img' => 'queso-vino.jpeg'],
-    ['label' => 'Plan de tarde', 'title' => 'Miradores, sobremesa y noche', 'copy' => 'Experiencias para bajar el ritmo y disfrutar Colón sin prisa.', 'img' => 'noche-restaurante.jpeg'],
-    ['label' => 'Ruta memorable', 'title' => 'Momentos hechos para compartir', 'copy' => 'Combina gastronomia, servicios y atractivos cercanos en una sola salida.', 'img' => 'gordita.jpeg', 'wide' => true],
+    ['label' => 'Producto local', 'title' => 'Queso, vino y sabores de origen', 'copy' => 'Paradas para probar, comprar y conversar con anfitriones locales.', 'img' => 'colon-vinaltura-2.jpg'],
+    ['label' => 'Plan de tarde', 'title' => 'Miradores, sobremesa y noche', 'copy' => 'Experiencias para bajar el ritmo y disfrutar Colón sin prisa.', 'img' => 'colon-pinal-zamorano.jpg'],
+    ['label' => 'Ruta memorable', 'title' => 'Momentos hechos para compartir', 'copy' => 'Combina gastronomia, servicios y atractivos cercanos en una sola salida.', 'img' => 'colon-vinaltura-3.jpg', 'wide' => true],
   ],
   'turismo-cultural' => [
-    ['label' => 'Tradición', 'title' => 'Mercados, dulces y oficios', 'copy' => 'Encuentra lugares donde la identidad local se vive en cada detalle.', 'img' => 'dulces-tradicionales.jpeg'],
-    ['label' => 'Historia', 'title' => 'Haciendas, plazas y memoria', 'copy' => 'Recorridos para conectar arquitectura, relatos y vida cotidiana.', 'img' => 'el-chino.jpeg'],
-    ['label' => 'Comunidad', 'title' => 'Cultura con anfitriones locales', 'copy' => 'Haz una ruta con paradas utiles para comer, comprar y aprender.', 'img' => 'noche-restaurante.jpeg', 'wide' => true],
+    ['label' => 'Tradición', 'title' => 'Mercados, dulces y oficios', 'copy' => 'Encuentra lugares donde la identidad local se vive en cada detalle.', 'img' => 'colon-escuela-telar.jpg'],
+    ['label' => 'Historia', 'title' => 'Haciendas, plazas y memoria', 'copy' => 'Recorridos para conectar arquitectura, relatos y vida cotidiana.', 'img' => 'colon-basilica-soriano.jpg'],
+    ['label' => 'Comunidad', 'title' => 'Cultura con anfitriones locales', 'copy' => 'Haz una ruta con paradas utiles para comer, comprar y aprender.', 'img' => 'colon-parroquia-san-francisco-2.jpg', 'wide' => true],
   ],
   'ecoturismo-y-aventura' => [
-    ['label' => 'Aire libre', 'title' => 'Senderos y paisajes abiertos', 'copy' => 'Opciones para caminar, respirar y descubrir vistas del municipio.', 'img' => 'noche-restaurante.jpeg'],
-    ['label' => 'Naturaleza', 'title' => 'Presas, cerros y descanso', 'copy' => 'Lugares para convivir con amigos, familia o pareja.', 'img' => 'queso-vino.jpeg'],
-    ['label' => 'Aventura suave', 'title' => 'Rutas para moverte a tu ritmo', 'copy' => 'Planea una salida con servicios cercanos y puntos de interes.', 'img' => 'dulces-tradicionales.jpeg', 'wide' => true],
+    ['label' => 'Aire libre', 'title' => 'Senderos y paisajes abiertos', 'copy' => 'Opciones para caminar, respirar y descubrir vistas del municipio.', 'img' => 'colon-paisaje-09985.jpg'],
+    ['label' => 'Naturaleza', 'title' => 'Presas, cerros y descanso', 'copy' => 'Lugares para convivir con amigos, familia o pareja.', 'img' => 'colon-panorama.jpg'],
+    ['label' => 'Aventura suave', 'title' => 'Rutas para moverte a tu ritmo', 'copy' => 'Planea una salida con servicios cercanos y puntos de interes.', 'img' => 'colon-tierra-alonso.jpg', 'wide' => true],
   ],
   'turismo-religioso' => [
-    ['label' => 'Fe', 'title' => 'Templos y celebraciones', 'copy' => 'Ubica espacios religiosos y fiestas patronales de Colón.', 'img' => 'el-chino.jpeg'],
-    ['label' => 'Patrimonio', 'title' => 'Arquitectura y tradición', 'copy' => 'Recorridos serenos con valor histórico y espiritual.', 'img' => 'dulces-tradicionales.jpeg'],
-    ['label' => 'Peregrinacion', 'title' => 'Una visita cuidada de principio a fin', 'copy' => 'Complementa la ruta con servicios, comida y puntos cercanos.', 'img' => 'noche-restaurante.jpeg', 'wide' => true],
+    ['label' => 'Fe', 'title' => 'Templos y celebraciones', 'copy' => 'Ubica espacios religiosos y fiestas patronales de Colón.', 'img' => 'colon-parroquia-san-francisco-2.jpg'],
+    ['label' => 'Patrimonio', 'title' => 'Arquitectura y tradición', 'copy' => 'Recorridos serenos con valor histórico y espiritual.', 'img' => 'colon-panorama.jpg'],
+    ['label' => 'Peregrinacion', 'title' => 'Una visita cuidada de principio a fin', 'copy' => 'Complementa la ruta con servicios, comida y puntos cercanos.', 'img' => 'colon-escuela-telar.jpg', 'wide' => true],
   ],
   'turismo-gastronomico' => [
-    ['label' => 'Antojitos', 'title' => 'Sabores de fonda y mercado', 'copy' => 'Paradas casuales para probar recetas locales y antojos de la región.', 'img' => 'gordita.jpeg'],
-    ['label' => 'Sobremesa', 'title' => 'Restaurantes y cocina local', 'copy' => 'Opciones para comer bien y convertir la visita en experiencia.', 'img' => 'el-chino.jpeg'],
-    ['label' => 'Producto regional', 'title' => 'Queso, vino y dulces tradicionales', 'copy' => 'Arma una ruta para llevarte Colón también a casa.', 'img' => 'queso-vino.jpeg', 'wide' => true],
+    ['label' => 'Antojitos', 'title' => 'Sabores de fonda y mercado', 'copy' => 'Paradas casuales para probar recetas locales y antojos de la región.', 'img' => 'colon-vinaltura.jpg'],
+    ['label' => 'Sobremesa', 'title' => 'Restaurantes y cocina local', 'copy' => 'Opciones para comer bien y convertir la visita en experiencia.', 'img' => 'colon-vinaltura-1.jpg'],
+    ['label' => 'Producto regional', 'title' => 'Queso, vino y dulces tradicionales', 'copy' => 'Arma una ruta para llevarte Colón también a casa.', 'img' => 'colon-vinaltura-3.jpg', 'wide' => true],
   ],
 ];
 $defaultRouteCards = [
-  ['label' => 'Experiencias', 'title' => 'Queserías, viñedos y miradores', 'copy' => 'Productos locales y nativos, restaurantes gourmet, balnearios y paseos a caballo.', 'img' => 'queso-vino.jpeg', 'href' => $landingRouteUrls['turismo-de-experiencias']],
-  ['label' => 'Turismo Cultural', 'title' => 'Mercados, artesanías e historia', 'copy' => 'Corredores artesanales, museos, mercados, haciendas y recorridos turísticos.', 'img' => 'dulces-tradicionales.jpeg', 'href' => $landingRouteUrls['turismo-cultural']],
-  ['label' => 'Ecoturismo y aventura', 'title' => 'Senderos, naturaleza y aire libre', 'copy' => 'Cerros, presas, pesca, camping y rutas para conectar con el paisaje.', 'img' => 'noche-restaurante.jpeg', 'href' => $landingRouteUrls['ecoturismo-y-aventura']],
-  ['label' => 'Turismo religioso', 'title' => 'Fe, peregrinación y patrimonio', 'copy' => 'Iglesias, celebraciones, conventos y recorridos con valor espiritual e histórico.', 'img' => 'el-chino.jpeg', 'href' => $landingRouteUrls['turismo-religioso']],
-  ['label' => 'Gastronomía', 'title' => 'De la fonda al restaurante', 'copy' => 'Sabores locales, antojitos y lo mejor de la gastronomía del municipio.', 'img' => 'gordita.jpeg', 'href' => $landingRouteUrls['turismo-gastronomico'], 'wide' => true],
+  ['label' => 'Experiencias', 'title' => 'Queserías, viñedos y miradores', 'copy' => 'Productos locales y nativos, restaurantes gourmet, balnearios y paseos a caballo.', 'img' => 'colon-vinaltura.jpg', 'href' => $landingRouteUrls['turismo-de-experiencias']],
+  ['label' => 'Turismo Cultural', 'title' => 'Mercados, artesanías e historia', 'copy' => 'Corredores artesanales, museos, mercados, haciendas y recorridos turísticos.', 'img' => 'colon-escuela-telar.jpg', 'href' => $landingRouteUrls['turismo-cultural']],
+  ['label' => 'Ecoturismo y aventura', 'title' => 'Senderos, naturaleza y aire libre', 'copy' => 'Cerros, presas, pesca, camping y rutas para conectar con el paisaje.', 'img' => 'colon-pinal-zamorano.jpg', 'href' => $landingRouteUrls['ecoturismo-y-aventura']],
+  ['label' => 'Turismo religioso', 'title' => 'Fe, peregrinación y patrimonio', 'copy' => 'Iglesias, celebraciones, conventos y recorridos con valor espiritual e histórico.', 'img' => 'colon-basilica-soriano.jpg', 'href' => $landingRouteUrls['turismo-religioso']],
+  ['label' => 'Gastronomía', 'title' => 'De la fonda al restaurante', 'copy' => 'Sabores locales, antojitos y lo mejor de la gastronomía del municipio.', 'img' => 'colon-flor-alfalfa.jpg', 'href' => $landingRouteUrls['turismo-gastronomico'], 'wide' => true],
 ];
 $routeCards = $routeCardsBySlug[$preloadCat ?? ''] ?? $defaultRouteCards;
 if (!empty($preloadCat) && isset($landingRouteUrls[$preloadCat])) {
@@ -394,7 +394,7 @@ require APP_PATH . '/views/layout/head.php';
 <section class="colon-hero" id="inicio" aria-label="Colón te conquistará">
   <div class="colon-hero-bg" aria-hidden="true">
     <?php foreach ($landingContent['slides'] as $i => $slide): ?>
-    <img class="colon-hero-slide <?= $i === 0 ? 'is-active' : '' ?>" src="<?= asset('img/landing/' . $slide) ?>" alt="">
+    <img class="colon-hero-slide <?= $i === 0 ? 'is-active' : '' ?>" src="<?= asset('img/landing/' . $slide) ?>" alt="" decoding="async" <?= $i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' ?>>
     <?php endforeach; ?>
   </div>
   <div class="colon-hero-shade" aria-hidden="true"></div>
@@ -548,7 +548,7 @@ require APP_PATH . '/views/layout/head.php';
 </main>
 
 <?php
-  $facebookPageUrl = 'https://www.facebook.com/MunicipioColonOficial';
+  $facebookPageUrl = 'https://www.facebook.com/colonteconquistara';
   $facebookPluginWidth = 500;
   $facebookPluginHeight = 560;
   $facebookPluginUrl = 'https://www.facebook.com/plugins/page.php?' . http_build_query([
@@ -570,7 +570,7 @@ require APP_PATH . '/views/layout/head.php';
     <div class="colon-facebook-copy reveal-up">
       <p class="colon-eyebrow">Actualidad</p>
       <h2><span>Actualidad</span> <span>de Col&oacute;n</span></h2>
-      <p>Eventos, avisos y novedades publicados por el Municipio de Col&oacute;n.</p>
+      <p>Eventos, avisos y novedades publicados por Col&oacute;n te conquistar&aacute;.</p>
       <a href="<?= e($facebookPageUrl) ?>" class="colon-facebook-link" target="_blank" rel="noopener">
         <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17 17 7M9 7h8v8"/>
@@ -586,7 +586,7 @@ require APP_PATH . '/views/layout/head.php';
             <strong>Cargando publicaciones...</strong>
           </div>
           <iframe
-            title="Publicaciones de Facebook del Municipio de Col&oacute;n"
+            title="Publicaciones de Facebook de Col&oacute;n te conquistar&aacute;"
             src="<?= e($facebookPluginUrl) ?>"
             width="<?= (int) $facebookPluginWidth ?>"
             height="<?= (int) $facebookPluginHeight ?>"
@@ -682,27 +682,27 @@ require APP_PATH . '/views/layout/head.php';
   </div>
 
   <div class="colon-route-grid">
-    <article class="colon-route-card reveal-up" style="--route-img: url('<?= asset('img/landing/dulces-tradicionales.jpeg') ?>')">
+    <article class="colon-route-card reveal-up" style="--route-img: url('<?= asset('img/landing/colon-escuela-telar.jpg') ?>')">
       <span>Turismo Cultural</span>
       <h3>Mercados, artesanías e historia</h3>
       <p>Corredores artesanales, museos, mercados, haciendas y recorridos turísticos.</p>
     </article>
-    <article class="colon-route-card reveal-up" style="--route-img: url('<?= asset('img/landing/queso-vino.jpeg') ?>')">
+    <article class="colon-route-card reveal-up" style="--route-img: url('<?= asset('img/landing/colon-vinaltura.jpg') ?>')">
       <span>Experiencias</span>
       <h3>Queserías, viñedos y miradores</h3>
       <p>Productos locales y nativos, restaurantes gourmet, balnearios y paseos a caballo.</p>
     </article>
-    <article class="colon-route-card reveal-up" style="--route-img: url('<?= asset('img/landing/noche-restaurante.jpeg') ?>')">
+    <article class="colon-route-card reveal-up" style="--route-img: url('<?= asset('img/landing/colon-pinal-zamorano.jpg') ?>')">
       <span>Ecoturismo</span>
       <h3>Aventura al aire libre</h3>
       <p>Senderismo, pesca, Mountain Bike, crosstrail y camping.</p>
     </article>
-    <article class="colon-route-card reveal-up" style="--route-img: url('<?= asset('img/landing/el-chino.jpeg') ?>')">
+    <article class="colon-route-card reveal-up" style="--route-img: url('<?= asset('img/landing/colon-basilica-soriano.jpg') ?>')">
       <span>Religioso</span>
       <h3>Soriano y fiestas patronales</h3>
       <p>Catedral, peregrinaciones, iglesias, conventos y celebraciones tradicionales.</p>
     </article>
-    <article class="colon-route-card colon-route-wide reveal-up" style="--route-img: url('<?= asset('img/landing/gordita.jpeg') ?>')">
+    <article class="colon-route-card colon-route-wide reveal-up" style="--route-img: url('<?= asset('img/landing/colon-flor-alfalfa.jpg') ?>')">
       <span>Gastronomía</span>
       <h3>De la fonda al restaurante</h3>
       <p>Sabores locales, antojitos y lo mejor de la gastronomía del municipio.</p>
@@ -788,7 +788,7 @@ require APP_PATH . '/views/layout/head.php';
       </div>
     </a>
     <a href="<?= url(($routePrefix ?? '') . 'registro/prestador') ?>" class="colon-public-banner">
-      <img src="<?= asset('img/landing/noche-restaurante.jpeg') ?>" alt="Negocio turístico en Colón" loading="lazy" decoding="async">
+      <img src="<?= asset('img/landing/colon-tierra-alonso.jpg') ?>" alt="Negocio turístico en Colón" loading="lazy" decoding="async">
       <span class="colon-public-overlay" aria-hidden="true"></span>
       <div class="colon-public-banner-content">
         <span>Prestadores</span>

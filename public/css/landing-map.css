@@ -43,6 +43,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center center;
+  image-rendering: auto;
   opacity: 0;
   transform: scale(1.06);
   transition: opacity 1s ease, transform 7s ease;
@@ -708,7 +710,8 @@
   inset: 0;
   background-image: linear-gradient(0deg, rgba(15, 23, 42, .84), rgba(15, 23, 42, .08) 64%), var(--route-img);
   background-size: cover;
-  background-position: center;
+  background-position: center center;
+  image-rendering: auto;
   transition: transform .7s ease, filter .7s ease;
 }
 
@@ -772,7 +775,7 @@
   display: grid;
   place-items: center;
   border-radius: 24px;
-  background: linear-gradient(rgba(255,255,255,.74), rgba(255,255,255,.74)), url("../img/landing/noche-restaurante.jpeg") center / cover;
+  background: linear-gradient(rgba(255,255,255,.74), rgba(255,255,255,.74)), url("../img/landing/colon-hondonada.jpg") center center / cover;
 }
 
 .colon-bot-badge {
@@ -856,6 +859,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center center;
+  image-rendering: auto;
   transition: transform .7s ease, filter .7s ease;
 }
 
@@ -1017,6 +1022,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center center;
+  image-rendering: auto;
   transition: transform .7s ease, filter .7s ease;
 }
 
@@ -1086,7 +1093,7 @@
   place-items: center;
   background:
     linear-gradient(rgba(255,255,255,.84), rgba(255,255,255,.92)),
-    url("../img/landing/queso-vino.jpeg") center / cover;
+    url("../img/landing/colon-vinaltura.jpg") center center / cover;
 }
 
 .colon-auth-shell {
