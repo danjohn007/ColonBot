@@ -557,73 +557,6 @@ require APP_PATH . '/views/layout/head.php';
   </div>
   </section>
 </main>
-
-<?php
-  $facebookPageUrl = 'https://www.facebook.com/colonteconquistara';
-  $facebookPluginWidth = 500;
-  $facebookPluginHeight = 560;
-  $facebookPluginUrl = 'https://www.facebook.com/plugins/page.php?' . http_build_query([
-    'href' => $facebookPageUrl,
-    'tabs' => 'timeline',
-    'width' => (string) $facebookPluginWidth,
-    'height' => (string) $facebookPluginHeight,
-    'small_header' => 'false',
-    'adapt_container_width' => 'true',
-    'hide_cover' => 'false',
-    'show_facepile' => 'true',
-    'locale' => 'es_LA',
-  ], '', '&', PHP_QUERY_RFC3986);
-?>
-
-<section class="colon-facebook-section" aria-label="Actualidad de Col&oacute;n">
-  <div class="colon-facebook-inner">
-    <div class="colon-facebook-copy reveal-up">
-      <p class="colon-eyebrow">Actualidad</p>
-      <h2><span>Actualidad</span> <span>de Col&oacute;n</span></h2>
-      <p>Eventos, avisos y novedades publicados por Col&oacute;n te conquistar&aacute;.</p>
-      <a href="<?= e($facebookPageUrl) ?>" class="colon-facebook-link" target="_blank" rel="noopener">
-        <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17 17 7M9 7h8v8"/>
-        </svg>
-        Ver m&aacute;s en Facebook
-      </a>
-    </div>
-    <div class="colon-facebook-widget reveal-up">
-      <div class="colon-facebook-card">
-        <div class="colon-facebook-feed" data-facebook-diagnostics-url="<?= e(url('mapa/facebook-diagnostico')) ?>">
-          <iframe
-            class="colon-facebook-frame"
-            title="Publicaciones de Facebook de Col&oacute;n te conquistar&aacute;"
-            src="<?= e($facebookPluginUrl) ?>"
-            width="<?= (int) $facebookPluginWidth ?>"
-            height="<?= (int) $facebookPluginHeight ?>"
-            scrolling="yes"
-            frameborder="0"
-            allowfullscreen="true"
-            allowtransparency="true"
-            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-            loading="eager"
-            data-facebook-frame></iframe>
-          <div class="colon-facebook-loading" aria-hidden="true">
-            <span>Facebook</span>
-            <strong>Publicaciones recientes</strong>
-          </div>
-          <div class="colon-facebook-fallback">
-            <span>Facebook no permite mostrar publicaciones en este navegador.</span>
-            <a href="<?= e($facebookPageUrl) ?>" target="_blank" rel="noopener">Abrir publicaciones en Facebook</a>
-          </div>
-        </div>
-        <a href="<?= e($facebookPageUrl) ?>" class="colon-facebook-card-link" target="_blank" rel="noopener">
-          Abrir la p&aacute;gina completa
-          <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17 17 7M9 7h8v8"/>
-          </svg>
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
-
 <?php
   $chatbotPhone = preg_replace('/\D/', '', setting('chatbot_wa_number', ''));
   $chatbotMapUrl = $chatbotPhone
@@ -1478,62 +1411,6 @@ if (PRELOAD_CAT) {
 }
 updateFavCount();
 loadPOIs();
-(() => {
-  document.querySelectorAll('.colon-facebook-feed').forEach(feed => {
-    const frame = feed.querySelector('[data-facebook-frame]');
-    const diagnosticsUrl = feed.dataset.facebookDiagnosticsUrl;
-    let reported = false;
-
-    function reportFacebookEmbed(reason) {
-      if (reported || !diagnosticsUrl) return;
-      reported = true;
-      const payload = new URLSearchParams({
-        reason,
-        frame_src: frame?.src || '',
-        page_url: window.location.href,
-        viewport: `${window.innerWidth}x${window.innerHeight}`,
-        user_agent: navigator.userAgent,
-      });
-
-      if (navigator.sendBeacon) {
-        navigator.sendBeacon(diagnosticsUrl, payload);
-        return;
-      }
-
-      fetch(diagnosticsUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: payload,
-        keepalive: true,
-      }).catch(() => {});
-    }
-
-    const timeout = window.setTimeout(() => {
-      if (!feed.classList.contains('is-loaded')) {
-        feed.classList.add('is-unavailable');
-        reportFacebookEmbed('timeout_without_iframe_load');
-      }
-    }, 9000);
-
-    frame?.addEventListener('load', () => {
-      window.clearTimeout(timeout);
-      feed.classList.add('is-loaded');
-      window.setTimeout(() => {
-        if ((frame.offsetHeight || 0) < 220 || (frame.offsetWidth || 0) < 260) {
-          feed.classList.add('is-unavailable');
-          reportFacebookEmbed('iframe_loaded_with_invalid_size');
-        }
-      }, 1200);
-    });
-
-    frame?.addEventListener('error', () => {
-      window.clearTimeout(timeout);
-      feed.classList.add('is-unavailable');
-      reportFacebookEmbed('iframe_error_event');
-    });
-  });
-})();
-
 (() => {
   const slides = Array.from(document.querySelectorAll('.colon-hero-slide'));
   const dots = Array.from(document.querySelectorAll('.colon-dot'));
