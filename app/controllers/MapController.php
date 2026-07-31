@@ -16,6 +16,13 @@ class MapController extends Controller
 
     public function index(string $id = ''): void
     {
+        $routeUri = $this->currentRouteUri();
+        if ($routeUri === 'landing/mapa' || strpos($routeUri, 'landing/mapa/') === 0) {
+            $target = 'mapa' . ($id !== '' ? '/' . rawurlencode($id) : '');
+            header('Location: ' . url($target), true, 301);
+            exit;
+        }
+
         $categories = $this->categories->active();
         $this->analytics->track('map_view');
         $preloadId  = (is_numeric($id) && (int)$id > 0) ? (int)$id : 0;

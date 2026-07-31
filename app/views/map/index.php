@@ -16,7 +16,7 @@ $landingProfiles = [
     'intro' => 'Explora experiencias, productos locales y anfitriones listos para recibirte.',
     'routes_title' => 'Momentos para saborear, caminar y compartir.',
     'routes_copy' => 'Combina recorridos guiados, productos regionales y pausas escénicas en una ruta hecha a tu ritmo.',
-    'slides' => ['colon-vinaltura.jpg', 'colon-vinaltura-1.jpg', 'colon-tierra-alonso.jpg', 'colon-hondonada.jpg'],
+    'slides' => ['colon-vinaltura.jpg', 'colon-vinaltura-1.jpg', 'colon-tierra-alonso.jpg', 'colon-hondonada.jpg', 'colon-pinal-zamorano.jpg', 'colon-panorama.jpg'],
   ],
   'turismo-cultural' => [
     'eyebrow' => 'Turismo cultural',
@@ -25,7 +25,7 @@ $landingProfiles = [
     'intro' => 'Encuentra puntos culturales, corredores artesanales y lugares con memoria.',
     'routes_title' => 'Una ruta para mirar Colón con calma.',
     'routes_copy' => 'Conecta arquitectura, oficios locales, historia y encuentros con la comunidad.',
-    'slides' => ['colon-panorama.jpg', 'colon-escuela-telar-2.jpg', 'colon-basilica-detalle.jpg', 'colon-parroquia-san-francisco.jpg'],
+    'slides' => ['colon-escuela-telar-2.jpg', 'colon-basilica-detalle.jpg', 'colon-panorama.jpg', 'colon-parroquia-san-francisco.jpg', 'colon-basilica-atrio.jpg', 'colon-paisaje-09932.jpg'],
   ],
   'ecoturismo-y-aventura' => [
     'eyebrow' => 'Ecoturismo y aventura',
@@ -34,7 +34,7 @@ $landingProfiles = [
     'intro' => 'Filtra lugares para aventura, descanso al aire libre y paisajes abiertos.',
     'routes_title' => 'Aventura con horizonte colonense.',
     'routes_copy' => 'Planea salidas familiares, con amigos o en pareja entre senderos, agua y vistas amplias.',
-    'slides' => ['colon-pinal-zamorano.jpg', 'colon-hondonada.jpg', 'colon-paisaje-09932.jpg', 'colon-paisaje-07545.jpg'],
+    'slides' => ['colon-pinal-zamorano.jpg', 'colon-hondonada.jpg', 'colon-paisaje-09932.jpg', 'colon-paisaje-07545.jpg', 'colon-paisaje-09985.jpg', 'colon-tierra-alonso.jpg'],
   ],
   'turismo-religioso' => [
     'eyebrow' => 'Turismo religioso',
@@ -43,7 +43,7 @@ $landingProfiles = [
     'intro' => 'Ubica espacios religiosos, fiestas patronales y puntos cercanos para completar tu visita.',
     'routes_title' => 'Tradición espiritual en cada parada.',
     'routes_copy' => 'Crea una ruta serena entre templos, plazas, servicios y experiencias locales.',
-    'slides' => ['colon-basilica-soriano.jpg', 'colon-basilica-atrio.jpg', 'colon-parroquia-san-francisco.jpg', 'colon-basilica-detalle.jpg'],
+    'slides' => ['colon-basilica-soriano.jpg', 'colon-basilica-atrio.jpg', 'colon-parroquia-san-francisco.jpg', 'colon-basilica-detalle.jpg', 'colon-parroquia-san-francisco-2.jpg', 'colon-panorama.jpg'],
   ],
   'turismo-gastronomico' => [
     'eyebrow' => 'Turismo gastronómico',
@@ -52,7 +52,7 @@ $landingProfiles = [
     'intro' => 'Encuentra restaurantes, productos locales y paradas ideales para comer bien.',
     'routes_title' => 'Una ruta para probar Colón.',
     'routes_copy' => 'Arma el día entre desayunos, antojitos, sobremesa, dulces y cenas con identidad local.',
-    'slides' => ['colon-flor-alfalfa.jpg', 'colon-hondonada.jpg', 'colon-tierra-alonso.jpg', 'colon-vinaltura-2.jpg'],
+    'slides' => ['colon-flor-alfalfa.jpg', 'colon-vinaltura-2.jpg', 'colon-vinaltura.jpg', 'colon-vinaltura-1.jpg', 'colon-hondonada.jpg', 'colon-tierra-alonso.jpg'],
   ],
 ];
 $landingDefault = [
@@ -62,54 +62,65 @@ $landingDefault = [
   'intro' => 'Explora atractivos, sabores y experiencias desde el mapa interactivo del turismo en Colón.',
   'routes_title' => 'Elige tu forma de vivir Colón.',
   'routes_copy' => 'Descubre atractivos públicos y privados de acuerdo al estilo de visita que quieras realizar: familiar, en pareja, con amigos o pet friendly.',
-  'slides' => ['colon-panorama.jpg', 'colon-hondonada.jpg', 'colon-tierra-alonso.jpg', 'colon-parroquia-san-francisco.jpg'],
+  'slides' => ['colon-panorama.jpg', 'colon-hondonada.jpg', 'colon-tierra-alonso.jpg', 'colon-parroquia-san-francisco.jpg', 'colon-vinaltura.jpg', 'colon-basilica-soriano.jpg'],
 ];
-$landingRouteUrls = [
-  'turismo-de-experiencias' => 'https://colon.click/landing/mapa/turismo-de-experiencias',
-  'turismo-cultural' => 'https://colon.click/landing/mapa/turismo-cultural',
-  'ecoturismo-y-aventura' => 'https://colon.click/landing/mapa/ecoturismo-y-aventura',
-  'turismo-religioso' => 'https://colon.click/landing/mapa/turismo-religioso',
-  'turismo-gastronomico' => 'https://colon.click/landing/mapa/turismo-gastronomico',
+$mapRouteUrls = [
+  'turismo-de-experiencias' => url('mapa/turismo-de-experiencias'),
+  'turismo-cultural' => url('mapa/turismo-cultural'),
+  'ecoturismo-y-aventura' => url('mapa/ecoturismo-y-aventura'),
+  'turismo-religioso' => url('mapa/turismo-religioso'),
+  'turismo-gastronomico' => url('mapa/turismo-gastronomico'),
 ];
 $landingContent = $landingProfiles[$preloadCat ?? ''] ?? $landingDefault;
 $routeCardsBySlug = [
   'turismo-de-experiencias' => [
-    ['label' => 'Producto local', 'title' => 'Queso, vino y sabores de origen', 'copy' => 'Paradas para probar, comprar y conversar con anfitriones locales.', 'img' => 'colon-vinaltura-2.jpg'],
-    ['label' => 'Plan de tarde', 'title' => 'Miradores, sobremesa y noche', 'copy' => 'Experiencias para bajar el ritmo y disfrutar Colón sin prisa.', 'img' => 'colon-pinal-zamorano.jpg'],
-    ['label' => 'Ruta memorable', 'title' => 'Momentos hechos para compartir', 'copy' => 'Combina gastronomia, servicios y atractivos cercanos en una sola salida.', 'img' => 'colon-vinaltura-3.jpg', 'wide' => true],
+    ['label' => 'Viñedos', 'title' => 'Catas, recorridos y paisaje', 'copy' => 'Experiencias para probar, caminar y conocer proyectos locales con calma.', 'img' => 'colon-vinaltura-2.jpg'],
+    ['label' => 'Producto local', 'title' => 'Sabores de origen', 'copy' => 'Paradas para comprar, conversar y llevarte una parte del municipio.', 'img' => 'colon-flor-alfalfa.jpg'],
+    ['label' => 'Hospedaje rural', 'title' => 'Descanso entre naturaleza', 'copy' => 'Lugares para quedarse cerca de rutas, servicios y anfitriones locales.', 'img' => 'colon-paisaje-09985.jpg'],
+    ['label' => 'Campo abierto', 'title' => 'Ritmo lento y buena vista', 'copy' => 'Pausas escénicas para completar el día sin prisas.', 'img' => 'colon-paisaje-09932.jpg'],
+    ['label' => 'Ruta memorable', 'title' => 'Momentos hechos para compartir', 'copy' => 'Combina gastronomía, servicios y atractivos cercanos en una sola salida.', 'img' => 'colon-vinaltura-3.jpg', 'wide' => true],
   ],
   'turismo-cultural' => [
-    ['label' => 'Tradición', 'title' => 'Mercados, dulces y oficios', 'copy' => 'Encuentra lugares donde la identidad local se vive en cada detalle.', 'img' => 'colon-escuela-telar.jpg'],
-    ['label' => 'Historia', 'title' => 'Haciendas, plazas y memoria', 'copy' => 'Recorridos para conectar arquitectura, relatos y vida cotidiana.', 'img' => 'colon-basilica-soriano.jpg'],
-    ['label' => 'Comunidad', 'title' => 'Cultura con anfitriones locales', 'copy' => 'Haz una ruta con paradas utiles para comer, comprar y aprender.', 'img' => 'colon-parroquia-san-francisco-2.jpg', 'wide' => true],
+    ['label' => 'Oficios', 'title' => 'Telares, manos y tradición', 'copy' => 'Encuentra espacios donde la identidad local se vive en cada detalle.', 'img' => 'colon-escuela-telar.jpg'],
+    ['label' => 'Arquitectura', 'title' => 'Plazas, templos y memoria', 'copy' => 'Recorridos para conectar relatos, fachadas y vida cotidiana.', 'img' => 'colon-basilica-soriano.jpg'],
+    ['label' => 'Comunidad', 'title' => 'Cultura con anfitriones locales', 'copy' => 'Haz una ruta con paradas útiles para comer, comprar y aprender.', 'img' => 'colon-parroquia-san-francisco-2.jpg'],
+    ['label' => 'Paisaje histórico', 'title' => 'Calles con carácter colonense', 'copy' => 'Una mirada amplia a los lugares que dan identidad al municipio.', 'img' => 'colon-tierra-alonso.jpg'],
+    ['label' => 'Patrimonio', 'title' => 'Historias para recorrer despacio', 'copy' => 'Conecta talleres, templos y espacios públicos en una salida tranquila.', 'img' => 'colon-pinal-zamorano.jpg', 'wide' => true],
   ],
   'ecoturismo-y-aventura' => [
-    ['label' => 'Aire libre', 'title' => 'Senderos y paisajes abiertos', 'copy' => 'Opciones para caminar, respirar y descubrir vistas del municipio.', 'img' => 'colon-paisaje-09985.jpg'],
-    ['label' => 'Naturaleza', 'title' => 'Presas, cerros y descanso', 'copy' => 'Lugares para convivir con amigos, familia o pareja.', 'img' => 'colon-panorama.jpg'],
-    ['label' => 'Aventura suave', 'title' => 'Rutas para moverte a tu ritmo', 'copy' => 'Planea una salida con servicios cercanos y puntos de interes.', 'img' => 'colon-tierra-alonso.jpg', 'wide' => true],
+    ['label' => 'Panorama', 'title' => 'Colinas y horizonte abierto', 'copy' => 'Una vista amplia para planear rutas de naturaleza.', 'img' => 'colon-panorama.jpg'],
+    ['label' => 'Campo', 'title' => 'Paisaje productivo y descanso', 'copy' => 'Salidas suaves entre caminos, servicios cercanos y puntos de interés.', 'img' => 'colon-flor-alfalfa.jpg'],
+    ['label' => 'Ruta rural', 'title' => 'Caminos para moverte a tu ritmo', 'copy' => 'Conecta aire libre, vistas y experiencias cercanas.', 'img' => 'colon-vinaltura-2.jpg'],
+    ['label' => 'Miradores', 'title' => 'Pausas con luz de tarde', 'copy' => 'Espacios para bajar el ritmo antes de volver al mapa.', 'img' => 'colon-vinaltura-3.jpg'],
+    ['label' => 'Aventura suave', 'title' => 'Naturaleza para compartir', 'copy' => 'Planea una salida completa entre vistas amplias y puntos cercanos.', 'img' => 'colon-vinaltura.jpg', 'wide' => true],
   ],
   'turismo-religioso' => [
-    ['label' => 'Fe', 'title' => 'Templos y celebraciones', 'copy' => 'Ubica espacios religiosos y fiestas patronales de Colón.', 'img' => 'colon-parroquia-san-francisco-2.jpg'],
-    ['label' => 'Patrimonio', 'title' => 'Arquitectura y tradición', 'copy' => 'Recorridos serenos con valor histórico y espiritual.', 'img' => 'colon-panorama.jpg'],
-    ['label' => 'Peregrinacion', 'title' => 'Una visita cuidada de principio a fin', 'copy' => 'Complementa la ruta con servicios, comida y puntos cercanos.', 'img' => 'colon-escuela-telar.jpg', 'wide' => true],
+    ['label' => 'Atrios y plazas', 'title' => 'Fe alrededor del camino', 'copy' => 'Espacios de encuentro para detenerse antes de continuar.', 'img' => 'colon-escuela-telar.jpg'],
+    ['label' => 'Peregrinación', 'title' => 'Paisajes de llegada', 'copy' => 'Rutas serenas para acompañar una visita espiritual.', 'img' => 'colon-tierra-alonso.jpg'],
+    ['label' => 'Comunidad', 'title' => 'Tradición viva', 'copy' => 'Paradas cercanas para comer, descansar y seguir el recorrido.', 'img' => 'colon-pinal-zamorano.jpg'],
+    ['label' => 'Camino', 'title' => 'Recorridos con calma', 'copy' => 'Puntos para visitar con respeto, tiempo y buena orientación.', 'img' => 'colon-hondonada.jpg'],
+    ['label' => 'Patrimonio', 'title' => 'Una visita de principio a fin', 'copy' => 'Complementa templos, servicios y experiencias locales en una sola ruta.', 'img' => 'colon-paisaje-09932.jpg', 'wide' => true],
   ],
   'turismo-gastronomico' => [
-    ['label' => 'Antojitos', 'title' => 'Sabores de fonda y mercado', 'copy' => 'Paradas casuales para probar recetas locales y antojos de la región.', 'img' => 'colon-vinaltura.jpg'],
-    ['label' => 'Sobremesa', 'title' => 'Restaurantes y cocina local', 'copy' => 'Opciones para comer bien y convertir la visita en experiencia.', 'img' => 'colon-vinaltura-1.jpg'],
-    ['label' => 'Producto regional', 'title' => 'Queso, vino y dulces tradicionales', 'copy' => 'Arma una ruta para llevarte Colón también a casa.', 'img' => 'colon-vinaltura-3.jpg', 'wide' => true],
+    ['label' => 'Cata', 'title' => 'De la copa al recuerdo', 'copy' => 'Productos regionales para probar y llevar a casa.', 'img' => 'colon-vinaltura-3.jpg'],
+    ['label' => 'Panorama', 'title' => 'Mesa con paisaje', 'copy' => 'Una ruta para conectar sabor, campo y anfitriones locales.', 'img' => 'colon-panorama.jpg'],
+    ['label' => 'Mirador', 'title' => 'Sobremesa sin prisa', 'copy' => 'Pausas para disfrutar el camino entre una parada y otra.', 'img' => 'colon-pinal-zamorano.jpg'],
+    ['label' => 'Naturaleza', 'title' => 'Origen que también se prueba', 'copy' => 'Paisajes y productos locales para una salida completa.', 'img' => 'colon-paisaje-09985.jpg'],
+    ['label' => 'Tradición', 'title' => 'Sabores para compartir', 'copy' => 'Arma el día entre desayunos, productos regionales y cenas con identidad.', 'img' => 'colon-escuela-telar.jpg', 'wide' => true],
   ],
 ];
 $defaultRouteCards = [
-  ['label' => 'Experiencias', 'title' => 'Queserías, viñedos y miradores', 'copy' => 'Productos locales y nativos, restaurantes gourmet, balnearios y paseos a caballo.', 'img' => 'colon-vinaltura.jpg', 'href' => $landingRouteUrls['turismo-de-experiencias']],
-  ['label' => 'Turismo Cultural', 'title' => 'Mercados, artesanías e historia', 'copy' => 'Corredores artesanales, museos, mercados, haciendas y recorridos turísticos.', 'img' => 'colon-escuela-telar.jpg', 'href' => $landingRouteUrls['turismo-cultural']],
-  ['label' => 'Ecoturismo y aventura', 'title' => 'Senderos, naturaleza y aire libre', 'copy' => 'Cerros, presas, pesca, camping y rutas para conectar con el paisaje.', 'img' => 'colon-pinal-zamorano.jpg', 'href' => $landingRouteUrls['ecoturismo-y-aventura']],
-  ['label' => 'Turismo religioso', 'title' => 'Fe, peregrinación y patrimonio', 'copy' => 'Iglesias, celebraciones, conventos y recorridos con valor espiritual e histórico.', 'img' => 'colon-basilica-soriano.jpg', 'href' => $landingRouteUrls['turismo-religioso']],
-  ['label' => 'Gastronomía', 'title' => 'De la fonda al restaurante', 'copy' => 'Sabores locales, antojitos y lo mejor de la gastronomía del municipio.', 'img' => 'colon-flor-alfalfa.jpg', 'href' => $landingRouteUrls['turismo-gastronomico'], 'wide' => true],
+  ['label' => 'Experiencias', 'title' => 'Viñedos, producto local y miradores', 'copy' => 'Productos regionales, paisajes y anfitriones para armar una ruta memorable.', 'img' => 'colon-vinaltura-2.jpg', 'href' => $mapRouteUrls['turismo-de-experiencias']],
+  ['label' => 'Turismo Cultural', 'title' => 'Oficios, plazas e historia', 'copy' => 'Corredores artesanales, memoria local y recorridos turísticos.', 'img' => 'colon-escuela-telar.jpg', 'href' => $mapRouteUrls['turismo-cultural']],
+  ['label' => 'Ecoturismo y aventura', 'title' => 'Senderos, montaña y aire libre', 'copy' => 'Cerros, presas, camping y rutas para conectar con el paisaje.', 'img' => 'colon-pinal-zamorano.jpg', 'href' => $mapRouteUrls['ecoturismo-y-aventura']],
+  ['label' => 'Turismo religioso', 'title' => 'Soriano, fe y patrimonio', 'copy' => 'Iglesias, celebraciones, conventos y recorridos con valor espiritual.', 'img' => 'colon-basilica-detalle.jpg', 'href' => $mapRouteUrls['turismo-religioso']],
+  ['label' => 'Gastronomía', 'title' => 'De la fonda al producto regional', 'copy' => 'Sabores locales, antojitos y productos del municipio.', 'img' => 'colon-flor-alfalfa.jpg', 'href' => $mapRouteUrls['turismo-gastronomico']],
+  ['label' => 'Panoramas', 'title' => 'Colón para recorrer sin prisa', 'copy' => 'Combina naturaleza, cultura y servicios en una visita completa.', 'img' => 'colon-paisaje-09985.jpg', 'href' => '#explorar-mapa', 'wide' => true],
 ];
 $routeCards = $routeCardsBySlug[$preloadCat ?? ''] ?? $defaultRouteCards;
-if (!empty($preloadCat) && isset($landingRouteUrls[$preloadCat])) {
+if (!empty($preloadCat) && isset($mapRouteUrls[$preloadCat])) {
   foreach ($routeCards as &$card) {
-    $card['href'] = $card['href'] ?? $landingRouteUrls[$preloadCat];
+    $card['href'] = $card['href'] ?? $mapRouteUrls[$preloadCat];
   }
   unset($card);
 }
