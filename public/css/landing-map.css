@@ -541,7 +541,7 @@
   transition: opacity .25s ease;
 }
 
-.colon-facebook-feed.is-visible iframe {
+.colon-facebook-feed.is-loaded iframe {
   opacity: 1;
   pointer-events: auto;
 }
@@ -576,12 +576,39 @@
   font-size: .98rem;
 }
 
-.colon-facebook-feed.is-visible .colon-facebook-loading,
-.colon-facebook-feed.is-visible .colon-facebook-fallback {
+.colon-facebook-feed.is-loaded .colon-facebook-loading {
   opacity: 0;
   visibility: hidden;
 }
 
+.colon-facebook-feed.is-unavailable {
+  height: auto;
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.96), rgba(248,250,252,.98)),
+    radial-gradient(circle at 50% 18%, rgba(255, 127, 65, .12), transparent 34%);
+}
+
+.colon-facebook-feed.is-unavailable iframe,
+.colon-facebook-feed.is-unavailable .colon-facebook-loading {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.colon-facebook-feed.is-unavailable .colon-facebook-fallback {
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  width: 100%;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
 .colon-facebook-card-link {
   position: relative;
   min-height: 42px;
@@ -630,6 +657,9 @@
   font-weight: 700;
   background: rgba(255, 247, 237, .96);
   box-shadow: 0 14px 30px rgba(23, 32, 45, .10);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
   transition: opacity .2s ease, visibility .2s ease;
 }
 
@@ -638,33 +668,12 @@
   display: block;
 }
 
-.colon-facebook-fallback a,
-.colon-facebook-show {
+.colon-facebook-fallback a {
   color: var(--colon-orange-700);
   font-weight: 900;
   text-decoration: none;
 }
 
-.colon-facebook-show {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 38px;
-  margin: 2px auto 0;
-  padding: 0 16px;
-  border: 1px solid rgba(249, 115, 22, .34);
-  border-radius: 999px;
-  background: #fff;
-  color: var(--colon-orange-700);
-  font: inherit;
-  font-size: .78rem;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.colon-facebook-show:hover {
-  background: var(--colon-orange-50);
-}
 .colon-routes-section {
   padding: clamp(68px, 8vw, 112px) clamp(20px, 7vw, 96px);
 }
@@ -1539,6 +1548,11 @@
     min-height: 430px;
   }
 
+  .colon-facebook-feed.is-unavailable {
+    min-height: 190px;
+    padding: 12px;
+  }
+
   .colon-facebook-feed iframe {
     height: 100%;
   }
@@ -1547,7 +1561,7 @@
     left: 12px;
     right: 12px;
     bottom: 12px;
-    padding: 8px;
+    padding: 12px;
     font-size: .8rem;
   }
 

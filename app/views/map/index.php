@@ -603,15 +603,14 @@ require APP_PATH . '/views/layout/head.php';
             allowfullscreen="true"
             allowtransparency="true"
             allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-            loading="lazy"
+            loading="eager"
             data-facebook-frame></iframe>
           <div class="colon-facebook-loading" aria-hidden="true">
             <span>Facebook</span>
             <strong>Publicaciones recientes</strong>
           </div>
           <div class="colon-facebook-fallback">
-            <span>Si tu navegador bloquea Facebook, abre la pagina completa.</span>
-            <button class="colon-facebook-show" type="button" data-facebook-show>Mostrar feed aqui</button>
+            <span>Facebook no permite mostrar publicaciones en este navegador.</span>
             <a href="<?= e($facebookPageUrl) ?>" target="_blank" rel="noopener">Abrir publicaciones en Facebook</a>
           </div>
         </div>
@@ -1483,12 +1482,15 @@ loadPOIs();
 (() => {
   document.querySelectorAll('.colon-facebook-feed').forEach(feed => {
     const frame = feed.querySelector('[data-facebook-frame]');
-    const button = feed.querySelector('[data-facebook-show]');
+    const timeout = window.setTimeout(() => {
+      if (!feed.classList.contains('is-loaded')) {
+        feed.classList.add('is-unavailable');
+      }
+    }, 6500);
 
-    frame?.addEventListener('load', () => feed.classList.add('is-ready'));
-    button?.addEventListener('click', () => {
-      feed.classList.add('is-visible');
-      frame?.focus?.();
+    frame?.addEventListener('load', () => {
+      window.clearTimeout(timeout);
+      feed.classList.add('is-loaded');
     });
   });
 })();
