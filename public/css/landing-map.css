@@ -506,8 +506,8 @@
   position: relative;
   width: 100%;
   max-width: min(500px, 100%);
-  height: clamp(500px, 52vw, 560px);
-  min-height: 500px;
+  height: clamp(430px, 46vw, 560px);
+  min-height: 430px;
   margin-inline: auto;
   overflow: hidden;
   border: 1px solid rgba(226, 232, 240, .9);
@@ -537,11 +537,13 @@
   border: 0;
   background: #fff;
   opacity: 0;
+  pointer-events: none;
   transition: opacity .25s ease;
 }
 
-.colon-facebook-feed.is-loaded iframe {
+.colon-facebook-feed.is-visible iframe {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .colon-facebook-loading {
@@ -574,8 +576,8 @@
   font-size: .98rem;
 }
 
-.colon-facebook-feed.is-loaded .colon-facebook-loading,
-.colon-facebook-feed.is-loaded .colon-facebook-fallback {
+.colon-facebook-feed.is-visible .colon-facebook-loading,
+.colon-facebook-feed.is-visible .colon-facebook-fallback {
   opacity: 0;
   visibility: hidden;
 }
@@ -615,7 +617,7 @@
   left: 22px;
   right: 22px;
   bottom: 22px;
-  z-index: 2;
+  z-index: 5;
   display: grid;
   gap: 6px;
   margin: 0;
@@ -636,10 +638,32 @@
   display: block;
 }
 
-.colon-facebook-fallback a {
+.colon-facebook-fallback a,
+.colon-facebook-show {
   color: var(--colon-orange-700);
   font-weight: 900;
   text-decoration: none;
+}
+
+.colon-facebook-show {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 38px;
+  margin: 2px auto 0;
+  padding: 0 16px;
+  border: 1px solid rgba(249, 115, 22, .34);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--colon-orange-700);
+  font: inherit;
+  font-size: .78rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.colon-facebook-show:hover {
+  background: var(--colon-orange-50);
 }
 .colon-routes-section {
   padding: clamp(68px, 8vw, 112px) clamp(20px, 7vw, 96px);
@@ -1511,8 +1535,8 @@
   }
 
   .colon-facebook-feed {
-    height: 500px;
-    min-height: 500px;
+    height: 430px;
+    min-height: 430px;
   }
 
   .colon-facebook-feed iframe {

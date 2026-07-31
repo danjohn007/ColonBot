@@ -52,7 +52,7 @@ require APP_PATH . '/views/layout/head.php';
   .visitor-hero {
     background:
       linear-gradient(110deg, rgba(234, 88, 12, .96), rgba(249, 115, 22, .88)),
-      url("<?= asset('img/landing/queso-vino.jpeg') ?>") center / cover;
+      url("<?= asset('img/landing/colon-vinaltura.jpg') ?>") center / cover;
   }
   .visitor-hero h1 { color: #fff; }
   .media-tile {

@@ -82,7 +82,7 @@
           <div>
             <p style="font-size: 16px; font-weight: 700; margin-bottom: 0.75rem; color: #ffffff;">Redes Sociales Oficiales</p>
             <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-              <a href="https://www.facebook.com/MunicipioColonOficial" target="_blank" rel="noopener" style="color: #d288ed; font-size: 24px; transition: color 0.3s ease;" onmouseover="this.style.color='#ff7f41'" onmouseout="this.style.color='#d288ed'" title="Facebook">
+              <a href="https://www.facebook.com/colonteconquistara" target="_blank" rel="noopener" style="color: #d288ed; font-size: 24px; transition: color 0.3s ease;" onmouseover="this.style.color='#ff7f41'" onmouseout="this.style.color='#d288ed'" title="Facebook">
                 <i class="fab fa-facebook-f"></i>
               </a>
               <a href="https://www.instagram.com/gobiernodecolon/" target="_blank" rel="noopener" style="color: #d288ed; font-size: 24px; transition: color 0.3s ease;" onmouseover="this.style.color='#ff7f41'" onmouseout="this.style.color='#d288ed'" title="Instagram">

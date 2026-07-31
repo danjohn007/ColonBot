@@ -64,7 +64,7 @@ define('DB_CHARSET',  'utf8mb4');
 
 // ─── Aplicación ────────────────────────────────────────────────────────────
 define('APP_NAME',    'Plataforma Turística – Colón');
-define('APP_VERSION', '1.0.3');
+define('APP_VERSION', '1.0.4');
 define('APP_ENV',     getenv('APP_ENV') ?: 'production'); // development | production
 
 // ─── Sesiones ──────────────────────────────────────────────────────────────

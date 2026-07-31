@@ -80,7 +80,7 @@ require APP_PATH . '/views/layout/head.php';
           </a>
 
           <a href="<?= url($publicLoginPrefix . 'registro/prestador') ?>" class="colon-login-banner colon-login-banner--provider">
-            <img src="<?= asset('img/landing/noche-restaurante.jpeg') ?>" alt="">
+            <img src="<?= asset('img/landing/colon-hondonada.jpg') ?>" alt="">
             <span class="colon-login-banner-overlay"></span>
             <span class="colon-login-banner-content">
               <small>Prestadores</small>

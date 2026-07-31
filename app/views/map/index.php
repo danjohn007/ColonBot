@@ -581,11 +581,8 @@ require APP_PATH . '/views/layout/head.php';
     <div class="colon-facebook-widget reveal-up">
       <div class="colon-facebook-card">
         <div class="colon-facebook-feed">
-          <div class="colon-facebook-loading" aria-hidden="true">
-            <span>Facebook</span>
-            <strong>Cargando publicaciones...</strong>
-          </div>
           <iframe
+            class="colon-facebook-frame"
             title="Publicaciones de Facebook de Col&oacute;n te conquistar&aacute;"
             src="<?= e($facebookPluginUrl) ?>"
             width="<?= (int) $facebookPluginWidth ?>"
@@ -593,11 +590,17 @@ require APP_PATH . '/views/layout/head.php';
             scrolling="yes"
             frameborder="0"
             allowfullscreen="true"
+            allowtransparency="true"
             allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
             loading="lazy"
-            onload="this.closest('.colon-facebook-feed')?.classList.add('is-loaded')"></iframe>
+            data-facebook-frame></iframe>
+          <div class="colon-facebook-loading" aria-hidden="true">
+            <span>Facebook</span>
+            <strong>Publicaciones recientes</strong>
+          </div>
           <div class="colon-facebook-fallback">
-            <span>No pudimos mostrar el muro dentro de la p&aacute;gina.</span>
+            <span>Si tu navegador bloquea Facebook, abre la pagina completa.</span>
+            <button class="colon-facebook-show" type="button" data-facebook-show>Mostrar feed aqui</button>
             <a href="<?= e($facebookPageUrl) ?>" target="_blank" rel="noopener">Abrir publicaciones en Facebook</a>
           </div>
         </div>
@@ -1466,6 +1469,18 @@ if (PRELOAD_CAT) {
 }
 updateFavCount();
 loadPOIs();
+(() => {
+  document.querySelectorAll('.colon-facebook-feed').forEach(feed => {
+    const frame = feed.querySelector('[data-facebook-frame]');
+    const button = feed.querySelector('[data-facebook-show]');
+
+    frame?.addEventListener('load', () => feed.classList.add('is-ready'));
+    button?.addEventListener('click', () => {
+      feed.classList.add('is-visible');
+      frame?.focus?.();
+    });
+  });
+})();
 
 (() => {
   const slides = Array.from(document.querySelectorAll('.colon-hero-slide'));

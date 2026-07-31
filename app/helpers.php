@@ -29,7 +29,7 @@ function asset(string $path): string
 {
     $path = ltrim($path, '/');
     $url = BASE_URL . '/assets/' . $path;
-    return preg_match('/\.(css|js)$/i', $path)
+    return preg_match('/\.(css|js|jpe?g|png|gif|webp|svg)$/i', $path)
         ? $url . '?v=' . rawurlencode(APP_VERSION)
         : $url;
 }
