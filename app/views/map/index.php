@@ -570,8 +570,7 @@ require APP_PATH . '/views/layout/head.php';
     'small_header' => 'false',
     'adapt_container_width' => 'true',
     'hide_cover' => 'false',
-    'show_facepile' => 'false',
-    'show_posts' => 'true',
+    'show_facepile' => 'true',
     'locale' => 'es_LA',
   ], '', '&', PHP_QUERY_RFC3986);
 ?>
@@ -591,7 +590,7 @@ require APP_PATH . '/views/layout/head.php';
     </div>
     <div class="colon-facebook-widget reveal-up">
       <div class="colon-facebook-card">
-        <div class="colon-facebook-feed">
+        <div class="colon-facebook-feed" data-facebook-diagnostics-url="<?= e(url('mapa/facebook-diagnostico')) ?>">
           <iframe
             class="colon-facebook-frame"
             title="Publicaciones de Facebook de Col&oacute;n te conquistar&aacute;"
@@ -1482,15 +1481,55 @@ loadPOIs();
 (() => {
   document.querySelectorAll('.colon-facebook-feed').forEach(feed => {
     const frame = feed.querySelector('[data-facebook-frame]');
+    const diagnosticsUrl = feed.dataset.facebookDiagnosticsUrl;
+    let reported = false;
+
+    function reportFacebookEmbed(reason) {
+      if (reported || !diagnosticsUrl) return;
+      reported = true;
+      const payload = new URLSearchParams({
+        reason,
+        frame_src: frame?.src || '',
+        page_url: window.location.href,
+        viewport: `${window.innerWidth}x${window.innerHeight}`,
+        user_agent: navigator.userAgent,
+      });
+
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(diagnosticsUrl, payload);
+        return;
+      }
+
+      fetch(diagnosticsUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: payload,
+        keepalive: true,
+      }).catch(() => {});
+    }
+
     const timeout = window.setTimeout(() => {
       if (!feed.classList.contains('is-loaded')) {
         feed.classList.add('is-unavailable');
+        reportFacebookEmbed('timeout_without_iframe_load');
       }
-    }, 6500);
+    }, 9000);
 
     frame?.addEventListener('load', () => {
       window.clearTimeout(timeout);
       feed.classList.add('is-loaded');
+      window.setTimeout(() => {
+        if ((frame.offsetHeight || 0) < 220 || (frame.offsetWidth || 0) < 260) {
+          feed.classList.add('is-unavailable');
+          reportFacebookEmbed('iframe_loaded_with_invalid_size');
+        }
+      }, 1200);
+    });
+
+    frame?.addEventListener('error', () => {
+      window.clearTimeout(timeout);
+      feed.classList.add('is-unavailable');
+      reportFacebookEmbed('iframe_error_event');
     });
   });
 })();

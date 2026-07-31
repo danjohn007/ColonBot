@@ -122,6 +122,34 @@ class MapController extends Controller
         $this->json(['ok' => true]);
     }
 
+    public function facebookDiagnostic(): void
+    {
+        $trim = static fn(string $value, int $max = 300): string => substr(trim($value), 0, $max);
+        $reason = $trim((string)($_POST['reason'] ?? 'unknown'), 80);
+        $frameSrc = $trim((string)($_POST['frame_src'] ?? ''), 600);
+        $pageUrl = $trim((string)($_POST['page_url'] ?? ''), 600);
+        $viewport = $trim((string)($_POST['viewport'] ?? ''), 40);
+        $ua = $trim((string)($_POST['user_agent'] ?? ($_SERVER['HTTP_USER_AGENT'] ?? '')), 300);
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+
+        $message = sprintf(
+            'Facebook Page Plugin diagnostic: reason=%s viewport=%s ip=%s page=%s frame=%s ua=%s',
+            $reason,
+            $viewport,
+            $ip,
+            $pageUrl,
+            $frameSrc,
+            $ua
+        );
+
+        if (function_exists('logError')) {
+            logError($message, 'app/views/map/index.php', 0, 'warning');
+        } else {
+            error_log($message);
+        }
+
+        $this->json(['ok' => true]);
+    }
     /**
      * Obtiene las coordenadas del límite de Colón desde Overpass API (server-side)
      * OSM Relation ID del municipio de Colón, Querétaro: 5605684

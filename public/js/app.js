@@ -35,6 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
 // ─── PWA Service Worker registration ──────────────────────────────────────
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    navigator.serviceWorker.getRegistrations?.().then(registrations => {
+      registrations.forEach(registration => {
+        if (registration.active?.scriptURL?.endsWith('/sw.js')) {
+          registration.unregister();
+        }
+      });
+    }).catch(() => {});
   });
 }

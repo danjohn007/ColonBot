@@ -32,6 +32,8 @@ $router = new Router();
 $router->get('',                        'MapController',       'index');
 $router->get('mapa',                    'MapController',       'index');
 $router->get('mapa/poi',                'MapController',       'poi');
+$router->post('mapa/facebook-diagnostico', 'MapController',       'facebookDiagnostic');
+$router->post('landing/mapa/facebook-diagnostico', 'MapController', 'facebookDiagnostic');
 $router->get('mapa/{id}',              'MapController',       'index');
 $router->get('landing/mapa',            'MapController',       'index');
 $router->get('landing/mapa/poi',        'MapController',       'poi');
