@@ -1,5 +1,10 @@
 <!DOCTYPE html>
-<html lang="es" class="scroll-smooth">
+<?php
+$requestPath = trim(rawurldecode((string)(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '')), '/');
+$basePath = trim(rawurldecode((string)(parse_url(BASE_URL, PHP_URL_PATH) ?? '')), '/');
+$isPublicRoot = $requestPath === $basePath;
+?>
+<html lang="es" class="scroll-smooth<?= $isPublicRoot ? '' : ' page-with-scrollbar' ?>">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">

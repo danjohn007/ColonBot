@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= $pageTitle ?></title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>html { overflow-y: scroll; }</style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
   <div class="text-center">

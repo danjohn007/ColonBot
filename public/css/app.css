@@ -32,6 +32,10 @@ body {
   overflow-x: hidden;
 }
 
+html.page-with-scrollbar {
+  overflow-y: scroll;
+}
+
 .site-login-label-short {
   display: none;
 }
