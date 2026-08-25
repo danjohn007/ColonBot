@@ -5,24 +5,40 @@ require APP_PATH . '/views/layout/head.php';
 <?php require APP_PATH . '/views/layout/navbar.php'; ?>
 
 <main class="max-w-6xl mx-auto px-4 py-8 mb-24">
-  <div class="flex items-center justify-between mb-6">
+  <div class="flex flex-col md:flex-row gap-6">
+    <!-- Sidebar lateral -->
+    <aside class="md:w-56 md:shrink-0">
+      <nav class="flex md:flex-col gap-2 md:sticky md:top-4">
+        <button onclick="showPanel('contactos')" id="tab-btn-contactos" class="crm-tab w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition bg-blue-600 text-white">
+          📇 Contactos
+        </button>
+        <button onclick="showPanel('mensajes')" id="tab-btn-mensajes" class="crm-tab w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition bg-gray-100 text-gray-700 hover:bg-blue-100">
+          💬 Mensajes
+        </button>
+      </nav>
+    </aside>
+
+    <!-- Contenido -->
+    <section class="flex-1 min-w-0">
+      <!-- Business selector (compartido entre paneles Contactos y Mensajes) -->
+      <div class="mb-6">
+        <label class="label block text-sm font-medium text-gray-700 mb-1">Seleccionar negocio</label>
+        <select id="business-select" onchange="loadContacts(); loadHistorial(); actualizarVistaPrevia()" class="input w-full sm:w-72 px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
+          <option value="">-- Selecciona un negocio --</option>
+          <?php foreach ($businesses as $b): ?>
+          <option value="<?= $b['id'] ?>"><?= e($b['name']) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+
+      <div id="panel-contactos">
+        <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold text-gray-900">📇 CRM - Mis Contactos</h1>
     <div class="flex gap-2">
       <button onclick="openAddModal()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition">
         + Nuevo contacto
       </button>
     </div>
-  </div>
-
-  <!-- Business selector -->
-  <div class="mb-6">
-    <label class="label block text-sm font-medium text-gray-700 mb-1">Seleccionar negocio</label>
-    <select id="business-select" onchange="loadContacts()" class="input w-full sm:w-72 px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
-      <option value="">-- Selecciona un negocio --</option>
-      <?php foreach ($businesses as $b): ?>
-      <option value="<?= $b['id'] ?>"><?= e($b['name']) ?></option>
-      <?php endforeach; ?>
-    </select>
   </div>
 
   <!-- Category filter tabs -->
@@ -56,6 +72,82 @@ require APP_PATH . '/views/layout/head.php';
         </tbody>
       </table>
     </div>
+      </div>
+      </div>
+
+      <!-- Panel Mensajes (apartado lateral "Mensajes") -->
+      <div id="panel-mensajes" class="hidden">
+        <div class="flex items-center justify-between mb-6">
+          <h1 class="text-2xl font-bold text-gray-900">💬 Mensajes</h1>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <!-- Formulario -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
+            <div>
+              <label class="label block text-sm font-medium text-gray-700 mb-1">Nombre de la campaña *</label>
+              <input type="text" id="msg-campana-nombre" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="Ej. Promoción de verano">
+            </div>
+
+            <div>
+              <label class="label block text-sm font-medium text-gray-700 mb-1">Enviar a</label>
+              <select id="msg-segmento" onchange="onSegmentoChange()" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm">
+                <option value="todos">Todos los contactos</option>
+                <option value="prospecto_sin_historial">Prospectos sin historial</option>
+                <option value="prospecto_recurrente">Prospectos recurrentes</option>
+                <option value="cliente">Clientes</option>
+                <option value="cliente_frecuente">Clientes frecuentes</option>
+                <option value="individual">Un contacto individual</option>
+              </select>
+            </div>
+
+            <!-- Búsqueda individual -->
+            <div id="msg-individual-box" class="hidden space-y-2">
+              <label class="label block text-sm font-medium text-gray-700 mb-1">Buscar contacto (nombre o WhatsApp)</label>
+              <input type="text" id="msg-buscar-input" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" placeholder="Escribe nombre o número..." oninput="buscarContactoIndividual()">
+              <div id="msg-buscar-results" class="border border-gray-200 rounded-xl max-h-48 overflow-y-auto divide-y divide-gray-100"></div>
+            </div>
+
+            <div>
+              <label class="label block text-sm font-medium text-gray-700 mb-1">Mensaje (solo texto) *</label>
+              <textarea id="msg-mensaje" rows="4" class="input w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm" maxlength="4000" oninput="actualizarVistaPrevia()" placeholder="Escribe aquí tu mensaje..."></textarea>
+              <p class="text-xs text-gray-400 mt-1 text-right"><span id="msg-caracteres">0</span>/4000</p>
+            </div>
+
+            <p class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">⚠️ No se permiten mensajes de prueba (palabras como "prueba" o "mensaje de prueba").</p>
+
+            <button onclick="enviarMensaje()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition">
+              📨 Enviar mensaje
+            </button>
+            <p id="msg-enviar-nota" class="text-xs text-gray-500">El mensaje se encolará para su envío por WhatsApp. No se contacta a Meta en este momento.</p>
+          </div>
+
+          <!-- Vista previa -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 h-fit">
+            <h3 class="text-sm font-semibold text-gray-800 mb-3">👁️ Vista previa</h3>
+            <div id="msg-preview-target" class="text-xs text-gray-500 mb-2">Destinatario: —</div>
+            <div class="bg-[#e5ddd5] rounded-2xl p-4">
+              <div class="bg-[#dcf8c6] rounded-xl rounded-tr-none px-3 py-2 shadow-sm max-w-[85%] ml-auto">
+                <p id="msg-preview-text" class="text-sm text-gray-800 whitespace-pre-wrap">Escribe un mensaje para ver la vista previa...</p>
+                <p class="text-[10px] text-gray-500 text-right mt-1">Vista previa</p>
+              </div>
+            </div>
+            <div id="msg-preview-info" class="text-xs text-gray-400 mt-3">Selecciona el negocio y el segmento para calcular destinatarios.</div>
+          </div>
+        </div>
+
+        <!-- Historial -->
+        <div class="mt-8 bg-white rounded-2xl shadow-sm border border-gray-100">
+          <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <h3 class="text-sm font-semibold text-gray-800">📜 Historial de campañas / envíos</h3>
+            <button onclick="loadHistorial()" class="text-xs text-blue-600 hover:underline">↻ Refrescar</button>
+          </div>
+          <div id="msg-historial" class="p-5">
+            <p class="text-sm text-gray-400">Selecciona un negocio para ver el historial.</p>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 </main>
 
@@ -441,6 +533,300 @@ function addPurchaseEvent(e) {
     }
   })
   .catch(err => alert('Error del servidor: ' + err.message));
+}
+
+// ═══════════════════ Módulo Mensajes ═══════════════════
+
+let selectedContacto = null;
+let msgBuscarTimer = null;
+
+function showPanel(name) {
+  document.getElementById('panel-contactos').classList.toggle('hidden', name !== 'contactos');
+  document.getElementById('panel-mensajes').classList.toggle('hidden', name !== 'mensajes');
+
+  const tabs = document.querySelectorAll('.crm-tab');
+  tabs.forEach(b => {
+    const active = b.id === ('tab-btn-' + name);
+    b.classList.toggle('bg-blue-600', active);
+    b.classList.toggle('text-white', active);
+    b.classList.toggle('bg-gray-100', !active);
+    b.classList.toggle('text-gray-700', !active);
+  });
+
+  if (name === 'mensajes') {
+    loadHistorial();
+    actualizarVistaPrevia();
+  }
+}
+
+function onSegmentoChange() {
+  const seg = document.getElementById('msg-segmento').value;
+  document.getElementById('msg-individual-box').classList.toggle('hidden', seg !== 'individual');
+  if (seg !== 'individual') {
+    selectedContacto = null;
+    document.getElementById('msg-buscar-results').innerHTML = '';
+  }
+  actualizarVistaPrevia();
+}
+
+function buscarContactoIndividual() {
+  const q = document.getElementById('msg-buscar-input').value.trim();
+  const box = document.getElementById('msg-buscar-results');
+  const businessId = document.getElementById('business-select').value;
+
+  if (!businessId) { box.innerHTML = '<p class="text-xs text-gray-400 px-3 py-2">Primero selecciona un negocio.</p>'; return; }
+  if (q.length < 2) { box.innerHTML = ''; return; }
+
+  clearTimeout(msgBuscarTimer);
+  msgBuscarTimer = setTimeout(() => {
+    fetch(BASE_URL + '/admin/crm/buscar-contacto?business_id=' + encodeURIComponent(businessId) + '&q=' + encodeURIComponent(q))
+      .then(r => r.json())
+      .then(list => {
+        if (!Array.isArray(list)) { box.innerHTML = '<p class="text-xs text-red-500 px-3 py-2">Error en la búsqueda.</p>'; return; }
+        if (list.length === 0) { box.innerHTML = '<p class="text-xs text-gray-400 px-3 py-2">Sin resultados.</p>'; return; }
+        const found = {};
+        var opts = list.filter(c => {
+          if (found[c.id]) return false;
+          found[c.id] = true;
+          return true;
+        });
+        box.innerHTML = opts.map(c => {
+          const phone = c.phone || c.wa_id || '—';
+          const display = (c.name || 'Contacto') + ' (' + phone + ')';
+          const sel = (selectedContacto && selectedContacto.id == c.id) ? 'checked' : '';
+          return '<label class="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-50">' +
+            '<input type="radio" name="msg-contacto" value="' + c.id + '" data-phone="' + escHtml(phone) + '" data-name="' + escHtml(c.name || 'Contacto') + '" ' + sel + ' onchange="seleccionarContacto(this)">' +
+            '<span class="text-sm text-gray-700 truncate">' + escHtml(display) + '</span>' +
+            '</label>';
+        }).join('');
+      })
+      .catch(() => { box.innerHTML = '<p class="text-xs text-red-500 px-3 py-2">Error de red.</p>'; });
+  }, 350);
+}
+
+function seleccionarContacto(input) {
+  const phone = input.dataset.phone || '';
+  const name = input.dataset.name || 'Contacto';
+  selectedContacto = { id: input.value, phone: phone, name: name };
+  actualizarVistaPrevia();
+}
+
+function actualizarVistaPrevia() {
+  const msj = document.getElementById('msg-mensaje').value;
+  document.getElementById('msg-caracteres').textContent = msj.length;
+  document.getElementById('msg-preview-text').textContent = msj || 'Escribe un mensaje para ver la vista previa...';
+
+  const businessId = document.getElementById('business-select').value;
+  const seg = document.getElementById('msg-segmento').value;
+  const box = document.getElementById('msg-preview-target');
+  const info = document.getElementById('msg-preview-info');
+
+  if (!businessId) {
+    box.textContent = 'Destinatario: —';
+    info.textContent = 'Selecciona el negocio para continuar.';
+    return;
+  }
+
+  const labels = {
+    'todos': 'Todos los contactos',
+    'prospecto_sin_historial': 'Prospectos sin historial',
+    'prospecto_recurrente': 'Prospectos recurrentes',
+    'cliente': 'Clientes',
+    'cliente_frecuente': 'Clientes frecuentes',
+  };
+
+  if (seg === 'individual') {
+    if (selectedContacto && selectedContacto.id) {
+      box.textContent = 'Destinatario: ' + (selectedContacto.name || 'Contacto') + ' (' + selectedContacto.phone + ')';
+      info.textContent = 'La campaña se encolará a un único contacto.';
+    } else {
+      box.textContent = 'Destinatario: selecciona un contacto';
+      info.textContent = 'Usa la búsqueda para elegir un solo contacto por nombre o WhatsApp.';
+    }
+    return;
+  }
+
+  box.textContent = 'Destinatario: ' + (labels[seg] || seg);
+  fetch(BASE_URL + '/admin/crm/' + encodeURIComponent(businessId) + '/list?category=' + encodeURIComponent(seg === 'todos' ? '' : seg))
+    .then(r => r.json())
+    .then(contacts => {
+      if (Array.isArray(contacts)) {
+        info.textContent = 'Se encolarán mensajes a ' + contacts.length + ' contacto(s) con WhatsApp del segmento "' + (labels[seg] || seg) + '".';
+      }
+    })
+    .catch(() => { info.textContent = 'No se pudo calcular destinatarios.'; });
+}
+
+function validarTextoPermitido(texto) {
+  const t = texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  const frasesProhibidas = ['mensaje de prueba', 'mensaje de test', 'mensajeprueba', 'prueba', 'pruebas', 'probando'];
+  if (frasesProhibidas.some(p => t.includes(p))) return false;
+  if (/\btest(?:ing)?\b/.test(t)) return false;
+  return true;
+}
+
+function enviarMensaje() {
+  const businessId = document.getElementById('business-select').value;
+  if (!businessId) { alert('Primero selecciona un negocio.'); return; }
+
+  const nombre = document.getElementById('msg-campana-nombre').value.trim();
+  if (!nombre) { alert('El nombre de la campaña es obligatorio.'); return; }
+
+  const mensaje = document.getElementById('msg-mensaje').value.trim();
+  if (!mensaje) { alert('Escribe un mensaje.'); return; }
+
+  if (!validarTextoPermitido(nombre) || !validarTextoPermitido(mensaje)) {
+    alert('No se permiten mensajes de prueba (palabras como "prueba" o "mensaje de prueba").');
+    return;
+  }
+
+  const segmento = document.getElementById('msg-segmento').value;
+  let contactId = 0;
+  if (segmento === 'individual') {
+    if (!selectedContacto || !selectedContacto.id) {
+      alert('Busca y selecciona un contacto individual.'); return;
+    }
+    contactId = selectedContacto.id;
+  }
+
+  const body = new URLSearchParams();
+  body.append('_csrf', CSRF);
+  body.append('business_id', businessId);
+  body.append('nombre', nombre);
+  body.append('mensaje', mensaje);
+  body.append('segmento', segmento);
+  if (contactId) body.append('contact_id', contactId);
+
+  fetch(BASE_URL + '/admin/crm/mensajes/crear', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  })
+  .then(r => {
+    if (!r.ok) {
+      return r.text().then(t => {
+        let msg = 'Error del servidor';
+        try { const j = JSON.parse(t); msg = j.error || msg; } catch (e) {}
+        throw new Error(msg);
+      });
+    }
+    return r.json();
+  })
+  .then(d => {
+    if (d.ok) {
+      document.getElementById('msg-campana-nombre').value = '';
+      document.getElementById('msg-mensaje').value = '';
+      selectedContacto = null;
+      document.getElementById('msg-buscar-results').innerHTML = '';
+      actualizarVistaPrevia();
+      loadHistorial();
+      alert('Campaña creada y ' + d.total + ' envío(s) encolado(s).');
+    } else {
+      alert(d.error || 'Error al crear la campaña');
+    }
+  })
+  .catch(err => alert(err.message));
+}
+
+function segmentoLabel(seg) {
+  const labels = {
+    'todos': 'Todos',
+    'prospecto_sin_historial': 'Prospectos sin historial',
+    'prospecto_recurrente': 'Prospectos recurrentes',
+    'cliente': 'Clientes',
+    'cliente_frecuente': 'Clientes frecuentes',
+    'individual': 'Contacto individual',
+  };
+  return labels[seg] || seg;
+}
+
+function estadoClase(estado) {
+  const map = {
+    'pendiente': 'bg-gray-100 text-gray-700',
+    'procesando': 'bg-blue-100 text-blue-700',
+    'aceptado_meta': 'bg-purple-100 text-purple-700',
+    'enviado': 'bg-indigo-100 text-indigo-700',
+    'entregado': 'bg-green-100 text-green-700',
+    'leido': 'bg-teal-100 text-teal-700',
+    'error': 'bg-red-100 text-red-700',
+  };
+  return map[estado] || 'bg-gray-100 text-gray-700';
+}
+
+function loadHistorial() {
+  const businessId = document.getElementById('business-select').value;
+  const cont = document.getElementById('msg-historial');
+  if (!businessId) {
+    cont.innerHTML = '<p class="text-sm text-gray-400">Selecciona un negocio para ver el historial.</p>';
+    return;
+  }
+
+  cont.innerHTML = '<p class="text-sm text-gray-400">Cargando historial...</p>';
+  fetch(BASE_URL + '/admin/crm/mensajes/historial?business_id=' + encodeURIComponent(businessId))
+    .then(r => r.json())
+    .then(campanas => {
+      if (!Array.isArray(campanas) || campanas.length === 0) {
+        cont.innerHTML = '<p class="text-sm text-gray-400">Sin campañas registradas para este negocio.</p>';
+        return;
+      }
+      cont.innerHTML = campanas.map(c => {
+        const estados = [
+          ['pendiente', c.pendientes], ['procesando', c.procesando], ['aceptado_meta', c.aceptados],
+          ['enviado', c.enviados], ['entregado', c.entregados], ['leido', c.leidos], ['error', c.errores]
+        ].filter(x => parseInt(x[1] || 0, 10) > 0);
+        const chips = estados.length
+          ? estados.map(e => '<span class="inline-block text-[10px] px-2 py-0.5 rounded-full ' + estadoClase(e[0]) + '">' + e[0].replace('_', ' ') + ' ' + e[1] + '</span>').join(' ')
+          : '<span class="text-[10px] text-gray-400">sin envíos</span>';
+
+        return '<div class="border border-gray-200 rounded-xl p-4 mb-2">' +
+          '<div class="flex flex-wrap items-center justify-between gap-2">' +
+            '<div>' +
+              '<p class="text-sm font-semibold text-gray-800">' + escHtml(c.nombre) + '</p>' +
+              '<p class="text-xs text-gray-400 mt-0.5">' + segmentoLabel(c.segmento) + ' · ' + (c.total_destinatarios || 0) + ' destinatarios · ' + escHtml(c.creado_en || '') + '</p>' +
+            '</div>' +
+            '<div class="flex flex-wrap gap-1">' + chips + '</div>' +
+          '</div>' +
+          '<p class="text-xs text-gray-500 mt-2 whitespace-pre-wrap">' + escHtml(c.mensaje) + '</p>' +
+          '<button class="text-xs text-blue-600 hover:underline mt-2" onclick="toggleEnvios(' + c.id_campana + ', this)">Ver envíos</button>' +
+          '<div class="msg-envios hidden mt-2" data-campana="' + c.id_campana + '"></div>' +
+        '</div>';
+      }).join('');
+    })
+    .catch(() => { cont.innerHTML = '<p class="text-sm text-red-500">Error al cargar el historial.</p>'; });
+}
+
+function toggleEnvios(idCampana, btn) {
+  const cont = btn.parentNode.querySelector('.msg-envios');
+  if (!cont) return;
+  if (!cont.classList.contains('hidden')) {
+    cont.classList.add('hidden');
+    return;
+  }
+
+  if (!cont.dataset.loaded) {
+    fetch(BASE_URL + '/admin/crm/mensajes/' + idCampana + '/detalle')
+      .then(r => r.json())
+      .then(envios => {
+        if (!Array.isArray(envios)) {
+          cont.innerHTML = '<p class="text-xs text-red-500">Error al cargar envíos.</p>';
+        } else if (envios.length === 0) {
+          cont.innerHTML = '<p class="text-xs text-gray-400">Sin envíos registrados.</p>';
+        } else {
+          cont.innerHTML = '<div class="max-h-56 overflow-y-auto divide-y divide-gray-100 border border-gray-100 rounded-lg">' +
+            envios.map(e =>
+              '<div class="flex items-center justify-between px-3 py-2 text-xs">' +
+                '<span class="text-gray-700 truncate">' + escHtml(e.contacto_nombre || 'Contacto') + ' (' + escHtml(e.whatsapp || '—') + ')</span>' +
+                '<span class="ml-2 px-2 py-0.5 rounded-full ' + estadoClase(e.estado) + '">' + e.estado.replace('_', ' ') + '</span>' +
+              '</div>'
+            ).join('') + '</div>';
+        }
+        cont.dataset.loaded = '1';
+        cont.classList.remove('hidden');
+      })
+      .catch(() => { cont.innerHTML = '<p class="text-xs text-red-500">Error de red.</p>'; });
+    return;
+  }
+  cont.classList.remove('hidden');
 }
 </script>
 

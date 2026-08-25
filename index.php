@@ -98,6 +98,10 @@ $router->post('admin/crm/{id}/upgrade', 'CrmController',       'upgradeToCliente
 $router->post('admin/crm/{id}/compra',  'CrmController',       'addPurchase');
 $router->get('admin/crm/{id}/whatsapp', 'CrmController',       'sendWhatsapp');
 $router->get('admin/crm/{id}/metrics',  'CrmController',       'metrics');
+$router->get('admin/crm/buscar-contacto',        'CrmController', 'buscarContacto');
+$router->post('admin/crm/mensajes/crear',        'CrmController', 'crearCampana');
+$router->get('admin/crm/mensajes/historial',     'CrmController', 'historialCampanas');
+$router->get('admin/crm/mensajes/{id}/detalle',  'CrmController', 'detalleCampana');
 
 // ─── Promociones ──────────────────────────────────────────────────
 $router->get('admin/promociones',             'PromotionController', 'index');

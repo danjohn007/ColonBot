@@ -70,6 +70,108 @@ class ContactModel extends Model
         );
     }
 
+    /**
+     * Busca contactos por nombre o WhatsApp (phone / wa_id).
+     */
+    public function search(int $businessId, string $q, int $limit = 20): array
+    {
+        $q   = trim($q);
+        $lim = max(1, min(50, $limit));
+        if ($q === '') {
+            return [];
+        }
+
+        $like = '%' . $q . '%';
+
+        // Búsqueda en contactos con tabla
+        $contacts = $this->query(
+            "SELECT c.id, c.wa_id, c.name, c.email, c.phone, c.category, c.source,
+                    c.total_visits, c.total_purchases AS total_spent, c.last_contact_at
+             FROM contacts c
+             WHERE c.business_id = ?
+               AND (c.name LIKE ? 
+                    OR c.phone LIKE ?
+                    OR c.wa_id LIKE ?)
+             ORDER BY c.updated_at DESC
+             LIMIT {$lim}",
+            [$businessId, $like, $like, $like]
+        );
+
+        $normalized = [];
+        $normalize  = function (string $s): string {
+            $s = mb_strtolower($s, 'UTF-8');
+            $s = strtr($s, ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u', 'ñ' => 'n']);
+            return $s;
+        };
+        $qNorm = $normalize($q);
+
+        // Búsqueda en sesiones de chatbot (prospectos WhatsApp) no presentes en contacts
+        $chatbot = $this->query(
+            "SELECT cs.id AS chatbot_session_id, cs.wa_id, cs.last_message AS notes,
+                    cs.category AS session_category, cs.session_count, cs.purchase_count, cs.updated_at
+             FROM chatbot_sessions cs
+             WHERE cs.wa_id LIKE ?
+                OR cs.last_message LIKE ?
+             ORDER BY cs.updated_at DESC
+             LIMIT 50",
+            [$like, $like]
+        );
+
+        foreach ($chatbot as $session) {
+            $waId       = (string)$session['wa_id'];
+            $name       = $session['session_category'] ?: 'Prospecto WhatsApp';
+            $normName   = $normalize($name);
+            $normWa     = $normalize($waId);
+
+            if ($waId === '') {
+                continue;
+            }
+
+            // Coincide solo por nombre (si la búsqueda no parece numérica/wa_id)
+            $matchByName = str_contains($normName, $qNorm);
+            $matchByWa   = str_contains($normWa, $qNorm);
+
+            if (!$matchByName && !$matchByWa) {
+                continue;
+            }
+
+            // Ya existía en contacts (mismo wa_id o phone)
+            $exists = $this->queryOne(
+                'SELECT id FROM contacts WHERE business_id = ? AND (wa_id = ? OR phone = ?) LIMIT 1',
+                [$businessId, $waId, $waId]
+            );
+            if ($exists) {
+                $real = $this->find((int)$exists['id']);
+                if ($real) {
+                    $normalized[] = $real + [
+                        'total_spent'        => (float)($real['total_purchases'] ?? 0),
+                        'purchase_count'     => (int)($real['total_visits'] ?? 0),
+                        'is_chatbot'         => true,
+                        'chatbot_session_id' => (int)$session['chatbot_session_id'],
+                    ];
+                }
+                continue;
+            }
+
+            // Materializar el prospecto de chatbot como contacto real (para envíos/CRM)
+            $contacto = $this->createOrUpdate($businessId, $name, $waId, $waId, '', 'whatsapp');
+            $category = $this->determineProspectCategory($session, ['total_acciones' => (int)$session['session_count']]);
+            $this->update((int)$contacto['id'], ['category' => $category]);
+
+            $real = $this->find((int)$contacto['id']);
+            if ($real) {
+                $normalized[] = $real + [
+                    'total_spent'        => (float)($real['total_purchases'] ?? 0),
+                    'purchase_count'     => (int)($real['total_visits'] ?? 0),
+                    'is_chatbot'         => true,
+                    'chatbot_session_id' => (int)$session['chatbot_session_id'],
+                ];
+            }
+        }
+
+        return array_merge($contacts, $normalized);
+    }
+
     public function createOrUpdate(int $businessId, string $name, string $waId = '', string $phone = '', string $email = '', string $source = 'manual'): array
     {
         $existing = null;
